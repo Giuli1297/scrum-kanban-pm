@@ -1,1 +1,1 @@
-web: gunicorn scrum-kanban-pm.wsgi
+web: gunicorn scrum_kanban_pm.wsgi
