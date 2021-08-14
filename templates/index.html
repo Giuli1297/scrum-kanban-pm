@@ -19,7 +19,8 @@
                 {% if user.is_authenticated %}
                 <p>Welcome, {{ user.username }} !</p>
                 {% else %}
-                <h1>Welcome Friend, please log in</h1>
+
+                <h1>Welcome Friend, please <a href="accounts/login/">log in</a></h1>
                 {% endif %}
           </div>
         </div>
