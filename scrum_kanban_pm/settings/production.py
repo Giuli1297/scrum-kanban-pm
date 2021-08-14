@@ -11,6 +11,8 @@ DEBUG = True
 
 SECRET_KEY = env('SECRET_KEY')
 
+SITE_ID = env('SITE_ID')
+
 # SECURITY WARNING: update this when you have the production host
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'scrumkanbanpm.herokuapp.com']
 
