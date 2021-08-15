@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-STATICFILES_DIRS=['home/nelson/Escritorio/scrum-kanban-pm/templates/account']
+STATICFILES_DIRS=['../../templates/account']
 # Application definition
 
 INSTALLED_APPS = [
@@ -48,10 +48,12 @@ INSTALLED_APPS = [
 
     'crispy_forms',
     #Local Apps
+    'projectmanager',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -140,8 +142,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-SITE_ID =3
 
+SITE_ID = 3
 LOGIN_REDIRECT_URL = '/'
 
 SOCIALACCOUNT_PROVIDERS = {
