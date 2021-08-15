@@ -1,8 +1,7 @@
-from django.contrib import admin
-from django.urls import path
-from django.views.generic import TemplateView
+from django.urls import path, include
 from .views import homepage
 
 urlpatterns = [
     path('', homepage,name="home"),
+    path('accounts/', include('allauth.urls')),
 ]
