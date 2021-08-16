@@ -13,6 +13,7 @@ Welcome to Scrum-Kanban's documentation!
    modules/all-about-me.rst
    modules/views.rst
    modules/tests.rst
+   modules/models.rst
 Indices and tables
 ==================
 
