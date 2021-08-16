@@ -9,7 +9,7 @@ defusedxml==0.7.1
 dj-database-url==0.5.0
 Django==3.2.6
 django-allauth==0.45.0
--e git://github.com/maraujop/django-crispy-forms.git@7ce02ff6a4a720fd0969341d4787528dba80a589#egg=django_crispy_forms
+-e git+git://github.com/maraujop/django-crispy-forms.git@7ce02ff6a4a720fd0969341d4787528dba80a589#egg=django_crispy_forms
 django-environ==0.4.5
 django-heroku==0.3.1
 docutils==0.16
@@ -42,6 +42,7 @@ sphinxcontrib-htmlhelp==2.0.0
 sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.5
+selenium==3.141.0
 sqlparse==0.4.1
 typing-extensions==3.10.0.0
 urllib3==1.26.6
