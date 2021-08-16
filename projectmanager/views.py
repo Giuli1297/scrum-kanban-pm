@@ -6,7 +6,6 @@ from django.shortcuts import render
 
 def homepage(request):
     """
-<<<<<<< HEAD
     Devuelve la pagina principal de la aplicacion
 
     Parameters
