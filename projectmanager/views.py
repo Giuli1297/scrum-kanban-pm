@@ -5,5 +5,10 @@ from django.shortcuts import render
 
 
 def homepage(request):
+    """
+    Pagina principal
+    :param request:
+    :return:
+    """
 
     return render(request, "dashboard/home.html")
