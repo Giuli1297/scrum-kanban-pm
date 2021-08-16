@@ -4,13 +4,13 @@
 
 {% load crispy_forms_filters %}
 
-{% block head_title %}{% trans "Signup" %}{% endblock %}
+{% block head_title %}{% trans "Registrarse" %}{% endblock %}
 
 {% block content %}
 <div class="text-center">
-    <h1>{% trans "Sign Up" %}</h1>
+    <h1>{% trans "Registrarse" %}</h1>
 
-    <p>{% blocktrans %}Already have an account? Then please <a href="{{ login_url }}">sign in</a>.{% endblocktrans %}</p>
+    <p>{% blocktrans %}Tienes una cuenta? <a href="{{ login_url }}">Iniciar sesion</a>.{% endblocktrans %}</p>
 </div>
 <div class="row">
     <div class="col-md-6 offset-md-3">
@@ -21,7 +21,7 @@
         <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
         {% endif %}
         <div class="d-grid mt-3">
-            <button class="btn btn-dark" type="submit">{% trans "Sign Up" %}</button>
+            <button class="btn btn-dark" type="submit">{% trans "Registrarse" %}</button>
         </div>
         </form>
     </div>

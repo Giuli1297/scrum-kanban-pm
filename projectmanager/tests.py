@@ -5,7 +5,7 @@ from django.test import TestCase
 from . import views
 from django.urls.base import reverse,resolve
 # Create your tests here.
-
+from allauth.account.forms import BaseSignupForm, ResetPasswordForm, SignupForm
 
 class TestModeloAutenticacion(TestCase):
     """
@@ -16,11 +16,11 @@ class TestModeloAutenticacion(TestCase):
     Methods
     -------
     setUp()
-        Deja listo variables que se utilizaran para los test
+
     test_login()
-        Prueba la funcionalidad de logearse de un usuario existente
+
     test_login_false()
-        Prueba que un usuario con credenciales incorrectas no se pueda logear
+
     """
 
     def setUp(self):
@@ -49,6 +49,20 @@ class TestModeloAutenticacion(TestCase):
         """
         logged_in = self.client.login(username='prueb', password='12345')
         self.assertFalse(logged_in)
+    def test_signup_email_verification(self):
+        '''
+
+        testea el registro de un email valido
+
+        '''
+
+        data = {
+            "username": "user",
+            "email": "user@example.com",
+        }
+        form = BaseSignupForm(data, email_required=True)
+        self.assertTrue(form.is_valid())
+
 
 class TestHomePage(TestCase):
     """
@@ -80,3 +94,6 @@ class TestHomePage(TestCase):
         response=self.client.get(self.register_home)
         self.assertEqual(response.status_code,200)#confirma si cargo correctamente la pagina
         self.assertTemplateUsed(response,'dashboard/home.html')#confirmacion de la plantilla usada
+
+
+
