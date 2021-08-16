@@ -5,19 +5,19 @@
 
 {% load crispy_forms_filters %}
 
-{% block head_title %}{% trans "Sign In" %}{% endblock %}
+{% block head_title %}{% trans "Iniciar Sesión" %}{% endblock %}
 
 {% block content %}
 
   <div class="text-center">
-    <h1>{% trans "Sign In" %}</h1>
+    <h1>{% trans "Iniciar Sesión" %}</h1>
 
     {% get_providers as socialaccount_providers %}
 
     {% if socialaccount_providers %}
-    <p>{% blocktrans with site.name as site_name %}Please sign in with one
-    of your existing third party accounts.<br>Or, <a href="{{ signup_url }}">sign up</a>
-    for a {{ site_name }} account and sign in below:{% endblocktrans %}</p>
+    <p>{% blocktrans with site.name as site_name %}Por favor, inicie sesión con una de sus cuentas de terceros existentes.
+      <br>o, <a href="{{ signup_url }}">registrate</a>
+    para una {{ site_name }}e inicie sesión a continuación:{% endblocktrans %}</p>
 
     <div class="socialaccount_ballot">
 
@@ -25,15 +25,15 @@
         {% include "socialaccount/snippets/provider_list.html" with process="login" %}
       </div>
 
-      <div class="login-or border-top border-bottom my-3">{% trans 'OR' %}</div>
+      <div class="login-or border-top border-bottom my-3">{% trans 'O' %}</div>
 
     </div>
 
     {% include "socialaccount/snippets/login_extra.html" %}
 
     {% else %}
-    <p>{% blocktrans %}If you have not created an account yet, then please
-    <a href="{{ signup_url }}">sign up</a> first.{% endblocktrans %}</p>
+    <p>{% blocktrans %}Si aún no has creado una cuenta, entonces por favor
+    <a href="{{ signup_url }}">registrate</a> primero.{% endblocktrans %}</p>
     {% endif %}
   </div>
   <div class="row">
@@ -45,8 +45,8 @@
           <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
           {% endif %}
           <div class="d-grid">
-            <button class="primaryAction mt-3 btn btn-dark" type="submit">{% trans "Sign In" %}</button><br>
-            <a class="button secondaryAction text-dark text-center" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a>
+            <button class="primaryAction mt-3 btn btn-dark" type="submit">{% trans "Iniciar Sesión" %}</button><br>
+            <a class="button secondaryAction text-dark text-center" href="{% url 'account_reset_password' %}">{% trans "Resetear contraseña" %}</a>
           </div>
         </form>
     </div>
