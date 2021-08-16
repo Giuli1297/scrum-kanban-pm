@@ -81,6 +81,7 @@ TEMPLATES = [
     },
 ]
 
+#Utilizado por django-allauth para la autenticacion
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
