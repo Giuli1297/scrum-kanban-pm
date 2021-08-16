@@ -73,9 +73,9 @@ class TestHomePage(TestCase):
     Methods
     -------
     setUp()
-        Deja listo variables que se utilizaran para los test
+
     test_home()
-        Prueba que se cargue el template correcto
+
     """
 
     def setUp(self):
