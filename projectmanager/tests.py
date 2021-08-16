@@ -63,6 +63,7 @@ class TestModeloAutenticacion(TestCase):
         form = BaseSignupForm(data, email_required=True)
         self.assertTrue(form.is_valid())
 
+
 class TestHomePage(TestCase):
     """
     Clase de Testing para funciones de la pagina principal
