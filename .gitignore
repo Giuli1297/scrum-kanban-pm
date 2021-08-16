@@ -121,6 +121,7 @@ GitHub.sublime-settings
 # sphinx build folder
 docs/_build/
 _build/
+_build
 # Compiled source #
 ###################
 *.com
