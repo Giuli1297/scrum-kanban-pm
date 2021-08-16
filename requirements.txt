@@ -11,6 +11,7 @@ django-environ==0.4.5
 django-heroku==0.3.1
 gunicorn==20.1.0
 -e git://github.com/maraujop/django-crispy-forms.git@7ce02ff6a4a720fd0969341d4787528dba80a589#egg=django_crispy_forms
+django-environ==0.4.5
 idna==3.2
 oauthlib==3.1.1
 psycopg2==2.9.1
