@@ -27,6 +27,7 @@ class Proyecto(models.Model):
 
     class Meta:
         verbose_name = 'Proyectos'
+        permissions = (('can_access', 'Puede acceder a la pagina'),)
         ordering = ('-fecha_inicio',)
 
     def get_absolute_url(self):
