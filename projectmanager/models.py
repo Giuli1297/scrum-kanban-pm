@@ -22,7 +22,7 @@ class Proyecto(models.Model):
     scrum_member = models.ManyToManyField(User, related_name='proyecto_asignado')
     # Cambiar luego a manytomany de userstories
     product_backlog = models.TextField(blank=True)
-    # Cambiel luego a manytomany de sprints
+    # Cambiar luego a manytomany de sprints
     sprintList = models.TextField(blank=True)
 
     class Meta:
