@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Permission
+from django.contrib import messages
 
 from django.shortcuts import render, redirect
 from django.views import View
@@ -15,7 +16,6 @@ from .utils import account_activation_token
 from projectmanager.models import Proyecto
 
 
-@login_required
 def homepage(request):
     """
     Devuelve la pagina principal de la aplicacion
@@ -29,7 +29,7 @@ def homepage(request):
     return render(request, "dashboard/home.html")
 
 
-
+@login_required()
 def proyecto_detail(request, proyecto_slug):
     """
     Presenta la pagina principla para la gestion de un proyecto
@@ -47,16 +47,17 @@ class VerificationView(View):
             user = User.objects.get(pk=id)
 
             if not account_activation_token.check_token(user, token):
+                messages.error(request, "El usuario no pudo ser habilitado2")
                 return redirect('home')
 
             if user.is_active:
+                messages.error(request, "El usuario no pudo ser habilitado1")
                 return redirect('home')
             user.is_active = True
             user.save()
 
+            messages.success(request, "Usuario "+user.username+" habilitado")
             return redirect('home')
-
         except Exception as ex:
-            pass
-
-        return redirect('home')
+            messages.error(request, "El usuario no pudo ser habilitado")
+            return redirect('home')

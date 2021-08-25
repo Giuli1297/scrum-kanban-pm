@@ -15,6 +15,7 @@ from django.urls import reverse
 def send_email_to_admin(request, user, **kwargs):
     admin = User.objects.get(groups__name='Administrador')
     user.is_active = False
+    user.save()
     current_site = get_current_site(request)
     email_body = {
         'user': user,
