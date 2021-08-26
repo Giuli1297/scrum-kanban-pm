@@ -1,8 +1,16 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse_lazy
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Permission
 from django.contrib import messages
+
+from django.views.generic import (
+    ListView,
+    CreateView,
+    UpdateView
+)
+from projectmanager.forms import ProyectoForm
 
 from django.shortcuts import render, redirect
 from django.views import View
@@ -29,7 +37,7 @@ def homepage(request):
     return render(request, "dashboard/home.html")
 
 
-@login_required()
+#@login_required()
 def proyecto_detail(request, proyecto_slug):
     """
     Presenta la pagina principla para la gestion de un proyecto
@@ -56,8 +64,35 @@ class VerificationView(View):
             user.is_active = True
             user.save()
 
-            messages.success(request, "Usuario "+user.username+" habilitado")
+            messages.success(request, "Usuario " + user.username + " habilitado")
             return redirect('home')
         except Exception as ex:
             messages.error(request, "El usuario no pudo ser habilitado")
             return redirect('home')
+
+
+
+class ProyectoCreate(CreateView):
+    """
+	Vista basada en clase el sirve para crear un proyecto nuevo
+	"""
+    model = Proyecto
+    form_class = ProyectoForm
+    template_name = "proyecto/proyecto_form.html"
+    success_url = reverse_lazy('proyecto_listar')
+
+class ProyectoView(ListView):
+	"""
+	Vista basada en clase el cual lista todos los proyectos
+	"""
+	model = Proyecto
+	template_name = 'proyecto/proyecto_list.html'
+
+class ProyectoUpdate(UpdateView):
+	"""
+	Vista basada en clase el sirve para crear un proyecto nuevo
+	"""
+	model = Proyecto #Indicar el modelo a utilizar
+	form_class = ProyectoForm #Indicar el formulario
+	template_name = 'proyecto/proyecto_form.html' #Indicar el template
+	success_url = reverse_lazy('proyecto_listar') #Redireccionar
