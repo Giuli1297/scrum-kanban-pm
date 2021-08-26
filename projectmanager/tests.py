@@ -6,6 +6,44 @@ from . import views
 from django.urls.base import reverse,resolve
 # Create your tests here.
 from allauth.account.forms import BaseSignupForm, ResetPasswordForm, SignupForm
+from .models import Proyecto
+
+class TestModeloProyecto(TestCase):
+    def setUp(self):
+        self.credentials = {
+            'username': 'testuser',
+            'password': 'secret'}
+        user = User.objects.create_user(**self.credentials)
+        nombre = 'test'
+        slug = 'test'
+        descripcion = 'testtest'
+        estado = 'PEN'
+        scrum_master = User.objects.create(username='test', password='test')
+        self.data1 = Proyecto.objects.create(nombre=nombre, slug=slug, descripcion=descripcion, estado=estado,
+                                       scrum_master=scrum_master)
+        self.data2 = Proyecto.objects.create(nombre=nombre+'2', slug=slug+'2', descripcion=descripcion, estado=estado,
+                                             scrum_master=scrum_master)
+
+    def test_proyecto_model_entry(self):
+        """
+        Test product model data insertion/types/field attributes
+        """
+        data = self.data1
+        self.assertTrue(isinstance(data, Proyecto))
+        self.assertEqual(str(data), 'test')
+
+    def test_proyecto_url(self):
+        """
+        Test product model slug and URL reverse
+        """
+        loin = self.client.login(username='testuser', password='secret')
+        url = reverse('proyecto_detail', args=[self.data1.slug])
+        self.assertEqual(url, '/proyecto/test/')
+        response = self.client.post(
+            reverse('proyecto_detail', args=[self.data1.slug]))
+        self.assertEqual(response.status_code, 200)
+
+
 
 class TestModeloAutenticacion(TestCase):
     """
