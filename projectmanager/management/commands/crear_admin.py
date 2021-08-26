@@ -7,6 +7,8 @@ class Command(BaseCommand):
     help = 'Crea un usuario administrador con todos los permisos'
 
     def handle(self, *args, **options):
+        if User.objects.filter(groups__name="Administrador"):
+            raise CommandError("Ya Existe Un Usuario Adminstrador")
         admin_username = input('Ingresa el nombre de usuario: ')
         admin_password = input('Ingresa la contrasena del administrador: ')
 
