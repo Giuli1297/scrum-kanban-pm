@@ -1,0 +1,41 @@
+{% extends "account/base.html" %}
+
+{% block content %}
+<table class="table table-hover table dark">
+	<thead>
+		<tr>
+			<th scope="col">Slug</th>
+			<th scope="col">Nombre</th>
+			<th scope="col">Estado</th>
+			<th scope="col">Fecha de inicio</th>
+			<th scope="col">Scrum Master</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		{% if object_list %}
+		{% for proyecto in object_list %}
+		<tr>
+			<th scope="row">{{ proyecto.slug }}</th>
+			<td>{{ proyecto.nombre }}</td>
+			<td>{{ proyecto.estado }}</td>
+			<td>{{ proyecto.fecha_inicio }}</td>
+			<td>{{ proyecto.scrum_master }}</td>
+			<td>
+            {% if proyecto.estado != 'Cancelado' %}
+                {% if proyecto.estado != 'Finalizado' %}
+                    <a class="btn btn-primary" href="{% url 'proyecto_editar' proyecto.slug %}">Modificar</a>
+                {% endif %}
+            {% endif%}
+
+			</td>
+		</tr>
+		{% endfor %}
+		{% else %}
+		<h1>No hay registros de proyectos</h1>
+		{% endif%}
+		<a class="btn btn-primary" href="{% url 'proyecto_crear' %}">Crear</a>
+	</tbody>
+</table>
+
+{% endblock%}
