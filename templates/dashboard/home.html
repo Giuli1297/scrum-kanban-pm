@@ -1,14 +1,9 @@
-{% extends 'account/base.html' %}
-{% block head_title %}Project Manger{% endblock %}
+{% extends 'base.html' %}
+
 {% block content %}
     <div class="text-center">
         <h2>Gestor de Proyectos </h2> 
-        {% if user.is_authenticated %}
-        <p>Hola {{ user.first_name }}!</p>
-        <p>Tu username : {{ user }}</p>
-        {% else %}
-        <p>Por favor inicia sesión o crea una cuenta</p>
-        {% endif %}
-        <a class="btn btn-dark" href="{% url 'socialaccount_connections' %}">Configuraciones</a>
+        <p>Hola {{ request.user  }}!</p>
+        <a href="{% url 'cerrar_sesion' %}" class="btn btn-dark">Cerrar sesión</a>
     </div>
 {% endblock %}

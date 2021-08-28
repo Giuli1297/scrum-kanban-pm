@@ -1,0 +1,32 @@
+{% extends "base.html" %} 
+
+{% block content %} 
+    <div class="d-flex w-100 justify-content-center align-items-center" style="height: 100vh;">
+        <div class="card" style="width: 20rem; height: 30rem;">
+            <div class="card-header font-weight-bold text-center text-white text-uppercase bg-success">Registrarse</div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese su nombre">
+                    </div>
+                    <div class="form-group">
+                        <label for="apellido">Apellido</label>
+                        <input type="text" class="form-control" id="apellido" name="apellido" placeholder="Ingrese su apellido">
+                    </div>
+                    <div class="form-group">
+                      <label for="correo">Correo</label>
+                      <input type="email" class="form-control" id="correo" name="email" placeholder="Ingrese su correo">
+                    </div>
+                    <div class="form-group">
+                      <label for="password">Password</label>
+                      <input type="password" class="form-control" id="password" name="password" placeholder="Ingrese su contraseña">
+                    </div>                  
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                  </form>
+            </div>
+        </div>
+        </div>
+    </div>
+{% endblock %}

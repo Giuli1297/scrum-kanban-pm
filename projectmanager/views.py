@@ -14,16 +14,16 @@ from projectmanager.forms import ProyectoForm
 
 from django.shortcuts import render, redirect
 from django.views import View
-from django.contrib.auth.models import User
 from django.contrib import messages
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
-from .utils import account_activation_token
+from .utils import account_activation_token 
+from django.contrib.auth import get_user_model, authenticate, login, logout
 
 # Create your views here.
 from projectmanager.models import Proyecto
 
-
+@login_required(login_url="/login")
 def homepage(request):
     """
     Devuelve la pagina principal de la aplicacion
@@ -34,10 +34,25 @@ def homepage(request):
         Objeto que contiene info acerca de la solicitud del cliente
 
     """
-    return render(request, "dashboard/home.html")
+    return render(request, "dashboard/home.html") 
+
+def IniciarSesion(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        user = authenticate(request, email=email, password=password) 
+
+        if user is not None:
+            login(request, user)
+            return redirect("home")
+
+    return render(request, "account/login.html") 
+
+def CerrarSesion(request):
+    logout(request)
+    return redirect("iniciar_sesion")
 
 
-#@login_required()
 def proyecto_detail(request, proyecto_slug):
     """
     Presenta la pagina principla para la gestion de un proyecto
@@ -95,4 +110,16 @@ class ProyectoUpdate(UpdateView):
 	model = Proyecto #Indicar el modelo a utilizar
 	form_class = ProyectoForm #Indicar el formulario
 	template_name = 'proyecto/proyecto_form.html' #Indicar el template
-	success_url = reverse_lazy('proyecto_listar') #Redireccionar
+	success_url = reverse_lazy('proyecto_listar') #Redireccionar 
+
+def registro(request):
+    if request.method == "POST":
+        name = request.POST.get("nombre")
+        last_name = request.POST.get("apellido")
+        email = request.POST.get("email")
+        password = request.POST.get("password") 
+        User = get_user_model()
+        user = User.objects.create_user(email, name, last_name, password)
+        print(user)
+        return redirect('iniciar_sesion')
+    return render(request, "account/registro.html")
