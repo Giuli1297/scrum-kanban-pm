@@ -8,8 +8,14 @@
     <title>Document</title>
 </head>
 <body>
-<p>{{ jkggjkg }}</p>
-{% for user in objects_list %}
+<p><div><a type="submit" href="{% url 'create_rol' %}">Crear nuevo rol</a></div>
+<div><a type="submit" href="{% url 'account_login' %}">Home</a></div></p>
+
+{% for object in object_list %}
+    <p>{{ object }}
+        <a type="submit" href="{% url 'update_rol' object.id %}">Modificar</a>
+        <a type="submit"  href="{% url 'delete_rol' object.id %}"> Eliminar </a>
+    </p>
 
 {% endfor %}
 

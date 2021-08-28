@@ -31,6 +31,7 @@
       <div class="container d-flex justify-content-between">
           {% if user.is_authenticated %}
           <div><a class="text-light" href="{% url 'account_email' %}">Cambiar email</a></div>
+          <div><a class="text-light" href="{% url 'list_rol' %}">Roles</a></div>
           <div><a class="text-light" href="{% url 'home' %}">Home</a></div>
           <div><a class="text-light" href="{% url 'account_logout' %}">Cerrar Sesión</a></div>
           {% else %}

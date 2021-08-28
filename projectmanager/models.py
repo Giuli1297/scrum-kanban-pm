@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User ,AbstractUser
+from django.contrib.auth.models import User ,AbstractUser,Group
 from django.db import models
 from django.urls import reverse
 
@@ -37,3 +37,10 @@ class Proyecto(models.Model):
         return self.nombre
 
 
+class rol(Group):
+    usuario=models.ManyToManyField(User)
+    class Meta:
+        verbose_name_plural='Rol'
+        ordering=['name']
+    def __unicode__(self):
+        return self.name

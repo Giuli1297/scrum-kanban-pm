@@ -3,18 +3,21 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Permission
 from django.contrib import messages
-
+from .forms import UserForm
 from django.shortcuts import render, redirect
 from django.views import View
-from django.views.generic import ListView
-from django.contrib.auth.models import User
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.models import User, Group
 from django.contrib import messages
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
 from .utils import account_activation_token
 
 # Create your views here.
-from projectmanager.models import Proyecto
+from projectmanager.models import Proyecto, rol
+
+from django.http import JsonResponse
+from django.urls import reverse_lazy
 
 
 def homepage(request):
@@ -64,3 +67,30 @@ class VerificationView(View):
             return redirect('home')
 
 
+class RolListView(ListView):
+    model = rol
+
+    template_name = 'rol/list.html'
+
+
+class RolCreateView(CreateView):
+    model = rol
+    form_class = UserForm
+    template_name = 'rol/create.html'
+    success_url = reverse_lazy('list_rol')
+
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+
+class RolUpdateView(UpdateView):
+    model = rol
+    form_class = UserForm
+    template_name = 'rol/update.html'
+    success_url = reverse_lazy('list_rol')
+
+
+class RolDeleteView(DeleteView):
+    model = rol
+    template_name = 'rol/delete.html'
+    success_url = reverse_lazy('list_rol')
