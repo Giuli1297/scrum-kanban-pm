@@ -14,6 +14,7 @@ Welcome to Scrum-Kanban's documentation!
    modules/views.rst
    modules/tests.rst
    modules/models.rst
+
 Indices and tables
 ==================
 

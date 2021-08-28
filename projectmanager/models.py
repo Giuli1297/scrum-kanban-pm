@@ -6,6 +6,17 @@ from django.utils import timezone
 
 # Create your models here.
 class Proyecto(models.Model):
+    """
+    Guarda y define los campos de un proyecto.
+    ...
+
+    """
+    ESTADOS = (
+        ('PEN', 'Pendiente'),
+        ('CAN', 'Cancelado'),
+        ('ACT', 'Activo'),
+        ('FIN', 'Finalizado')
+    )
 
     nombre = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
@@ -14,7 +25,7 @@ class Proyecto(models.Model):
     fecha_fin = models.DateTimeField(blank=True, null=True)
     estado = models.CharField(max_length=10)
     scrum_master = models.ForeignKey(User, related_name='proyecto_encargado', on_delete=models.CASCADE)
-    scrum_member = models.ManyToManyField(User, related_name='proyecto_asignado')
+    scrum_member = models.ManyToManyField(User, related_name='proyecto_asignado', blank=True)
     # Cambiar luego a manytomany de userstories
     product_backlog = models.TextField(blank=True)
     # Cambiar luego a manytomany de sprints
