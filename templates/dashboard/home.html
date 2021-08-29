@@ -1,9 +1,19 @@
-{% extends 'base.html' %}
+{% extends 'account/base.html' %}
 
 {% block content %}
-    <div class="text-center">
-        <h2>Gestor de Proyectos </h2> 
-        <p>Hola {{ request.user  }}!</p>
-        <a href="{% url 'cerrar_sesion' %}" class="btn btn-dark">Cerrar sesión</a>
+    <div class="d-flex w-100" style="height: 100vh;">
+        <div class="d-flex flex-column flex-shrink-0 p-3 bg-light border-right border-dark" style="width: 280px;">
+            <span class="fs-4 mt-2 text-center text-uppercase font-weight-bold">Gestor de Proyectos</span>
+            <p class="text-center mt-3">Bienvenido {{ request.user.nombre|add:" "|add:request.user.apellido }}</p>
+            <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">Mi perfil</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{% url 'proyecto_listar' %}">Proyectos</a>
+            </div>
+            <hr>
+            <a href="{% url 'cerrar_sesion' %}" class="btn btn-dark">Cerrar sesión</a>
+        </div>
+        <div class="container">
+            <!--Colocar contenido-->
+        </div>
     </div>
 {% endblock %}
