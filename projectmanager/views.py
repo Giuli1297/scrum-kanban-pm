@@ -1,6 +1,8 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.views import redirect_to_login
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Permission
 from django.contrib import messages
@@ -22,6 +24,17 @@ from .utils import account_activation_token
 
 # Create your views here.
 from projectmanager.models import Proyecto
+
+class UserAccessMixin(PermissionRequiredMixin):
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path(),
+                                     self.get_login_url(), self.get_redirect_field_name())
+        if not self.has_permission():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('/')
+        return super(UserAccessMixin, self).dispatch(request, *args, **kwargs)
 
 
 def homepage(request):
@@ -72,27 +85,44 @@ class VerificationView(View):
 
 
 
-class ProyectoCreate(CreateView):
+class ProyectoCreate(UserAccessMixin, CreateView):
     """
 	Vista basada en clase el sirve para crear un proyecto nuevo
 	"""
+    raise_exception = False
+    permission_required = ('projectmanager.crear_proyecto')
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+
     model = Proyecto
     form_class = ProyectoForm
     template_name = "proyecto/proyecto_form.html"
     success_url = reverse_lazy('proyecto_listar')
 
-class ProyectoView(ListView):
-	"""
-	Vista basada en clase el cual lista todos los proyectos
-	"""
-	model = Proyecto
-	template_name = 'proyecto/proyecto_list.html'
 
-class ProyectoUpdate(UpdateView):
-	"""
-	Vista basada en clase el sirve para crear un proyecto nuevo
-	"""
-	model = Proyecto #Indicar el modelo a utilizar
-	form_class = ProyectoForm #Indicar el formulario
-	template_name = 'proyecto/proyecto_form.html' #Indicar el template
-	success_url = reverse_lazy('proyecto_listar') #Redireccionar
+class ProyectoView(UserAccessMixin, ListView):
+    """
+    Vista basada en clase el cual lista todos los proyectos
+    """
+
+    raise_exception = False
+    permission_required = ('projectmanager.ver_proyectos')
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+
+    model = Proyecto
+    template_name = 'proyecto/proyecto_list.html'
+
+class ProyectoUpdate(UserAccessMixin, UpdateView):
+    """
+    Vista basada en clase el sirve para crear un proyecto nuevo
+    """
+    raise_exception = False
+    permission_required = ('projectmanager.editar_proyecto')
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+
+    model = Proyecto #Indicar el modelo a utilizar
+    form_class = ProyectoForm #Indicar el formulario
+    template_name = 'proyecto/proyecto_form.html' #Indicar el template
+    success_url = reverse_lazy('proyecto_listar') #Redireccionar
