@@ -100,7 +100,7 @@ class ProyectoCreate(UserAccessMixin, CreateView):
     success_url = reverse_lazy('proyecto_listar')
 
 
-class ProyectoView(ListView):
+class ProyectoView(UserAccessMixin, ListView):
     """
     Vista basada en clase el cual lista todos los proyectos
     """
@@ -113,7 +113,7 @@ class ProyectoView(ListView):
     model = Proyecto
     template_name = 'proyecto/proyecto_list.html'
 
-class ProyectoUpdate(UpdateView):
+class ProyectoUpdate(UserAccessMixin, UpdateView):
     """
     Vista basada en clase el sirve para crear un proyecto nuevo
     """
