@@ -10,7 +10,9 @@ from django.contrib import messages
 from django.views.generic import (
     ListView,
     CreateView,
-    UpdateView
+    UpdateView,
+    TemplateView,
+    DetailView
 )
 from projectmanager.forms import ProyectoForm
 
@@ -25,6 +27,7 @@ from .utils import account_activation_token
 # Create your views here.
 from projectmanager.models import Proyecto
 
+
 class UserAccessMixin(PermissionRequiredMixin):
 
     def dispatch(self, request, *args, **kwargs):
@@ -35,30 +38,6 @@ class UserAccessMixin(PermissionRequiredMixin):
             messages.error(request, "No tienes permisos para eso")
             return redirect('/')
         return super(UserAccessMixin, self).dispatch(request, *args, **kwargs)
-
-
-def homepage(request):
-    """
-    Devuelve la pagina principal de la aplicacion
-
-    Parameters
-    ----------
-    request
-        Objeto que contiene info acerca de la solicitud del cliente
-
-    """
-    return render(request, "dashboard/home.html")
-
-
-#@login_required()
-def proyecto_detail(request, proyecto_slug):
-    """
-    Presenta la pagina principla para la gestion de un proyecto
-    :param request:
-    :return:
-    """
-    proyecto = get_object_or_404(Proyecto, slug=proyecto_slug)
-    return render(request, 'proyecto/detail.html', {'proyecto': proyecto})
 
 
 class VerificationView(View):
@@ -83,6 +62,42 @@ class VerificationView(View):
             messages.error(request, "El usuario no pudo ser habilitado")
             return redirect('home')
 
+
+class HomePage(TemplateView):
+    """
+    Devuelve la pagina principal de la aplicacion
+
+    Parameters
+    ----------
+    request
+        Objeto que contiene info acerca de la solicitud del cliente
+
+    """
+    template_name = "dashboard/home.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class ProyectoDetailView(UserAccessMixin, DetailView):
+    """
+    Presenta la pagina principla para la gestion de un proyecto
+    :param request:
+    :return:
+    """
+    raise_exception = False
+    permission_required = ('projectmanager.ver_proyecto')
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+
+    model = Proyecto
+    template_name = 'proyecto/detail.html'
+    context_object_name = 'proyecto'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 
 
 class ProyectoCreate(UserAccessMixin, CreateView):
@@ -113,6 +128,7 @@ class ProyectoView(UserAccessMixin, ListView):
     model = Proyecto
     template_name = 'proyecto/proyecto_list.html'
 
+
 class ProyectoUpdate(UserAccessMixin, UpdateView):
     """
     Vista basada en clase el sirve para crear un proyecto nuevo
@@ -122,7 +138,7 @@ class ProyectoUpdate(UserAccessMixin, UpdateView):
     permission_denied_message = "You don't have permissions"
     redirect_field_name = 'next'
 
-    model = Proyecto #Indicar el modelo a utilizar
-    form_class = ProyectoForm #Indicar el formulario
-    template_name = 'proyecto/proyecto_form.html' #Indicar el template
-    success_url = reverse_lazy('proyecto_listar') #Redireccionar
+    model = Proyecto  # Indicar el modelo a utilizar
+    form_class = ProyectoForm  # Indicar el formulario
+    template_name = 'proyecto/proyecto_form.html'  # Indicar el template
+    success_url = reverse_lazy('proyecto_listar')  # Redireccionar

@@ -35,6 +35,7 @@ class Proyecto(models.Model):
         verbose_name = 'Proyectos'
         permissions = (('crear_proyecto', 'Puede crear un proyecto'),
                        ('editar_proyecto', 'Puede editar un proyecto'),
+                       ('ver_proyecto', 'Puede ver un proyecto en detalle'),
                        ('ver_proyectos', 'Puede ver proyectos'),)
         ordering = ('-fecha_inicio',)
 
