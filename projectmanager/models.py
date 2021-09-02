@@ -7,10 +7,34 @@ from django.template.defaultfilters import slugify
 # Create your models here.
 class Proyecto(models.Model):
     """
-    Guarda y define los campos de un proyecto.
-    ...
+        Guarda y define los campos del proyecto
 
-    """
+        Atributos:
+
+        Parameters
+        ----------
+        estado
+            Define el estado del proyecto, ya sea pendiente, cancelado, activo, finalizado
+
+        nombre
+            Define el nombre de proyecto
+
+        descripcion
+            Breve descripcion del proyecto
+
+        Fecha_inicio
+            Establece la fecha de inicio del proyecto
+
+        Fecha_fin
+            Fecha del final del proyectos
+
+        scrum_master
+            Encargado del equipo del proyecto
+
+        scrum_member
+            Lista de miembros del equipo
+
+        """
     ESTADOS = (
         ('PEN', 'Pendiente'),
         ('CAN', 'Cancelado'),
@@ -39,6 +63,10 @@ class Proyecto(models.Model):
         ordering = ('-fecha_inicio',)
 
     def save(self, *args, **kwargs):
+        """
+        Guarde la instancia actual. Reemplace esto en una subclase si desea controlar el proceso de guardado.
+
+        """
         if not self.slug:
             self.slug = slugify(self.nombre)
         return super().save(*args, **kwargs)
