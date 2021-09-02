@@ -1,4 +1,4 @@
-Views
+Vistas
 ======
 
 .. automodule:: projectmanager.views

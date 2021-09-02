@@ -1,4 +1,4 @@
-Models
+Modelos
 ======
 
 .. automodule:: projectmanager.models
