@@ -40,6 +40,13 @@ def add_user_to_obj_group(user, group_name):
     return User.objects.get(id=user.id)
 
 
+def add_users_to_obj_group(users, group_name):
+    for user in users:
+        print(user.username)
+        add_user_to_obj_group(user, group_name)
+    return
+
+
 def remove_all_users_from_obj_group(group_name):
     group = Group.objects.get(name=group_name)
     users = User.objects.filter(groups__name=group_name)

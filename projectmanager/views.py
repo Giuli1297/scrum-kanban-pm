@@ -143,7 +143,7 @@ class ProyectoView(UserAccessMixin, ListView):
     def get_queryset(self):
         if self.request.user.groups.filter(name='Administrador').exists():
             return Proyecto.objects.all()
-        return Proyecto.objects.filter(Q(scrum_master=self.request.user) | Q(scrum_member=self.request.user))
+        return Proyecto.objects.filter(Q(scrum_master=self.request.user) | Q(scrum_member=self.request.user)).distinct()
 
 
 class ProyectoUpdate(UserAccessMixin, UpdateView):
