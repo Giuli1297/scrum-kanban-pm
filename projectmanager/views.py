@@ -23,7 +23,7 @@ from .utils import account_activation_token
 # Create your views here.
 from projectmanager.models import Proyecto
 
-
+@login_required(login_url='/accounts/login/')
 def homepage(request):
     """
     Devuelve la pagina principal de la aplicacion
@@ -37,7 +37,6 @@ def homepage(request):
     return render(request, "dashboard/home.html")
 
 
-#@login_required()
 def proyecto_detail(request, proyecto_slug):
     """
     Presenta la pagina principla para la gestion de un proyecto
