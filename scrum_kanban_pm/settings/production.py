@@ -2,12 +2,11 @@ from scrum_kanban_pm.settings.common import *
 
 import django_heroku
 
-
 import environ
+
 # Initialise environment variables
 env = environ.Env()
 environ.Env.read_env()
-
 
 DEBUG = False
 
@@ -26,5 +25,11 @@ STATICFILES_DIRS = [
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-django_heroku.settings(locals())
+EMAIL_BACKEND = env('EMAIL_BACKEND')
+EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_USE_TLS = env('EMAIL_USE_TLS')
+EMAIL_PORT = env('EMAIL_PORT')
+EMAIL_HOST_USER = env('EMAIL_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 
+django_heroku.settings(locals())
