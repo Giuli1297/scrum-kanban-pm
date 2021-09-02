@@ -31,6 +31,9 @@ from django.http import JsonResponse
 from django.urls import reverse_lazy
 
 class UserAccessMixin(PermissionRequiredMixin):
+    """
+        Clase donde esta centralizada la verificacion de los permisos
+        """
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -55,13 +58,13 @@ def homepage(request):
     return render(request, "dashboard/home.html")
 
 
-#@login_required()
 def proyecto_detail(request, proyecto_slug):
     """
-    Presenta la pagina principla para la gestion de un proyecto
-    :param request:
-    :return:
+        Presenta la pagina principla para la gestion de un proyecto
     """
+
+
+
     proyecto = get_object_or_404(Proyecto, slug=proyecto_slug)
     return render(request, 'proyecto/detail.html', {'proyecto': proyecto})
 
@@ -90,8 +93,17 @@ class VerificationView(View):
 
 class ProyectoCreate(UserAccessMixin, CreateView):
     """
-	Vista basada en clase el sirve para crear un proyecto nuevo
-	"""
+        Vista basada en clase para la creacion de un proyecto nuevo
+        Atributos:
+
+        Parameters
+        ----------
+        model
+            Modelo a utilizar seria el de Proyecto
+
+        formclass
+            El formulario a utilizar es el FormProyecto
+    """
     raise_exception = False
     permission_required = ('projectmanager.crear_proyecto')
     permission_denied_message = "You don't have permissions"
@@ -105,7 +117,14 @@ class ProyectoCreate(UserAccessMixin, CreateView):
 
 class ProyectoView(UserAccessMixin, ListView):
     """
-    Vista basada en clase el cual lista todos los proyectos
+    Vista basada en clase que lista todos lo proyectos y los muesrra
+
+        Atributos:
+
+        Parameters
+        ----------
+        model
+            Modelo a utilizar seria el de Proyecto
     """
 
     raise_exception = False
@@ -113,12 +132,24 @@ class ProyectoView(UserAccessMixin, ListView):
     permission_denied_message = "You don't have permissions"
     redirect_field_name = 'next'
 
+
+    #:EL modelo base a utilizar es el de Proyecto
     model = Proyecto
     template_name = 'proyecto/proyecto_list.html'
 
 class ProyectoUpdate(UserAccessMixin, UpdateView):
     """
-    Vista basada en clase el sirve para crear un proyecto nuevo
+    Vista basada en clase el sirve para la modificacion de un proyecto en especifico
+
+        Atributos:
+
+        Parameters
+        ----------
+        model
+            Modelo a utilizar seria el de Proyecto
+
+        formclass
+            El formulario a utilizar es el FormProyecto
     """
     raise_exception = False
     permission_required = ('projectmanager.editar_proyecto')
