@@ -1,10 +1,11 @@
 {% extends "layout/base.html" %}
+{% load projectmanager_extras %}
 
 {% block content %}
-<table class="table table-hover table dark">
+<table class="table table-striped table-hover">
 	<thead>
 		<tr>
-			<th scope="col">Slug</th>
+            <th scope="col">#</th>
 			<th scope="col">Nombre</th>
 			<th scope="col">Estado</th>
 			<th scope="col">Fecha de inicio</th>
@@ -15,21 +16,21 @@
 	<tbody>
 		{% if object_list %}
 		{% for proyecto in object_list %}
-		<tr>
-			<th scope="row">{{ proyecto.slug }}</th>
-			<td>{{ proyecto.nombre }}</td>
-			<td>{{ proyecto.estado }}</td>
-			<td>{{ proyecto.fecha_inicio }}</td>
-			<td>{{ proyecto.scrum_master }}</td>
-			<td>
-            {% if proyecto.estado != 'Cancelado' %}
-                {% if proyecto.estado != 'Finalizado' %}
-                    <a class="btn btn-primary" href="{% url 'proyecto_editar' proyecto.slug %}">Modificar</a>
-                {% endif %}
-            {% endif%}
+            <tr onclick="document.location = '{% url 'proyecto_editar_sm' proyecto.slug %}';">
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ proyecto.nombre }}</td>
+                <td>{{ proyecto.estado }}</td>
+                <td>{{ proyecto.fecha_inicio }}</td>
+                <td>{{ proyecto.scrum_master }}</td>
+                <td>
+                {% if proyecto.estado != 'Cancelado' and request.user|has_group:"Administrador" %}
+                    {% if proyecto.estado != 'Finalizado' %}
+                        <a class="btn btn-primary" href="{% url 'proyecto_editar' proyecto.slug %}">Modificar</a>
+                    {% endif %}
+                {% endif%}
 
-			</td>
-		</tr>
+                </td>
+            </tr>
 		{% endfor %}
 		{% else %}
 		<h1>No hay registros de proyectos</h1>
@@ -37,5 +38,4 @@
 		<a class="btn btn-dark" href="{% url 'proyecto_crear' %}">Crear</a>
 	</tbody>
 </table>
-
 {% endblock%}
