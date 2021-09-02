@@ -49,12 +49,12 @@ def add_scrum_master_signal(sender, instance, created, **kwargs):
     if created:
         add_obj_perm_to_group('scrum_master_' + instance.slug, 'editar_proyecto', instance)
         add_obj_perm_to_group('scrum_master_' + instance.slug, 'ver_proyecto', instance)
+        add_obj_perm_to_group('scrum_master_' + instance.slug, 'iniciar_proyecto', instance)
         add_perm_to_group('scrum_master_' + instance.slug, 'ver_proyectos')
         add_user_to_obj_group(instance.scrum_master, 'scrum_master_' + instance.slug)
         add_obj_perm_to_group('scrum_member_' + instance.slug, 'ver_proyecto', instance)
         add_perm_to_group('scrum_member_' + instance.slug, 'ver_proyectos')
     else:
-        print('gg')
         remove_all_users_from_obj_group('scrum_master_' + instance.slug)
         add_user_to_obj_group(instance.scrum_master, 'scrum_master_' + instance.slug)
 

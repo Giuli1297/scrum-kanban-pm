@@ -11,6 +11,12 @@
             <button class="btn btn-dark" type="submit">Guardar</button>
         </form>
     </div>
-
+    <div class="col-6">
+        <form action="{% url 'proyecto_iniciar' proyecto.slug %}" method="POST">
+            {% csrf_token %}
+            <button class="btn btn-dark" type="submit">Iniciar Proyecto</button>
+        </form>
+        <p class="mb-3">Manejo de Product Backlog Y Sprint iria aqui</p>
+    </div>
 </div>
 {% endblock %}

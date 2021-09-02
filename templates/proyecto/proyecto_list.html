@@ -2,7 +2,13 @@
 {% load projectmanager_extras %}
 
 {% block content %}
-<table class="table table-striped table-hover">
+<div class="container">
+{% if perms.projectmanager.crear_proyecto %}
+    <a class="mb-3 btn btn-dark" href="{% url 'proyecto_crear' %}">Crear</a>
+{% endif %}
+<h4 class="mb-3">Proyectos a los que tienes acceso: </h4>
+</div>
+<table class="table table-hover">
 	<thead>
 		<tr>
             <th scope="col">#</th>
@@ -35,7 +41,6 @@
 		{% else %}
 		<h1>No hay registros de proyectos</h1>
 		{% endif%}
-		<a class="btn btn-dark" href="{% url 'proyecto_crear' %}">Crear</a>
 	</tbody>
 </table>
 {% endblock%}

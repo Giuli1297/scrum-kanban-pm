@@ -192,3 +192,25 @@ class ProyectoSMUpdate(UserAccessMixin, UpdateView):
                 messages.error(request, "No tienes permisos para eso")
                 return redirect('/')
         return super().post(request, *args, **kwargs)
+
+
+class ProyectoIniciarView(UserAccessMixin, View):
+    """
+        Vista basada en clase el sirve para iniciar un proyecto nuevo por parte del SM
+        """
+    raise_exception = False
+    permission_required = ()
+    permission_required_obj = ('projectmanager.iniciar_proyecto',)
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+
+    def post(self, request, *args, **kwargs):
+        project = Proyecto.objects.get(scrum_master=request.user)
+        if not request.user.has_perms(self.permission_required_obj):
+            if not request.user.has_perms(self.permission_required_obj, project):
+                messages.error(request, "No tienes permisos para eso")
+                return redirect('/')
+
+        project.estado = 'ACT'
+        project.save()
+        return redirect(reverse_lazy('proyecto_listar'))

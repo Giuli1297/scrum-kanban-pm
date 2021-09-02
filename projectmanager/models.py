@@ -38,7 +38,8 @@ class Proyecto(models.Model):
         permissions = (('crear_proyecto', 'Puede crear un proyecto'),
                        ('editar_proyecto', 'Puede editar un proyecto'),
                        ('ver_proyecto', 'Puede ver un proyecto en detalle'),
-                       ('ver_proyectos', 'Puede ver proyectos'),)
+                       ('ver_proyectos', 'Puede ver proyectos'),
+                       ('iniciar_proyecto', 'Puede iniciar proyecto'),)
         ordering = ('-fecha_inicio',)
 
     def save(self, *args, **kwargs):
