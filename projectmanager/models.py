@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User ,AbstractUser,Group
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -48,3 +48,12 @@ class Proyecto(models.Model):
 
     def __str__(self):
         return self.nombre
+
+
+class rol(Group):
+    usuario=models.ManyToManyField(User)
+    class Meta:
+        verbose_name_plural='Rol'
+        ordering=['name']
+    def __unicode__(self):
+        return self.name

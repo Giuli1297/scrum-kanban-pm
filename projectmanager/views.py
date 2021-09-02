@@ -7,23 +7,28 @@ from django.contrib.auth.models import User
 from django.contrib.auth.models import Permission
 from django.contrib import messages
 
+
 from django.views.generic import (
     ListView,
     CreateView,
     UpdateView
 )
 from projectmanager.forms import ProyectoForm
-
+from .forms import UserForm, RolForm
 from django.shortcuts import render, redirect
 from django.views import View
-from django.contrib.auth.models import User
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.models import User, Group
 from django.contrib import messages
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
 from .utils import account_activation_token
 
 # Create your views here.
-from projectmanager.models import Proyecto
+from projectmanager.models import Proyecto, rol
+
+from django.http import JsonResponse
+from django.urls import reverse_lazy
 
 class UserAccessMixin(PermissionRequiredMixin):
 
@@ -83,8 +88,6 @@ class VerificationView(View):
             messages.error(request, "El usuario no pudo ser habilitado")
             return redirect('home')
 
-
-
 class ProyectoCreate(UserAccessMixin, CreateView):
     """
 	Vista basada en clase el sirve para crear un proyecto nuevo
@@ -126,3 +129,45 @@ class ProyectoUpdate(UserAccessMixin, UpdateView):
     form_class = ProyectoForm #Indicar el formulario
     template_name = 'proyecto/proyecto_form.html' #Indicar el template
     success_url = reverse_lazy('proyecto_listar') #Redireccionar
+
+class RolListView(ListView):
+    model = rol
+    template_name = 'rol/list.html'
+
+
+class RolCreateView(CreateView):
+    model = rol
+    form_class = RolForm
+    template_name = 'rol/create.html'
+    success_url = reverse_lazy('list_rol')
+
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+
+class RolUpdateView(UpdateView):
+    model = rol
+    form_class = RolForm
+    template_name = 'rol/update.html'
+    success_url = reverse_lazy('list_rol')
+
+
+class RolDeleteView(DeleteView):
+    model = rol
+    template_name = 'rol/delete.html'
+    success_url = reverse_lazy('list_rol')
+
+
+
+
+class ListUser(ListView):
+    model = User
+    #form_class = UserForm
+    template_name = 'rol/list_user.html'
+
+class AsignarRol(UpdateView):
+    model = User
+    form_class = UserForm
+    template_name = 'rol/asignarRol.html'
+    success_url = reverse_lazy('list_user')
+
