@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Permission
 from django.contrib import messages
-from .forms import UserForm
+from .forms import UserForm, RolForm
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
@@ -69,13 +69,12 @@ class VerificationView(View):
 
 class RolListView(ListView):
     model = rol
-
     template_name = 'rol/list.html'
 
 
 class RolCreateView(CreateView):
     model = rol
-    form_class = UserForm
+    form_class = RolForm
     template_name = 'rol/create.html'
     success_url = reverse_lazy('list_rol')
 
@@ -85,7 +84,7 @@ class RolCreateView(CreateView):
 
 class RolUpdateView(UpdateView):
     model = rol
-    form_class = UserForm
+    form_class = RolForm
     template_name = 'rol/update.html'
     success_url = reverse_lazy('list_rol')
 
@@ -94,3 +93,17 @@ class RolDeleteView(DeleteView):
     model = rol
     template_name = 'rol/delete.html'
     success_url = reverse_lazy('list_rol')
+
+
+
+
+class ListUser(ListView):
+    model = User
+    #form_class = UserForm
+    template_name = 'rol/list_user.html'
+
+class AsignarRol(UpdateView):
+    model = User
+    form_class = UserForm
+    template_name = 'rol/asignarRol.html'
+    success_url = reverse_lazy('list_user')

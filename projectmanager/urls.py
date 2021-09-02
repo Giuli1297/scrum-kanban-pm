@@ -10,6 +10,8 @@ urlpatterns = [
     path('roles/lista/',views.RolListView.as_view(),name='list_rol'),
     path('roles/create/',views.RolCreateView.as_view(),name='create_rol'),
     path('roles/update/<int:pk>/',views.RolUpdateView.as_view(),name='update_rol'),
-    path('roles/delete/<int:pk>/',views.RolDeleteView.as_view(),name='delete_rol')
+    path('roles/delete/<int:pk>/',views.RolDeleteView.as_view(),name='delete_rol'),
+    path('roles/users/',views.ListUser.as_view(),name='list_user'),
+    path('roles/asignar/<int:pk>/',views.AsignarRol.as_view(),name='asignar_rol')
 
 ]

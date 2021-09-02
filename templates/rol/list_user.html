@@ -13,9 +13,8 @@
 
 {% for object in object_list %}
     <p>{{ object }}
-        <a type="submit" href="{% url 'update_rol' object.id %}">Modificar</a>
+        <a type="submit" href="{% url 'asignar_rol' object.id %}">Asignar Rol</a>
         <a type="submit"  href="{% url 'delete_rol' object.id %}"> Eliminar </a>
-        <a type="submit"  href="{% url 'list_user' %}"> Asignar Rol </a>
     </p>
 
 {% endfor %}
