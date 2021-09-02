@@ -6,6 +6,7 @@ from django.contrib.auth.views import redirect_to_login
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Permission
 from django.contrib import messages
+from django.db.models import Q
 
 from django.views.generic import (
     ListView,
@@ -14,7 +15,7 @@ from django.views.generic import (
     TemplateView,
     DetailView
 )
-from projectmanager.forms import ProyectoForm
+from projectmanager.forms import ProyectoForm, ProyectoEditarSMForm
 
 from django.shortcuts import render, redirect
 from django.views import View
@@ -87,7 +88,8 @@ class ProyectoDetailView(UserAccessMixin, DetailView):
     :return:
     """
     raise_exception = False
-    permission_required = ('projectmanager.ver_proyecto')
+    permission_required = ()
+    permission_required_obj = ('projectmanager.ver_proyecto',)
     permission_denied_message = "You don't have permissions"
     redirect_field_name = 'next'
 
@@ -99,13 +101,23 @@ class ProyectoDetailView(UserAccessMixin, DetailView):
         context = super().get_context_data(**kwargs)
         return context
 
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not request.user.has_perms(self.permission_required_obj):
+            if not request.user.has_perms(self.permission_required_obj, self.object):
+                messages.error(request, "No tienes permisos para eso")
+                return redirect('/')
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
+
 
 class ProyectoCreate(UserAccessMixin, CreateView):
     """
 	Vista basada en clase el sirve para crear un proyecto nuevo
 	"""
+
     raise_exception = False
-    permission_required = ('projectmanager.crear_proyecto')
+    permission_required = ('projectmanager.crear_proyecto',)
     permission_denied_message = "You don't have permissions"
     redirect_field_name = 'next'
 
@@ -121,12 +133,17 @@ class ProyectoView(UserAccessMixin, ListView):
     """
 
     raise_exception = False
-    permission_required = ('projectmanager.ver_proyectos')
+    permission_required = ('projectmanager.ver_proyectos',)
     permission_denied_message = "You don't have permissions"
     redirect_field_name = 'next'
 
     model = Proyecto
     template_name = 'proyecto/proyecto_list.html'
+
+    def get_queryset(self):
+        if self.request.user.groups.filter(name='Administrador').exists():
+            return Proyecto.objects.all()
+        return Proyecto.objects.filter(Q(scrum_master=self.request.user) | Q(scrum_member=self.request.user))
 
 
 class ProyectoUpdate(UserAccessMixin, UpdateView):
@@ -134,7 +151,8 @@ class ProyectoUpdate(UserAccessMixin, UpdateView):
     Vista basada en clase el sirve para crear un proyecto nuevo
     """
     raise_exception = False
-    permission_required = ('projectmanager.editar_proyecto')
+    permission_required = ('projectmanager.editar_proyecto',)
+    permission_required_obj = ()
     permission_denied_message = "You don't have permissions"
     redirect_field_name = 'next'
 
@@ -142,3 +160,35 @@ class ProyectoUpdate(UserAccessMixin, UpdateView):
     form_class = ProyectoForm  # Indicar el formulario
     template_name = 'proyecto/proyecto_form.html'  # Indicar el template
     success_url = reverse_lazy('proyecto_listar')  # Redireccionar
+
+
+class ProyectoSMUpdate(UserAccessMixin, UpdateView):
+    """
+    Vista basada en clase el sirve para editar un proyecto nuevo por parte del SM
+    """
+    raise_exception = False
+    permission_required = ()
+    permission_required_obj = ('projectmanager.editar_proyecto',)
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+
+    model = Proyecto  # Indicar el modelo a utilizar
+    form_class = ProyectoEditarSMForm  # Indicar el formulario
+    template_name = 'proyecto/detail.html'  # Indicar el template
+    success_url = reverse_lazy('proyecto_listar')  # Redireccionar
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not request.user.has_perms(self.permission_required_obj):
+            if not request.user.has_perms(self.permission_required_obj, self.object):
+                messages.error(request, "No tienes permisos para eso")
+                return redirect('/')
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not request.user.has_perms(self.permission_required_obj):
+            if not request.user.has_perms(self.permission_required_obj, self.object):
+                messages.error(request, "No tienes permisos para eso")
+                return redirect('/')
+        return super().post(request, *args, **kwargs)

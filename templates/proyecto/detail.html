@@ -1,11 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ proyecto.nombre }}</title>
-</head>
-<body>
-    <h1>{{ proyecto.nombre }}</h1>
-    <p>{{ proyecto.descripcion }}</p>
-</body>
-</html>
+{% extends "layout/base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-6">
+        <h3 class="mb-2">{{ proyecto.nombre }}</h3>
+        <p class="mb-3">{{ proyecto.descripcion }}</p>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="btn btn-dark" type="submit">Guardar</button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

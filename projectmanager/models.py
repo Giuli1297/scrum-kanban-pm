@@ -3,6 +3,8 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.template.defaultfilters import slugify
+from guardian.shortcuts import assign_perm
+
 
 # Create your models here.
 class Proyecto(models.Model):
@@ -18,8 +20,8 @@ class Proyecto(models.Model):
         ('FIN', 'Finalizado')
     )
 
-    nombre = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=255)
+    nombre = models.CharField(max_length=255, unique=True)
+    slug = models.SlugField(max_length=255, unique=True)
     descripcion = models.TextField(blank=True)
     fecha_inicio = models.DateTimeField(default=timezone.now)
     fecha_fin = models.DateTimeField(blank=True, null=True)

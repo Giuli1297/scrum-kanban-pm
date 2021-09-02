@@ -10,19 +10,33 @@ class ProyectoForm(forms.ModelForm):
             'nombre',
             'descripcion',
             'scrum_master',
-            'scrum_member',
         ]
 
         labels = {
             'nombre': 'Nombre',
             'descripcion': 'Descripcion',
             'scrum_master': 'Scrum Master',
-            'scrum_member': 'Scrum Member',
         }
 
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
-            'descripcion': forms.TextInput(attrs={'class': 'form-control'}),
-            'scrum_master': forms.Select(attrs={'class':'regDropDown'}),
+            'descripcion': forms.Textarea(attrs={'class': 'form-control'}),
+            'scrum_master': forms.Select(attrs={'class': 'regDropDown'}),
+        }
+
+
+class ProyectoEditarSMForm(forms.ModelForm):
+    class Meta:
+        model = Proyecto
+
+        fields = [
+            'scrum_member',
+        ]
+
+        labels = {
+            'scrum_member': 'Scrum Members'
+        }
+
+        widgets = {
             'scrum_member': forms.CheckboxSelectMultiple(attrs={'class': 'check-label'}),
         }
