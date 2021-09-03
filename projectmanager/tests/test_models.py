@@ -128,22 +128,11 @@ class TestModels(TestCase):
         self.assertTrue(loginresponse)
 
     def test_proyecto_is_assigned_slug_on_creation(self):
+        """
+        Testea que una vez creado el proyeto el slug sea correcto
+        """
         self.assertEquals(self.proyecto.slug, 'slug-1')
-        """
-        Deja listas las variables para que se utilicen en los tests.
 
-        """
-        self.register_home = reverse(views.homepage)
-        return super().setUp()
-
-    def test_home(self):
-        """
-        Testea que el template de home se cargue correctamenta
-
-        """
-        response = self.client.get(self.register_home)
-        self.assertEqual(response.status_code, 200)  # confirma si cargo correctamente la pagina
-        self.assertTemplateUsed(response, 'dashboard/home.html')  # confirmacion de la plantilla usada
 
 
 class TestModelss(TestCase):
