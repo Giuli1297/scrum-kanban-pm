@@ -30,6 +30,9 @@ from projectmanager.models import Proyecto
 
 
 class UserAccessMixin(PermissionRequiredMixin):
+    """
+        Clase donde esta centralizada la verificacion de los permisos
+        """
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -113,9 +116,17 @@ class ProyectoDetailView(UserAccessMixin, DetailView):
 
 class ProyectoCreate(UserAccessMixin, CreateView):
     """
-	Vista basada en clase el sirve para crear un proyecto nuevo
-	"""
+        Vista basada en clase para la creacion de un proyecto nuevo
+        Atributos:
 
+        Parameters
+        ----------
+        model
+            Modelo a utilizar seria el de Proyecto
+
+        formclass
+            El formulario a utilizar es el FormProyecto
+    """
     raise_exception = False
     permission_required = ('projectmanager.crear_proyecto',)
     permission_denied_message = "You don't have permissions"
@@ -129,7 +140,14 @@ class ProyectoCreate(UserAccessMixin, CreateView):
 
 class ProyectoView(UserAccessMixin, ListView):
     """
-    Vista basada en clase el cual lista todos los proyectos
+    Vista basada en clase que lista todos lo proyectos y los muesrra
+
+        Atributos:
+
+        Parameters
+        ----------
+        model
+            Modelo a utilizar seria el de Proyecto
     """
 
     raise_exception = False
@@ -137,6 +155,7 @@ class ProyectoView(UserAccessMixin, ListView):
     permission_denied_message = "You don't have permissions"
     redirect_field_name = 'next'
 
+    #:EL modelo base a utilizar es el de Proyecto
     model = Proyecto
     template_name = 'proyecto/proyecto_list.html'
 
@@ -148,7 +167,17 @@ class ProyectoView(UserAccessMixin, ListView):
 
 class ProyectoUpdate(UserAccessMixin, UpdateView):
     """
-    Vista basada en clase el sirve para crear un proyecto nuevo
+    Vista basada en clase el sirve para la modificacion de un proyecto en especifico
+
+        Atributos:
+
+        Parameters
+        ----------
+        model
+            Modelo a utilizar seria el de Proyecto
+
+        formclass
+            El formulario a utilizar es el FormProyecto
     """
     raise_exception = False
     permission_required = ('projectmanager.editar_proyecto',)
@@ -197,7 +226,7 @@ class ProyectoSMUpdate(UserAccessMixin, UpdateView):
 class ProyectoIniciarView(UserAccessMixin, View):
     """
         Vista basada en clase el sirve para iniciar un proyecto nuevo por parte del SM
-        """
+    """
     raise_exception = False
     permission_required = ()
     permission_required_obj = ('projectmanager.iniciar_proyecto',)
