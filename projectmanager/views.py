@@ -1,20 +1,23 @@
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 from django.contrib.auth.views import redirect_to_login
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.auth.models import Permission
 from django.contrib import messages
-
+from django.db.models import Q
 
 from django.views.generic import (
     ListView,
     CreateView,
-    UpdateView
+    UpdateView,
+    TemplateView,
+    DetailView
 )
+from projectmanager.forms import ProyectoForm, ProyectoEditarSMForm, ActualizarUsuarioForm
 from projectmanager.forms import ProyectoForm
-from .forms import UserForm, RolForm
+from .forms import UserForm, RolForm, UserFormDelete
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
@@ -30,6 +33,7 @@ from projectmanager.models import Proyecto, rol
 from django.http import JsonResponse
 from django.urls import reverse_lazy
 
+
 class UserAccessMixin(PermissionRequiredMixin):
     """
         Clase donde esta centralizada la verificacion de los permisos
@@ -43,30 +47,6 @@ class UserAccessMixin(PermissionRequiredMixin):
             messages.error(request, "No tienes permisos para eso")
             return redirect('/')
         return super(UserAccessMixin, self).dispatch(request, *args, **kwargs)
-
-
-def homepage(request):
-    """
-    Devuelve la pagina principal de la aplicacion
-
-    Parameters
-    ----------
-    request
-        Objeto que contiene info acerca de la solicitud del cliente
-
-    """
-    return render(request, "dashboard/home.html")
-
-
-def proyecto_detail(request, proyecto_slug):
-    """
-        Presenta la pagina principla para la gestion de un proyecto
-    """
-
-
-
-    proyecto = get_object_or_404(Proyecto, slug=proyecto_slug)
-    return render(request, 'proyecto/detail.html', {'proyecto': proyecto})
 
 
 class VerificationView(View):
@@ -91,6 +71,54 @@ class VerificationView(View):
             messages.error(request, "El usuario no pudo ser habilitado")
             return redirect('home')
 
+
+class HomePage(LoginRequiredMixin, TemplateView):
+    """
+    Devuelve la pagina principal de la aplicacion
+
+    Parameters
+    ----------
+    request
+        Objeto que contiene info acerca de la solicitud del cliente
+
+    """
+    template_name = "dashboard/home.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class ProyectoDetailView(UserAccessMixin, DetailView):
+    """
+    Presenta la pagina principla para la gestion de un proyecto
+    :param request:
+    :return:
+    """
+    raise_exception = False
+    permission_required = ()
+    permission_required_obj = ('projectmanager.ver_proyecto',)
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+
+    model = Proyecto
+    template_name = 'proyecto/detail.html'
+    context_object_name = 'proyecto'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not request.user.has_perms(self.permission_required_obj):
+            if not request.user.has_perms(self.permission_required_obj, self.object):
+                messages.error(request, "No tienes permisos para eso")
+                return redirect('/')
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
+
+
 class ProyectoCreate(UserAccessMixin, CreateView):
     """
         Vista basada en clase para la creacion de un proyecto nuevo
@@ -105,7 +133,7 @@ class ProyectoCreate(UserAccessMixin, CreateView):
             El formulario a utilizar es el FormProyecto
     """
     raise_exception = False
-    permission_required = ('projectmanager.crear_proyecto')
+    permission_required = ('projectmanager.crear_proyecto',)
     permission_denied_message = "You don't have permissions"
     redirect_field_name = 'next'
 
@@ -128,14 +156,19 @@ class ProyectoView(UserAccessMixin, ListView):
     """
 
     raise_exception = False
-    permission_required = ('projectmanager.ver_proyectos')
+    permission_required = ('projectmanager.ver_proyectos',)
     permission_denied_message = "You don't have permissions"
     redirect_field_name = 'next'
-
 
     #:EL modelo base a utilizar es el de Proyecto
     model = Proyecto
     template_name = 'proyecto/proyecto_list.html'
+
+    def get_queryset(self):
+        if self.request.user.groups.filter(name='Administrador').exists():
+            return Proyecto.objects.all()
+        return Proyecto.objects.filter(Q(scrum_master=self.request.user) | Q(scrum_member=self.request.user)).distinct()
+
 
 class ProyectoUpdate(UserAccessMixin, UpdateView):
     """
@@ -152,22 +185,101 @@ class ProyectoUpdate(UserAccessMixin, UpdateView):
             El formulario a utilizar es el FormProyecto
     """
     raise_exception = False
-    permission_required = ('projectmanager.editar_proyecto')
+    permission_required = ('projectmanager.editar_proyecto',)
+    permission_required_obj = ()
     permission_denied_message = "You don't have permissions"
     redirect_field_name = 'next'
 
-    model = Proyecto #Indicar el modelo a utilizar
-    form_class = ProyectoForm #Indicar el formulario
-    template_name = 'proyecto/proyecto_form.html' #Indicar el template
-    success_url = reverse_lazy('proyecto_listar') #Redireccionar
+    model = Proyecto  # Indicar el modelo a utilizar
+    form_class = ProyectoForm  # Indicar el formulario
+    template_name = 'proyecto/proyecto_form.html'  # Indicar el template
+    success_url = reverse_lazy('proyecto_listar')  # Redireccionar
 
-class RolListView(ListView):
-    model = rol
+
+class ProyectoSMUpdate(UserAccessMixin, UpdateView):
+    """
+    Vista basada en clase el sirve para editar un proyecto nuevo por parte del SM
+    """
+    raise_exception = False
+    permission_required = ()
+    permission_required_obj = ('projectmanager.editar_proyecto',)
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+
+    model = Proyecto  # Indicar el modelo a utilizar
+    form_class = ProyectoEditarSMForm  # Indicar el formulario
+    template_name = 'proyecto/detail.html'  # Indicar el template
+    success_url = reverse_lazy('proyecto_listar')  # Redireccionar
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not request.user.has_perms(self.permission_required_obj):
+            if not request.user.has_perms(self.permission_required_obj, self.object):
+                messages.error(request, "No tienes permisos para eso")
+                return redirect('/')
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not request.user.has_perms(self.permission_required_obj):
+            if not request.user.has_perms(self.permission_required_obj, self.object):
+                messages.error(request, "No tienes permisos para eso")
+                return redirect('/')
+        return super().post(request, *args, **kwargs)
+
+
+class ProyectoIniciarView(UserAccessMixin, View):
+    """
+        Vista basada en clase el sirve para iniciar un proyecto nuevo por parte del SM
+    """
+    raise_exception = False
+    permission_required = ()
+    permission_required_obj = ('projectmanager.iniciar_proyecto',)
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+
+    def post(self, request, *args, **kwargs):
+        project = Proyecto.objects.get(scrum_master=request.user)
+        if not request.user.has_perms(self.permission_required_obj):
+            if not request.user.has_perms(self.permission_required_obj, project):
+                messages.error(request, "No tienes permisos para eso")
+                return redirect('/')
+
+        project.estado = 'ACT'
+        project.save()
+        return redirect(reverse_lazy('proyecto_listar'))
+
+
+@login_required
+def perfilUsuario(request):
+    if request.method == "POST":
+        form = ActualizarUsuarioForm(request.POST, instance=request.user)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Tu información ha sido actualizada!")
+            return redirect("perfil")
+    else:
+        form = ActualizarUsuarioForm(instance=request.user)
+    return render(request, "perfil/usuario.html", {'form': form})
+
+
+class RolListView(UserAccessMixin, ListView):
+    raise_exception = False
+    permission_required = ('projectmanager.ver_roles')
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+
+    model = Group
     template_name = 'rol/list.html'
 
 
-class RolCreateView(CreateView):
-    model = rol
+class RolCreateView(UserAccessMixin, CreateView):
+    raise_exception = False
+    permission_required = ('projectmanager.crear_roles')
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+    model = Group
     form_class = RolForm
     template_name = 'rol/create.html'
     success_url = reverse_lazy('list_rol')
@@ -176,29 +288,50 @@ class RolCreateView(CreateView):
         return super().dispatch(request, *args, **kwargs)
 
 
-class RolUpdateView(UpdateView):
-    model = rol
+class RolUpdateView(UserAccessMixin, UpdateView):
+    raise_exception = False
+    permission_required = ('projectmanager.actualizar_roles')
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+    model = Group
     form_class = RolForm
     template_name = 'rol/update.html'
     success_url = reverse_lazy('list_rol')
 
 
-class RolDeleteView(DeleteView):
-    model = rol
+class RolDeleteView(UserAccessMixin, DeleteView):
+    raise_exception = False
+    permission_required = ('projectmanager.eliminar_roles')
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+    model = Group
     template_name = 'rol/delete.html'
     success_url = reverse_lazy('list_rol')
 
 
-
-
 class ListUser(ListView):
     model = User
-    #form_class = UserForm
+    # form_class = UserForm
     template_name = 'rol/list_user.html'
 
-class AsignarRol(UpdateView):
+
+class AsignarRol(UserAccessMixin, UpdateView):
+    raise_exception = False
+    permission_required = ('projectmanager.asignar_roles')
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
     model = User
     form_class = UserForm
     template_name = 'rol/asignarRol.html'
     success_url = reverse_lazy('list_user')
 
+
+class EliminarRolUser(UserAccessMixin, UpdateView):
+    raise_exception = False
+    permission_required = ('projectmanager.quitar_roles')
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+    model = User
+    form_class = UserFormDelete
+    template_name = 'rol/eliminarRolUser.html'
+    success_url = reverse_lazy('list_user')

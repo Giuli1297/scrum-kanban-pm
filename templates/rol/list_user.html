@@ -1,23 +1,34 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-</head>
-<body>
-<p><div><a type="submit" href="{% url 'create_rol' %}">Crear nuevo rol</a></div>
-<div><a type="submit" href="{% url 'account_login' %}">Home</a></div></p>
+{% extends 'layout/base.html' %}
+{% block body %}
+<div class="col-md-6  "  >
+            <div class="card card-default" >
+              <div class="card-header">
+                <h3 class="card-title">
+                    Usuarios
+                </h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <table class="table" id="data">
 
-{% for object in object_list %}
-    <p>{{ object }}
-        <a type="submit" href="{% url 'asignar_rol' object.id %}">Asignar Rol</a>
-        <a type="submit"  href="{% url 'delete_rol' object.id %}"> Eliminar </a>
-    </p>
+                      <tbody>
+                      {% block rows %}
+                        {% for c in object_list %}
+                            <tr>
+                             <td>{{ c }}</td>
+                                <td> <a class="btn btn-primary btn-flat " href="{% url 'asignar_rol' c.id %}" >Asignar Rol</a></td>
+                                <td> <a class="btn btn-danger btn-flat" href="{% url 'delete_rol_user' c.id %}" >Eliminar Rol de Usuario</a></td>
+                            </td>
+                            </tr>
+                        {% endfor %}
+                      {% endblock %}
 
-{% endfor %}
+                      </tbody>
+                    </table>
+              </div>
 
-</body>
-</html>
+            </div>
+          </div>
+{% endblock %}
+
+
