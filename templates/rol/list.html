@@ -17,9 +17,10 @@
                         {% for c in object_list %}
                             <tr>
                              <td>{{ c }}</td>
-                                <td> <a class="btn btn-primary btn-warning " href="{% url 'update_rol' c.id %}" >Editar Rol</a></td>
-                                <td> <a class="btn btn-danger btn-flat" href="{% url 'delete_rol' c.id %}" >Elimina Rol</a></td>
-
+                                {% ifnotequal c.name 'Administrador' %}
+                                    <td> <a class="btn btn-primary btn-warning " href="{% url 'update_rol' c.id %}" >Editar Rol</a></td>
+                                    <td> <a class="btn btn-danger btn-flat" href="{% url 'delete_rol' c.id %}" >Elimina Rol</a></td>
+                                {% endifnotequal %}
                             </td>
                             </tr>
                         {% endfor %}
