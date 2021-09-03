@@ -51,3 +51,51 @@ class TestUrls(SimpleTestCase):
         """
         url = reverse('proyecto_iniciar', args=['slug'])
         self.assertEquals(resolve(url).func.view_class, views.ProyectoIniciarView)
+
+    def test_ver_roles(self):
+        """
+        Test para verificar que se carga correctamente la vista correspondiente para ver roles
+        """
+        url = reverse('list_rol')
+        self.assertEquals(resolve(url).func.view_class, views.RolListView)
+    def test_crear_roles(self):
+        """
+        Test para verificar que se carga correctamente la vista correspondiente para crear roles
+        """
+        url = reverse('create_rol')
+        self.assertEquals(resolve(url).func.view_class, views.RolCreateView)
+
+    def test_actualizar_roles(self):
+        """
+        Test para verificar que se carga correctamente la vista correspondiente para actualizar roles
+        """
+        url = reverse('update_rol', args=[1])
+        self.assertEquals(resolve(url).func.view_class, views.RolUpdateView)
+
+    def test_eliminar_roles(self):
+        """
+        Test para verificar que se carga correctamente la vista correspondiente para eliminar roles
+        """
+        url = reverse('delete_rol_rol', args=[1])
+        self.assertEquals(resolve(url).func.view_class, views.RolDeleteView)
+
+    def test_ver_usuarios(self):
+        """
+        Test para verificar que se carga correctamente la vista correspondiente para ver los usuarios
+        """
+        url = reverse('list_user')
+        self.assertEquals(resolve(url).func.view_class, views.ListUser)
+
+    def test_asignar_roles(self):
+        """
+        Test para verificar que se carga correctamente la vista correspondiente para asignar roles a usuarios
+        """
+        url = reverse('asignar_rol', args=[1])
+        self.assertEquals(resolve(url).func.view_class, views.AsignarRol)
+
+    def test_eliminar_roles(self):
+        """
+        Test para verificar que se carga correctamente la vista correspondiente para eliminar roles de usuarios
+        """
+        url = reverse('delete_rol_user', args=[1])
+        self.assertEquals(resolve(url).func.view_class, views.EliminarRolUser)

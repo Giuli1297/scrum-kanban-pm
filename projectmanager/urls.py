@@ -20,5 +20,5 @@ urlpatterns = [
     path('roles/delete/<int:pk>/', views.RolDeleteView.as_view(), name='delete_rol'),
     path('roles/users/', views.ListUser.as_view(), name='list_user'),
     path('roles/asignar/<int:pk>/', views.AsignarRol.as_view(), name='asignar_rol'),
-    path('roles/deleteRolUser/<int:pk>/', views.AsignarRol.as_view(), name='delete_rol_user'),
+    path('roles/deleteRolUser/<int:pk>/', views.EliminarRolUser.as_view(), name='delete_rol_user'),
 ]
