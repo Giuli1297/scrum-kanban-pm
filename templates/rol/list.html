@@ -1,24 +1,39 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-</head>
-<body>
-<p><div><a type="submit" href="{% url 'create_rol' %}">Crear nuevo rol</a></div>
-<div><a type="submit" href="{% url 'account_login' %}">Home</a></div></p>
+{% extends 'layout/base.html' %}
+{% block body %}
+<div class="col-md-6  "  >
+            <div class="card card-default" >
+              <div class="card-header">
+                <h3 class="card-title">
 
-{% for object in object_list %}
-    <p>{{ object }}
-        <a type="submit" href="{% url 'update_rol' object.id %}">Modificar</a>
-        <a type="submit"  href="{% url 'delete_rol' object.id %}"> Eliminar </a>
-        <a type="submit"  href="{% url 'list_user' %}"> Asignar Rol </a>
-    </p>
+                    ROLES
+                </h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <table class="table" id="data">
 
-{% endfor %}
+                      <tbody>
+                      {% block rows %}
+                        {% for c in object_list %}
+                            <tr>
+                             <td>{{ c }}</td>
+                                <td> <a class="btn btn-primary btn-warning " href="{% url 'update_rol' c.id %}" >Editar Rol</a></td>
+                                <td> <a class="btn btn-danger btn-flat" href="{% url 'delete_rol' c.id %}" >Elimina Rol</a></td>
 
-</body>
-</html>
+                            </td>
+                            </tr>
+                        {% endfor %}
+                      {% endblock %}
+
+                      </tbody>
+                    </table>
+              </div>
+                <div class="card-footer">
+                    <td> <a class="btn btn-primary btn-flat " href="{% url 'create_rol' %}" >Nuevo Rol</a></td>
+                    <td> <a class="btn btn-success btn-flat " href="{% url 'list_user' %}" >Asignar Rol</a></td>
+                </div>
+            </div>
+          </div>
+{% endblock %}
+
+

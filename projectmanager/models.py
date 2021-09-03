@@ -1,8 +1,10 @@
-from django.contrib.auth.models import User ,AbstractUser,Group
+from django.contrib.auth.models import User, AbstractUser, Group
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.template.defaultfilters import slugify
+from guardian.shortcuts import assign_perm
+
 
 # Create your models here.
 class Proyecto(models.Model):
@@ -42,8 +44,8 @@ class Proyecto(models.Model):
         ('FIN', 'Finalizado')
     )
 
-    nombre = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=255)
+    nombre = models.CharField(max_length=255, unique=True)
+    slug = models.SlugField(max_length=255, unique=True)
     descripcion = models.TextField(blank=True)
     fecha_inicio = models.DateTimeField(default=timezone.now)
     fecha_fin = models.DateTimeField(blank=True, null=True)
@@ -59,7 +61,10 @@ class Proyecto(models.Model):
         verbose_name = 'Proyectos'
         permissions = (('crear_proyecto', 'Puede crear un proyecto'),
                        ('editar_proyecto', 'Puede editar un proyecto'),
-                       ('ver_proyectos', 'Puede ver proyectos'),)
+                       ('ver_proyecto', 'Puede ver un proyecto en detalle'),
+                       ('ver_proyectos', 'Puede ver proyectos'),
+                       ('iniciar_proyecto', 'Puede iniciar proyecto'),)
+        default_permissions = ()
         ordering = ('-fecha_inicio',)
 
     def save(self, *args, **kwargs):
@@ -67,6 +72,7 @@ class Proyecto(models.Model):
         Guarde la instancia actual. Reemplace esto en una subclase si desea controlar el proceso de guardado.
 
         """
+        self.nombre = self.nombre.lower()
         if not self.slug:
             self.slug = slugify(self.nombre)
         return super().save(*args, **kwargs)
@@ -79,9 +85,17 @@ class Proyecto(models.Model):
 
 
 class rol(Group):
-    usuario=models.ManyToManyField(User)
+    # usuario=models.ManyToManyField(User)
     class Meta:
-        verbose_name_plural='Rol'
-        ordering=['name']
+        permissions = (('ver_roles', 'Puede ver roles'),
+                       ('crear_roles', 'Puede crear roles'),
+                       ('actualizar_roles', 'Puede actualizar roles'),
+                       ('eliminar_roles', 'Puede eliminar roles'),
+                       ('asignar_roles', 'Asigna roles a usuarios'),
+                       ('quitar_roles', 'Quita rol de usuarios'))
+        default_permissions = ()
+        verbose_name_plural = 'Rol'
+        ordering = ['name']
+
     def __unicode__(self):
         return self.name
