@@ -37,7 +37,7 @@ from django.urls import reverse_lazy
 class UserAccessMixin(PermissionRequiredMixin):
     """
         Clase donde esta centralizada la verificacion de los permisos
-        """
+    """
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -92,8 +92,7 @@ class HomePage(LoginRequiredMixin, TemplateView):
 class ProyectoDetailView(UserAccessMixin, DetailView):
     """
     Presenta la pagina principla para la gestion de un proyecto
-    :param request:
-    :return:
+
     """
     raise_exception = False
     permission_required = ()
@@ -174,7 +173,7 @@ class ProyectoUpdate(UserAccessMixin, UpdateView):
     """
     Vista basada en clase el sirve para la modificacion de un proyecto en especifico
 
-        Atributos:
+    Atributos:
 
         Parameters
         ----------
@@ -199,6 +198,16 @@ class ProyectoUpdate(UserAccessMixin, UpdateView):
 class ProyectoSMUpdate(UserAccessMixin, UpdateView):
     """
     Vista basada en clase el sirve para editar un proyecto nuevo por parte del SM
+
+    Atributos:
+
+        Parameters
+        ----------
+        model
+            Modelo a utilizar seria el de Proyecto
+
+        formclass
+            El formulario a utilizar es el FormProyecto
     """
     raise_exception = False
     permission_required = ()
@@ -265,6 +274,16 @@ def perfilUsuario(request):
 
 
 class RolListView(UserAccessMixin, ListView):
+    """
+    Vista basada en clase que muestra una lista delos roles
+    Atributos:
+
+        Parameters
+        ----------
+        model
+            Modelo a utilizar seria el de Rol
+
+    """
     raise_exception = False
     permission_required = ('projectmanager.ver_roles')
     permission_denied_message = "You don't have permissions"
@@ -275,6 +294,18 @@ class RolListView(UserAccessMixin, ListView):
 
 
 class RolCreateView(UserAccessMixin, CreateView):
+    """
+       Vista basada en clase para poder crear los roles
+       Atributos:
+
+        Parameters
+        ----------
+        model
+            Modelo a utilizar seria el de Group
+
+        formclass
+            El formulario a utilizar es el del Rol
+    """
     raise_exception = False
     permission_required = ('projectmanager.crear_roles')
     permission_denied_message = "You don't have permissions"
@@ -289,6 +320,18 @@ class RolCreateView(UserAccessMixin, CreateView):
 
 
 class RolUpdateView(UserAccessMixin, UpdateView):
+    """
+      Vista basada en clase para poder modificar un rol
+      Atributos:
+
+        Parameters
+        ----------
+        model
+            Modelo a utilizar seria el de Group
+
+        formclass
+            El formulario a utilizar es el del Rol
+    """
     raise_exception = False
     permission_required = ('projectmanager.actualizar_roles')
     permission_denied_message = "You don't have permissions"
@@ -300,6 +343,15 @@ class RolUpdateView(UserAccessMixin, UpdateView):
 
 
 class RolDeleteView(UserAccessMixin, DeleteView):
+    """
+      Vista basada en clase para poder eliminar rol
+      Atributos:
+
+        Parameters
+        ----------
+        model
+            Modelo a utilizar seria el de Group
+    """
     raise_exception = False
     permission_required = ('projectmanager.eliminar_roles')
     permission_denied_message = "You don't have permissions"
@@ -310,12 +362,34 @@ class RolDeleteView(UserAccessMixin, DeleteView):
 
 
 class ListUser(ListView):
+    """
+      Vista basada en clase que muestra una lista de los usuarios
+      Atributos:
+
+        Parameters
+        ----------
+        model
+            Modelo a utilizar seria el de User
+
+    """
     model = User
     # form_class = UserForm
     template_name = 'rol/list_user.html'
 
 
 class AsignarRol(UserAccessMixin, UpdateView):
+    """
+      Vista basada en clase para poder asignar un rol a un usuario
+      Atributos:
+
+        Parameters
+        ----------
+        model
+            Modelo a utilizar seria el de User
+
+        formclass
+            El formulario a utilizar es el del User
+    """
     raise_exception = False
     permission_required = ('projectmanager.asignar_roles')
     permission_denied_message = "You don't have permissions"
