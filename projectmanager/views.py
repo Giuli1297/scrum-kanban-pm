@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 from django.contrib.auth.views import redirect_to_login
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.auth.models import Permission
 from django.contrib import messages
 from django.db.models import Q
@@ -16,17 +16,22 @@ from django.views.generic import (
     DetailView
 )
 from projectmanager.forms import ProyectoForm, ProyectoEditarSMForm, ActualizarUsuarioForm
-
+from projectmanager.forms import ProyectoForm
+from .forms import UserForm, RolForm, UserFormDelete
 from django.shortcuts import render, redirect
 from django.views import View
-from django.contrib.auth.models import User
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.models import User, Group
 from django.contrib import messages
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
 from .utils import account_activation_token
 
 # Create your views here.
-from projectmanager.models import Proyecto
+from projectmanager.models import Proyecto, rol
+
+from django.http import JsonResponse
+from django.urls import reverse_lazy
 
 
 class UserAccessMixin(PermissionRequiredMixin):
@@ -242,13 +247,13 @@ class ProyectoIniciarView(UserAccessMixin, View):
 
         project.estado = 'ACT'
         project.save()
-        return redirect(reverse_lazy('proyecto_listar'))  
+        return redirect(reverse_lazy('proyecto_listar'))
 
 
 @login_required
 def perfilUsuario(request):
     if request.method == "POST":
-        form = ActualizarUsuarioForm(request.POST, instance=request.user) 
+        form = ActualizarUsuarioForm(request.POST, instance=request.user)
 
         if form.is_valid():
             form.save()
@@ -256,4 +261,77 @@ def perfilUsuario(request):
             return redirect("perfil")
     else:
         form = ActualizarUsuarioForm(instance=request.user)
-    return render(request, "perfil/usuario.html", {'form': form })
+    return render(request, "perfil/usuario.html", {'form': form})
+
+
+class RolListView(UserAccessMixin, ListView):
+    raise_exception = False
+    permission_required = ('projectmanager.ver_roles')
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+
+    model = Group
+    template_name = 'rol/list.html'
+
+
+class RolCreateView(UserAccessMixin, CreateView):
+    raise_exception = False
+    permission_required = ('projectmanager.crear_roles')
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+    model = Group
+    form_class = RolForm
+    template_name = 'rol/create.html'
+    success_url = reverse_lazy('list_rol')
+
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+
+class RolUpdateView(UserAccessMixin, UpdateView):
+    raise_exception = False
+    permission_required = ('projectmanager.actualizar_roles')
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+    model = Group
+    form_class = RolForm
+    template_name = 'rol/update.html'
+    success_url = reverse_lazy('list_rol')
+
+
+class RolDeleteView(UserAccessMixin, DeleteView):
+    raise_exception = False
+    permission_required = ('projectmanager.eliminar_roles')
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+    model = Group
+    template_name = 'rol/delete.html'
+    success_url = reverse_lazy('list_rol')
+
+
+class ListUser(ListView):
+    model = User
+    # form_class = UserForm
+    template_name = 'rol/list_user.html'
+
+
+class AsignarRol(UserAccessMixin, UpdateView):
+    raise_exception = False
+    permission_required = ('projectmanager.asignar_roles')
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+    model = User
+    form_class = UserForm
+    template_name = 'rol/asignarRol.html'
+    success_url = reverse_lazy('list_user')
+
+
+class EliminarRolUser(UserAccessMixin, UpdateView):
+    raise_exception = False
+    permission_required = ('projectmanager.quitar_roles')
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+    model = User
+    form_class = UserFormDelete
+    template_name = 'rol/eliminarRolUser.html'
+    success_url = reverse_lazy('list_user')

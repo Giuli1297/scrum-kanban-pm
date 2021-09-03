@@ -157,6 +157,10 @@ ehthumbs.db
 Icon?
 Thumbs.db
 
+docs/_build/
+_build/
+_build
+
 # Editor backup files #
 #######################
 *~

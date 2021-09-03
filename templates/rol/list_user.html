@@ -1,0 +1,34 @@
+{% extends 'layout/base.html' %}
+{% block body %}
+<div class="col-md-6  "  >
+            <div class="card card-default" >
+              <div class="card-header">
+                <h3 class="card-title">
+                    Usuarios
+                </h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <table class="table" id="data">
+
+                      <tbody>
+                      {% block rows %}
+                        {% for c in object_list %}
+                            <tr>
+                             <td>{{ c }}</td>
+                                <td> <a class="btn btn-primary btn-flat " href="{% url 'asignar_rol' c.id %}" >Asignar Rol</a></td>
+                                <td> <a class="btn btn-danger btn-flat" href="{% url 'delete_rol_user' c.id %}" >Eliminar Rol de Usuario</a></td>
+                            </td>
+                            </tr>
+                        {% endfor %}
+                      {% endblock %}
+
+                      </tbody>
+                    </table>
+              </div>
+
+            </div>
+          </div>
+{% endblock %}
+
+

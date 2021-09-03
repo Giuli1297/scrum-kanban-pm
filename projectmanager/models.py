@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser, Group
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -64,6 +64,7 @@ class Proyecto(models.Model):
                        ('ver_proyecto', 'Puede ver un proyecto en detalle'),
                        ('ver_proyectos', 'Puede ver proyectos'),
                        ('iniciar_proyecto', 'Puede iniciar proyecto'),)
+        default_permissions = ()
         ordering = ('-fecha_inicio',)
 
     def save(self, *args, **kwargs):
@@ -81,3 +82,20 @@ class Proyecto(models.Model):
 
     def __str__(self):
         return self.nombre
+
+
+class rol(Group):
+    # usuario=models.ManyToManyField(User)
+    class Meta:
+        permissions = (('ver_roles', 'Puede ver roles'),
+                       ('crear_roles', 'Puede crear roles'),
+                       ('actualizar_roles', 'Puede actualizar roles'),
+                       ('eliminar_roles', 'Puede eliminar roles'),
+                       ('asignar_roles', 'Asigna roles a usuarios'),
+                       ('quitar_roles', 'Quita rol de usuarios'))
+        default_permissions = ()
+        verbose_name_plural = 'Rol'
+        ordering = ['name']
+
+    def __unicode__(self):
+        return self.name
