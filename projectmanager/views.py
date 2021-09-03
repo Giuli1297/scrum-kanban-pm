@@ -15,7 +15,7 @@ from django.views.generic import (
     TemplateView,
     DetailView
 )
-from projectmanager.forms import ProyectoForm, ProyectoEditarSMForm
+from projectmanager.forms import ProyectoForm, ProyectoEditarSMForm, ActualizarUsuarioForm
 
 from django.shortcuts import render, redirect
 from django.views import View
@@ -242,4 +242,18 @@ class ProyectoIniciarView(UserAccessMixin, View):
 
         project.estado = 'ACT'
         project.save()
-        return redirect(reverse_lazy('proyecto_listar'))
+        return redirect(reverse_lazy('proyecto_listar'))  
+
+
+@login_required
+def perfilUsuario(request):
+    if request.method == "POST":
+        form = ActualizarUsuarioForm(request.POST, instance=request.user) 
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Tu información ha sido actualizada!")
+            return redirect("perfil")
+    else:
+        form = ActualizarUsuarioForm(instance=request.user)
+    return render(request, "perfil/usuario.html", {'form': form })

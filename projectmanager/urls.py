@@ -10,5 +10,6 @@ urlpatterns = [
     path('proyectos/crear/', views.ProyectoCreate.as_view(), name="proyecto_crear"),
     path('proyectos/<slug:slug>/editar/', views.ProyectoUpdate.as_view(), name="proyecto_editar"),
     path('proyectos/<slug:slug>/editarsm/', views.ProyectoSMUpdate.as_view(), name="proyecto_editar_sm"),
-    path('proyectos/<slug:slug>/iniciar/', views.ProyectoIniciarView.as_view(), name="proyecto_iniciar")
+    path('proyectos/<slug:slug>/iniciar/', views.ProyectoIniciarView.as_view(), name="proyecto_iniciar"),
+    path('miperfil', views.perfilUsuario, name="perfil"),
 ]
