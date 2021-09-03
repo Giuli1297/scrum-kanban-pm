@@ -13,9 +13,6 @@ Bienvenido a la documentacion de Scrum-Kanban!
    modules/all-about-me.rst
    modules/views.rst
    modules/test_forms.rst
-   modules/test_models.rst
-   modules/test_urls.rst
-   modules/test_views.rst
    modules/models.rst
    modules/forms.rst
 

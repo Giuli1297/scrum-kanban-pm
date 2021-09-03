@@ -401,6 +401,17 @@ class AsignarRol(UserAccessMixin, UpdateView):
 
 
 class EliminarRolUser(UserAccessMixin, UpdateView):
+    """
+          Vista basada en clase para poder eliminar rol a un usuario
+          Atributos:
+
+            Parameters
+            ----------
+            model
+                Modelo a utilizar seria el de User
+            form_class
+                El formulario a utilizar es del UserFormDelete
+        """
     raise_exception = False
     permission_required = ('projectmanager.quitar_roles')
     permission_denied_message = "You don't have permissions"

@@ -34,6 +34,9 @@ class ProyectoForm(forms.ModelForm):
 
 
 class ProyectoEditarSMForm(forms.ModelForm):
+    """
+           Clase de formulario para editar datos de un proyecto
+    """
     class Meta:
         model = Proyecto
 
@@ -51,6 +54,10 @@ class ProyectoEditarSMForm(forms.ModelForm):
 
 
 class ActualizarUsuarioForm(forms.ModelForm):
+    """
+        Formulario para la actualizacion de datos de usuario
+
+    """
     email = forms.EmailField()
 
     class Meta:
@@ -67,7 +74,7 @@ class RolForm(forms.ModelForm):
     """
            Clase de formulario para el modelo Rol
 
-        """
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["permissions"].queryset = Permission.objects.filter(
@@ -100,8 +107,7 @@ class RolForm(forms.ModelForm):
 class UserForm(forms.ModelForm):
     """
            Clase de formulario para el modelo User
-
-        """
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -125,6 +131,9 @@ class UserForm(forms.ModelForm):
 
 
 class UserFormDelete(forms.ModelForm):
+    """
+           Clase de formulario para eliminar rol del User
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

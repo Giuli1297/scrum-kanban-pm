@@ -14,15 +14,7 @@ class TestViews(TestCase):
     """
        Clase de Testing para vistas
 
-       ...
-
-       Methods
-       -------
-       setUp()
-           Deja listo variables que se utilizaran para los test
-       test_home()
-           Prueba que se cargue el template correcto
-       """
+    """
 
     def setUp(self):
         """
@@ -48,21 +40,33 @@ class TestViews(TestCase):
         self.assertTemplateUsed(response, 'dashboard/home.html')
 
     def test_proyecto_list_GET(self):
+        """
+        Prueba que devuelva el template correcto
+        """
         response = self.client.get(reverse('proyecto_listar'))
         self.assertEquals(response.status_code, 200)
         self.assertTemplateUsed(response, 'proyecto/proyecto_list.html')
 
     def test_proyecto_crear_GET(self):
+        """
+        Prueba que devuelva el template correcto
+        """
         response = self.client.get(reverse('proyecto_crear'))
         self.assertEquals(response.status_code, 200)
         self.assertTemplateUsed(response, 'proyecto/proyecto_form.html')
 
     def test_proyecto_editar_GET(self):
+        """
+        Prueba que devuelva el template correcto
+        """
         response = self.client.get(reverse('proyecto_editar', args=[self.proyecto.slug]))
         self.assertEquals(response.status_code, 200)
         self.assertTemplateUsed(response, 'proyecto/proyecto_form.html')
 
     def test_proyecto_editarsm_GET(self):
+        """
+        Prueba que devuelva el template correcto
+        """
         response = self.client.get(reverse('proyecto_editar_sm', args=[self.proyecto.slug]))
         self.assertEquals(response.status_code, 200)
         self.assertTemplateUsed(response, 'proyecto/detail.html')

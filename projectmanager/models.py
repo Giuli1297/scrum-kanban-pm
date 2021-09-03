@@ -85,6 +85,9 @@ class Proyecto(models.Model):
 
 
 class rol(Group):
+    """
+    Modelo que hereda de Groups todos sus metodos y atributos para crear los roles y define los permisos para el CRUD
+    """
     # usuario=models.ManyToManyField(User)
     class Meta:
         permissions = (('ver_roles', 'Puede ver roles'),

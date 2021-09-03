@@ -1,4 +1,4 @@
-import pytest as pytest
+#import pytest as pytest
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.test import TestCase, Client
@@ -19,7 +19,13 @@ from projectmanager.views import *
 
 
 class TestModeloProyecto(TestCase):
+    """
+    Clase de Testing para formularios
+    """
     def setUp(self):
+        """
+        Deja listas las variables para que se utilicen en los tests.
+        """
         self.credentials = {
             'username': 'testuser',
             'password': 'secret'}
@@ -96,11 +102,11 @@ class TestModeloAutenticacion(TestCase):
         self.assertFalse(logged_in)
 
     def test_signup_email_verification(self):
-        '''
+        """
 
         testea el registro de un email valido
 
-        '''
+        """
 
         data = {
             "username": "user",
@@ -141,10 +147,10 @@ class TestModels(TestCase):
 
 
 class TestModelss(TestCase):
-    '''
+    """
     crea un grupo que seria igual a un rol
     crea un usuario par asignarle un rol
-    '''
+    """
 
     def setUp(self):
         nombre_rol = "grupo1"
@@ -154,32 +160,30 @@ class TestModelss(TestCase):
         self.user = User.objects.create_user(username="test", email="test@test.com", password="test")
 
     def test_create_rol(self):
-        '''
-
-        :return:retorna true si el nombre del rol creado es igual al otro argumento ,
-        '''
+        """
+        retorna true si el nombre del rol creado es igual al otro argumento ,
+        """
         self.assertEqual(self.roles.name, "grupo1")
 
     def test_asignar_rol(self):
-        '''
+        """
         asigna un role o grupo a un usuario
-        :return:
-        '''
+        """
         self.user.groups.add(self.roles)
         self.assertTrue(self.user.groups.filter(name="grupo1"))
 
     def test_elimiar_rol_de_usuario(self):
-        '''
+        """
         elimina el rol o grupo de usuario
-        :return: restorna true si es que eliminó correctamente el rol del usuario
-        '''
+        restorna true si es que eliminó correctamente el rol del usuario
+        """
         self.user.groups.remove(self.roles)
         self.assertFalse(self.user.groups.filter(name="grupo1"))
 
     def test_eliminar_rol(self):
-        '''
+        """
         se elimina el rol
-        :return: retorna true si es que se elimió correctamente el rol
-        '''
+        etorna true si es que se elimió correctamente el rol
+        """
         self.roles = self.roles.delete()
         self.assertFalse(self.user.groups.filter(name="grupo1"))
