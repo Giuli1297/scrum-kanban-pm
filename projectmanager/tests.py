@@ -1,12 +1,17 @@
+import pytest as pytest
 from django.test import TestCase
 
-from django.contrib.auth.models import User
-from django.test import TestCase
+from django.contrib.auth.models import User,Group
+from django.test import TestCase,Client
 from . import views
 from django.urls.base import reverse,resolve
 # Create your tests here.
 from allauth.account.forms import BaseSignupForm, ResetPasswordForm, SignupForm
-from .models import Proyecto
+from .models import Proyecto,rol
+from .views import *
+
+
+
 
 class TestModeloProyecto(TestCase):
     def setUp(self):
@@ -133,5 +138,45 @@ class TestHomePage(TestCase):
         self.assertEqual(response.status_code,200)#confirma si cargo correctamente la pagina
         self.assertTemplateUsed(response,'dashboard/home.html')#confirmacion de la plantilla usada
 
+class TestModelss(TestCase):
+    '''
+    crea un grupo que seria igual a un rol
+    crea un usuario par asignarle un rol
+    '''
+    def setUp(self):
+        nombre_rol="grupo1"
+        self.roles = Group.objects.create(name=nombre_rol)
+        self.roles.save()
+        self.c=Client()
+        self.user=User.objects.create_user(username="test",email="test@test.com",password="test")
+    def  test_create_rol(self):
+        '''
+
+        :return:retorna true si el nombre del rol creado es igual al otro argumento ,
+        '''
+        self.assertEqual(self.roles.name,"grupo1")
+    def test_asignar_rol(self):
+        '''
+        asigna un role o grupo a un usuario
+        :return:
+        '''
+        self.user.groups.add(self.roles)
+        self.assertTrue(self.user.groups.filter(name="grupo1"))
+
+    def test_elimiar_rol_de_usuario(self):
+        '''
+        elimina el rol o grupo de usuario
+        :return: restorna true si es que eliminó correctamente el rol del usuario
+        '''
+        self.user.groups.remove(self.roles)
+        self.assertFalse(self.user.groups.filter(name="grupo1"))
+
+    def test_eliminar_rol(self):
+        '''
+        se elimina el rol
+        :return: retorna true si es que se elimió correctamente el rol
+        '''
+        self.roles=self.roles.delete()
+        self.assertFalse(self.user.groups.filter(name="grupo1"))
 
 

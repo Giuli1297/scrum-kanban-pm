@@ -36,7 +36,7 @@ class RolForm(forms.ModelForm):
         #self.fields['first_name'].widget.attrs['autofocus'] = True
 
     class Meta:
-        model = rol
+        model = Group
         fields = ['name','permissions']
         labels = {
             'name': 'Nombre del rol',
@@ -79,3 +79,24 @@ class UserForm(forms.ModelForm):
         }
         exclude = ['user_permissions', 'last_login', 'date_joined', 'is_superuser', 'is_active', 'is_staff']
 
+class UserFormDelete(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    class Meta:
+        model = User
+        fields = 'username', 'groups'
+        widgets = {
+
+            'username': forms.TextInput(
+                attrs={
+                    'placeholder': 'Ingrese su username',
+                }
+            ),
+            'groups': forms.SelectMultiple(attrs={
+                'class': 'form-control select2',
+                'style': 'width: 100%',
+                'multiple': 'multiple'
+            })
+        }
+        exclude = ['user_permissions', 'last_login', 'date_joined', 'is_superuser', 'is_active', 'is_staff']

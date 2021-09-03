@@ -51,8 +51,14 @@ class Proyecto(models.Model):
 
 
 class rol(Group):
-    usuario=models.ManyToManyField(User)
+    #usuario=models.ManyToManyField(User)
     class Meta:
+        permissions = (('ver_roles', 'Puede ver roles'),
+                       ('crear_roles','Puede crear roles'),
+                       ('actualizar_roles','Puede actualizar roles'),
+                       ('eliminar_roles','Puede eliminar roles'),
+                       ('asignar_roles','Asigna roles a usuarios'),
+                       ('quitar_roles','Quita rol de usuarios'))
         verbose_name_plural='Rol'
         ordering=['name']
     def __unicode__(self):
