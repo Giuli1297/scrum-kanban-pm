@@ -121,6 +121,7 @@ GitHub.sublime-settings
 # sphinx build folder
 docs/_build/
 _build/
+_build
 # Compiled source #
 ###################
 *.com
@@ -155,6 +156,10 @@ _build/
 ehthumbs.db
 Icon?
 Thumbs.db
+
+docs/_build/
+_build/
+_build
 
 # Editor backup files #
 #######################

@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Scrum-Kanban's documentation!
-========================================
+Bienvenido a la documentacion de Scrum-Kanban!
+================================================
 
 .. toctree::
    :maxdepth: 2
@@ -12,8 +12,10 @@ Welcome to Scrum-Kanban's documentation!
 
    modules/all-about-me.rst
    modules/views.rst
-   modules/tests.rst
+   modules/test_forms.rst
    modules/models.rst
+   modules/forms.rst
+
 Indices and tables
 ==================
 
