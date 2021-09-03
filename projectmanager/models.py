@@ -71,6 +71,7 @@ class Proyecto(models.Model):
         Guarde la instancia actual. Reemplace esto en una subclase si desea controlar el proceso de guardado.
 
         """
+        self.nombre = self.nombre.lower()
         if not self.slug:
             self.slug = slugify(self.nombre)
         return super().save(*args, **kwargs)

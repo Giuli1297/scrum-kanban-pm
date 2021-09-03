@@ -1,12 +1,13 @@
 from django.test import TestCase
 
 from django.contrib.auth.models import User
-from django.test import TestCase
-from . import views
-from django.urls.base import reverse,resolve
+from django.test import TestCase, Client
+from .. import views
+from django.urls.base import reverse, resolve
 # Create your tests here.
 from allauth.account.forms import BaseSignupForm, ResetPasswordForm, SignupForm
-from .models import Proyecto
+from ..models import Proyecto
+
 
 class TestModeloProyecto(TestCase):
     def setUp(self):
@@ -20,8 +21,9 @@ class TestModeloProyecto(TestCase):
         estado = 'PEN'
         scrum_master = User.objects.create(username='test', password='test')
         self.data1 = Proyecto.objects.create(nombre=nombre, slug=slug, descripcion=descripcion, estado=estado,
-                                       scrum_master=scrum_master)
-        self.data2 = Proyecto.objects.create(nombre=nombre+'2', slug=slug+'2', descripcion=descripcion, estado=estado,
+                                             scrum_master=scrum_master)
+        self.data2 = Proyecto.objects.create(nombre=nombre + '2', slug=slug + '2', descripcion=descripcion,
+                                             estado=estado,
                                              scrum_master=scrum_master)
 
     def test_proyecto_model_entry(self):
@@ -37,12 +39,8 @@ class TestModeloProyecto(TestCase):
         Test product model slug and URL reverse
         """
         loin = self.client.login(username='testuser', password='secret')
-        url = reverse('proyecto_detail', args=[self.data1.slug])
-        self.assertEqual(url, '/proyecto/test/')
-        response = self.client.post(
-            reverse('proyecto_detail', args=[self.data1.slug]))
-        self.assertEqual(response.status_code, 200)
-
+        url = reverse('proyecto_editar_sm', args=[self.data1.slug])
+        self.assertEqual(url, '/proyectos/test/editarsm/')
 
 
 class TestModeloAutenticacion(TestCase):
@@ -69,7 +67,7 @@ class TestModeloAutenticacion(TestCase):
         user = User.objects.create(username='prueba')
         user.set_password('12345')
         user.save()
-        self.register_home=reverse(views.homepage)
+        self.register_home = reverse('home')
         return super().setUp()
 
     def test_login(self):
@@ -87,6 +85,7 @@ class TestModeloAutenticacion(TestCase):
         """
         logged_in = self.client.login(username='prueb', password='12345')
         self.assertFalse(logged_in)
+
     def test_signup_email_verification(self):
         '''
 
@@ -102,36 +101,16 @@ class TestModeloAutenticacion(TestCase):
         self.assertTrue(form.is_valid())
 
 
-class TestHomePage(TestCase):
-    """
-    Clase de Testing para funciones de la pagina principal
-
-    ...
-
-    Methods
-    -------
-    setUp()
-        Deja listo variables que se utilizaran para los test
-    test_home()
-        Prueba que se cargue el template correcto
-    """
-
+class TestModels(TestCase):
     def setUp(self):
-        """
-        Deja listas las variables para que se utilicen en los tests.
+        self.client = Client()
+        self.my_admin = User(username='user', is_staff=True, is_superuser=True)
+        self.my_admin.set_password('passphrase')  # can't set above because of hashing
+        self.my_admin.save()  # needed to save to temporary test db
+        response = self.client.get('/admin/', follow=True)
+        loginresponse = self.client.login(username='user', password='passphrase')
+        self.proyecto = Proyecto.objects.create(nombre='slug 1', descripcion='xd', scrum_master=self.my_admin)
+        self.assertTrue(loginresponse)
 
-        """
-        self.register_home=reverse(views.homepage)
-        return super().setUp()
-
-    def test_home(self):
-        """
-        Testea que el template de home se cargue correctamenta
-
-        """
-        response=self.client.get(self.register_home)
-        self.assertEqual(response.status_code,200)#confirma si cargo correctamente la pagina
-        self.assertTemplateUsed(response,'dashboard/home.html')#confirmacion de la plantilla usada
-
-
-
+    def test_proyecto_is_assigned_slug_on_creation(self):
+        self.assertEquals(self.proyecto.slug, 'slug-1')
