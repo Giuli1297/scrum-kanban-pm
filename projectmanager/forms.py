@@ -6,6 +6,10 @@ from .models import rol
 
 
 class ProyectoForm(forms.ModelForm):
+    """
+       Clase de formulario para el modelo Proyecto
+
+    """
     class Meta:
         model = Proyecto
 
@@ -31,6 +35,10 @@ class ProyectoForm(forms.ModelForm):
         }
 
 class RolForm(forms.ModelForm):
+    """
+           Clase de formulario para el modelo Rol
+
+        """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         #self.fields['first_name'].widget.attrs['autofocus'] = True
@@ -58,6 +66,10 @@ class RolForm(forms.ModelForm):
         exclude = ['last_login', 'date_joined', 'is_superuser', 'is_active', 'is_staff']
 
 class UserForm(forms.ModelForm):
+    """
+           Clase de formulario para el modelo User
+
+        """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

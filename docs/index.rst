@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Bienvenido a la documentacion de Scrum-Kanban!
-========================================
+================================================
 
 .. toctree::
    :maxdepth: 2
@@ -14,6 +14,7 @@ Bienvenido a la documentacion de Scrum-Kanban!
    modules/views.rst
    modules/tests.rst
    modules/models.rst
+   modules/forms.rst
 
 Indices and tables
 ==================
