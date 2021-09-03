@@ -140,7 +140,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-SITE_ID = 5
+SITE_ID = 9
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 
