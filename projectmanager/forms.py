@@ -42,14 +42,18 @@ class ProyectoEditarSMForm(forms.ModelForm):
 
         fields = [
             'scrum_member',
+
         ]
 
         labels = {
-            'scrum_member': 'Scrum Members'
+            'scrum_member': 'Scrum Members',
+
+
         }
 
         widgets = {
             'scrum_member': forms.CheckboxSelectMultiple(attrs={'class': 'check-label'}),
+
         }
 
 
@@ -154,3 +158,5 @@ class UserFormDelete(forms.ModelForm):
             })
         }
         exclude = ['user_permissions', 'last_login', 'date_joined', 'is_superuser', 'is_active', 'is_staff']
+
+
