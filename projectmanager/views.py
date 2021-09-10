@@ -431,5 +431,4 @@ class UserStoryCreate(CreateView,ListView):
     model = UserStory
     fields = 'nombre', 'descripcion'
     template_name = 'UserStory/crearUS.html'
-
     success_url = reverse_lazy('create_us')
