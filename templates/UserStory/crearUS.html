@@ -1,0 +1,49 @@
+{% extends 'layout/base.html' %}
+{% block body %}
+<div >
+<div class="col-md-6  " style = "float: left"   >
+            <div class="card card-default"  >
+              <div class="card-header" >
+                <h3 class="card-title" >
+                    CREAR USER STORY
+                </h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <table class="table" id="data">
+
+                     <form action="." method="post">
+	                	{% csrf_token %}
+	                    	{{ form.as_p }}
+		                    <button type="submit" >Guardar</button>
+	                </form>
+                    </table>
+              </div>
+
+            </div>
+          </div>
+ <div class="col-md-6  " style = "float: left" >
+            <div class="card card-default" >
+              <div class="card-header">
+                <h3 class="card-title">
+                    USERS STORYS
+                </h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <table class="table" id="data">
+                    {% for list in object_list %}
+                        <tr>
+                            <td>{{ list.nombre }}</td>
+                            <td>{{ list.descripcion }}</td>
+                        </tr>
+
+                    {% endfor %}
+
+                </table>
+              </div>
+
+            </div>
+          </div>
+</div>
+{% endblock %}

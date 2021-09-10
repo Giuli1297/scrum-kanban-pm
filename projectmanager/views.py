@@ -28,7 +28,7 @@ from django.utils.http import urlsafe_base64_decode
 from .utils import account_activation_token
 
 # Create your views here.
-from projectmanager.models import Proyecto, rol
+from projectmanager.models import *
 
 from django.http import JsonResponse
 from django.urls import reverse_lazy
@@ -420,3 +420,16 @@ class EliminarRolUser(UserAccessMixin, UpdateView):
     form_class = UserFormDelete
     template_name = 'rol/eliminarRolUser.html'
     success_url = reverse_lazy('list_user')
+
+
+
+
+##################################################################
+#VISTAS DE  USERS STORYS
+
+class UserStoryCreate(CreateView,ListView):
+    model = UserStory
+    fields = 'nombre', 'descripcion'
+    template_name = 'UserStory/crearUS.html'
+
+    success_url = reverse_lazy('create_us')
