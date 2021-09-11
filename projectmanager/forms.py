@@ -2,7 +2,6 @@ from django import forms
 from projectmanager.models import Proyecto
 from django.contrib.auth.models import User
 from django.contrib.auth.models import User, Group, Permission
-from .models import rol
 from django.db.models import Q
 
 
@@ -162,12 +161,20 @@ class UserFormDelete(forms.ModelForm):
 
 
 class CrearRolProyectoForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.slug = kwargs.pop('slug')
+        super(CrearRolProyectoForm, self).__init__(*args, **kwargs)
+        self.proyecto = Proyecto.objects.get(slug=self.slug)
+        self.fields['scrum_members'].queryset = User.objects.filter(Q(proyecto_asignado=self.proyecto))
+
     nombre = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
         'class': 'form-control'
     }))
-    permissions = forms.ModelMultipleChoiceField(queryset=Permission.objects.filter(
-        Q(content_type__app_label='projectmanager', content_type__model='rol') |
-        Q(content_type__app_label='projectmanager', content_type__model='proyecto')),
+    permissions = forms.ModelMultipleChoiceField(
+        queryset=Permission.objects.filter(Q(content_type__app_label='projectmanager', content_type__model='proyecto')),
         widget=forms.CheckboxSelectMultiple(attrs={
             'class': 'check-label'
         }))
+    scrum_members = forms.ModelMultipleChoiceField(queryset=None, widget=forms.CheckboxSelectMultiple(attrs={
+        'class': 'check-label'
+    }))

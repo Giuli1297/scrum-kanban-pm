@@ -29,7 +29,7 @@ from .utils import account_activation_token, add_user_to_obj_group, add_perm_to_
     add_users_to_obj_group
 
 # Create your views here.
-from projectmanager.models import Proyecto, rol
+from projectmanager.models import Proyecto
 
 from django.http import JsonResponse
 from django.urls import reverse_lazy
@@ -435,7 +435,7 @@ class CrearRolProyecto(UserAccessMixin, View):
 
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
-        form = CrearRolProyectoForm()
+        form = CrearRolProyectoForm(slug=slug)
         context = {
             'form': form,
             'proyecto': proyecto
@@ -444,13 +444,15 @@ class CrearRolProyecto(UserAccessMixin, View):
 
     def post(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
-        form = CrearRolProyectoForm(request.POST)
+        form = CrearRolProyectoForm(request.POST, slug=slug)
 
         if form.is_valid():
             nombre = form.cleaned_data['nombre']
             permissions = form.cleaned_data['permissions']
+            usuarios_a_asignar = form.cleaned_data['scrum_members']
             for permiso in permissions:
-                print(permiso.codename)
                 add_obj_perm_to_group(nombre, permiso.codename, proyecto)
+            for user in usuarios_a_asignar:
+                add_user_to_obj_group(user, nombre)
             messages.success(request, "Rol Creado Correctamente!")
         return redirect(reverse_lazy('proyecto_listar'))
