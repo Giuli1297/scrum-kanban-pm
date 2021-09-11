@@ -3,17 +3,21 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
+    # URLS de Usuario
     path('', views.HomePage.as_view(), name="home"),
     path('accounts/', include('allauth.urls')),
     path('activate/<uidb64>/<token>', views.VerificationView.as_view(), name='activate'),
-    path('proyectos/', views.ProyectoView.as_view(), name="proyecto_listar"),
+    path('miperfil', views.perfilUsuario, name="perfil"),
+
+    # URLS DE PROYECTO
+    path('proyectos/listar/', views.ProyectoView.as_view(), name="proyecto_listar"),
     path('proyectos/crear/', views.ProyectoCreate.as_view(), name="proyecto_crear"),
     path('proyectos/<slug:slug>/editar/', views.ProyectoUpdate.as_view(), name="proyecto_editar"),
     path('proyectos/<slug:slug>/editarsm/', views.ProyectoSMUpdate.as_view(), name="proyecto_editar_sm"),
     path('proyectos/<slug:slug>/iniciar/', views.ProyectoIniciarView.as_view(), name="proyecto_iniciar"),
-    path('miperfil', views.perfilUsuario, name="perfil"),
-    path('proyectos/listar/', views.ProyectoView.as_view(), name="proyecto_listar"),
-    path('proyectos/editar/<slug:slug>/', views.ProyectoUpdate.as_view(), name="proyecto_editar"),
+    path('proyectos/<slug:slug>/roles/', views.CrearRolProyecto.as_view(), name='proyecto_rol'),
+
+    # URLS DE ROLES
     path('roles/lista/', views.RolListView.as_view(), name='list_rol'),
     path('roles/create/', views.RolCreateView.as_view(), name='create_rol'),
     path('roles/update/<int:pk>/', views.RolUpdateView.as_view(), name='update_rol'),

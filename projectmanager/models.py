@@ -63,7 +63,11 @@ class Proyecto(models.Model):
                        ('editar_proyecto', 'Puede editar un proyecto'),
                        ('ver_proyecto', 'Puede ver un proyecto en detalle'),
                        ('ver_proyectos', 'Puede ver proyectos'),
-                       ('iniciar_proyecto', 'Puede iniciar proyecto'),)
+                       ('iniciar_proyecto', 'Puede iniciar proyecto'),
+                       ('crear_roles_proyecto', 'Puede Crear Roles de Proyecto'),
+                       ('ver_roles_proyecto', 'Puede ver roles de proyecto'),
+                       ('modificar_roles_proyecto', 'Puede Modificar Roles de Proyecto'),
+                       ('eliminar_roles_proyecto', 'Puede eliminar roles de proyecto'))
         default_permissions = ()
         ordering = ('-fecha_inicio',)
 
@@ -88,6 +92,7 @@ class rol(Group):
     """
     Modelo que hereda de Groups todos sus metodos y atributos para crear los roles y define los permisos para el CRUD
     """
+
     # usuario=models.ManyToManyField(User)
     class Meta:
         permissions = (('ver_roles', 'Puede ver roles'),

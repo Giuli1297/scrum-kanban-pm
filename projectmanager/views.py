@@ -15,7 +15,7 @@ from django.views.generic import (
     TemplateView,
     DetailView
 )
-from projectmanager.forms import ProyectoForm, ProyectoEditarSMForm, ActualizarUsuarioForm
+from projectmanager.forms import ProyectoForm, ProyectoEditarSMForm, ActualizarUsuarioForm, CrearRolProyectoForm
 from projectmanager.forms import ProyectoForm
 from .forms import UserForm, RolForm, UserFormDelete
 from django.shortcuts import render, redirect
@@ -25,7 +25,8 @@ from django.contrib.auth.models import User, Group
 from django.contrib import messages
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
-from .utils import account_activation_token
+from .utils import account_activation_token, add_user_to_obj_group, add_perm_to_group, add_obj_perm_to_group, \
+    add_users_to_obj_group
 
 # Create your views here.
 from projectmanager.models import Proyecto, rol
@@ -420,3 +421,36 @@ class EliminarRolUser(UserAccessMixin, UpdateView):
     form_class = UserFormDelete
     template_name = 'rol/eliminarRolUser.html'
     success_url = reverse_lazy('list_user')
+
+
+class CrearRolProyecto(UserAccessMixin, View):
+    """
+        Vista basada en clase el sirve para iniciar un proyecto nuevo por parte del SM
+    """
+    raise_exception = False
+    permission_required = ()
+    permission_required_obj = ('projectmanager.ver_roles_proyecto',)
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+
+    def get(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        form = CrearRolProyectoForm()
+        context = {
+            'form': form,
+            'proyecto': proyecto
+        }
+        return render(request, 'rol_proyecto/crear_rol.html', context)
+
+    def post(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        form = CrearRolProyectoForm(request.POST)
+
+        if form.is_valid():
+            nombre = form.cleaned_data['nombre']
+            permissions = form.cleaned_data['permissions']
+            for permiso in permissions:
+                print(permiso.codename)
+                add_obj_perm_to_group(nombre, permiso.codename, proyecto)
+            messages.success(request, "Rol Creado Correctamente!")
+        return redirect(reverse_lazy('proyecto_listar'))
