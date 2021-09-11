@@ -71,7 +71,7 @@ right: 20px;
                         <tr>
                             <td>{{ list.nombre }}</td>
                             <td>{{ list.descripcion }}</td>
-                          <td> <a class="btn btn-primary btn-warning " href="#" >Editar</a></td>
+                          <td> <a class="btn btn-primary btn-warning " href="{% url 'update_us' list.id %}" >Editar</a></td>
                             <td> <a class="btn btn-danger btn-flat" href="#" >Eliminar</a></td>
                             <td> <a class="btn btn-info btn-flat" href="#" >Historial</a></td>
 

@@ -21,6 +21,7 @@ urlpatterns = [
     path('roles/users/', views.ListUser.as_view(), name='list_user'),
     path('roles/asignar/<int:pk>/', views.AsignarRol.as_view(), name='asignar_rol'),
     path('roles/deleteRolUser/<int:pk>/', views.EliminarRolUser.as_view(), name='delete_rol_user'),
-    path('us/createUs/',views.UserStoryCreate.as_view(),name='create_us'),
+    path('proyecto/createUs/ ',views.UserStoryCreate.as_view(),name='create_us'),
+    path('us/updateUs/<int:pk>/',views.UserStoryUpdate.as_view(),name='update_us'),
 
 ]

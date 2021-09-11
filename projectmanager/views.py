@@ -421,14 +421,20 @@ class EliminarRolUser(UserAccessMixin, UpdateView):
     template_name = 'rol/eliminarRolUser.html'
     success_url = reverse_lazy('list_user')
 
-
-
-
 ##################################################################
 #VISTAS DE  USERS STORYS
 
 class UserStoryCreate(CreateView,ListView):
     model = UserStory
-    fields = 'nombre', 'descripcion'
+    fields = 'nombre', 'descripcion','proyecto'
     template_name = 'UserStory/crearUS.html'
     success_url = reverse_lazy('create_us')
+
+class UserStoryUpdate(UpdateView,ListView):
+    model = UserStory
+    fields = 'nombre', 'descripcion','proyecto'
+    template_name = 'UserStory/crearUS.html'
+    success_url = reverse_lazy('create_us')
+
+
+

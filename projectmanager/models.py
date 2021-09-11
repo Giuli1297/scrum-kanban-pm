@@ -54,9 +54,6 @@ class Proyecto(models.Model):
     estado = models.CharField(max_length=3, choices=ESTADOS, default='PEN')
     scrum_master = models.ForeignKey(User, related_name='proyecto_encargado', on_delete=models.CASCADE)
     scrum_member = models.ManyToManyField(User, related_name='proyecto_asignado', blank=True)
-
-    # Cambiar luego a manytomany de userstories
-    product_backlog = models.TextField(blank=True)
     # Cambiar luego a manytomany de sprints
     sprintList = models.TextField(blank=True)
 
@@ -123,3 +120,4 @@ class UserStory(models.Model):
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Nuevo')
     tiempoEnDesarrollo=models.IntegerField(validators=[MinValueValidator(0)],default=0)
     desarrolladorAsignado=models.ForeignKey(User,related_name='desarrollador_asignado',null=True, on_delete=models.CASCADE)
+    proyecto=models.ForeignKey(Proyecto,related_name='product_backlog',null=True,on_delete=models.CASCADE)
