@@ -26,10 +26,10 @@ from django.contrib import messages
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
 from .utils import account_activation_token, add_user_to_obj_group, add_perm_to_group, add_obj_perm_to_group, \
-    add_users_to_obj_group
-
+    add_users_to_obj_group, remove_all_perms_from_obj_group, remove_all_users_from_obj_group
+from guardian.shortcuts import get_perms
 # Create your views here.
-from projectmanager.models import Proyecto
+from projectmanager.models import Proyecto, Rol
 
 from django.http import JsonResponse
 from django.urls import reverse_lazy
@@ -291,6 +291,7 @@ class RolListView(UserAccessMixin, ListView):
     redirect_field_name = 'next'
 
     model = Group
+    queryset = Group.objects.filter(Q(rol__tipo='sistema'))
     template_name = 'rol/list.html'
 
 
@@ -316,8 +317,11 @@ class RolCreateView(UserAccessMixin, CreateView):
     template_name = 'rol/create.html'
     success_url = reverse_lazy('list_rol')
 
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
+    def form_valid(self, form):
+        """If the form is valid, save the associated model."""
+        returnValue = super().form_valid(form)
+        Rol.objects.create(related_group=self.object, tipo='sistema')
+        return returnValue
 
 
 class RolUpdateView(UserAccessMixin, UpdateView):
@@ -425,7 +429,7 @@ class EliminarRolUser(UserAccessMixin, UpdateView):
 
 class CrearRolProyecto(UserAccessMixin, View):
     """
-        Vista basada en clase el sirve para iniciar un proyecto nuevo por parte del SM
+        Vista basada en clase el sirve para crear un rol a nivel proyecto nuevo por parte del SM
     """
     raise_exception = False
     permission_required = ()
@@ -448,11 +452,61 @@ class CrearRolProyecto(UserAccessMixin, View):
 
         if form.is_valid():
             nombre = form.cleaned_data['nombre']
-            permissions = form.cleaned_data['permissions']
+            permissions = form.cleaned_data['permisos']
             usuarios_a_asignar = form.cleaned_data['scrum_members']
             for permiso in permissions:
                 add_obj_perm_to_group(nombre, permiso.codename, proyecto)
             for user in usuarios_a_asignar:
                 add_user_to_obj_group(user, nombre)
             messages.success(request, "Rol Creado Correctamente!")
-        return redirect(reverse_lazy('proyecto_listar'))
+        else:
+            messages.error(request, "Un Error a ocurrido")
+        return redirect('proyecto_rol', slug=slug)
+
+
+class ModificarRolProyecto(UserAccessMixin, View):
+    """
+        Vista basada en clase el sirve para crear un rol a nivel proyecto nuevo por parte del SM
+    """
+    raise_exception = False
+    permission_required = ()
+    permission_required_obj = ('projectmanager.ver_roles_proyecto',)
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+
+    def get(self, request, slug, pk, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        rol = Rol.objects.get(pk=pk)
+        perm_names = get_perms(rol.related_group, proyecto)
+        permisos = []
+        for perm_name in perm_names:
+            permisos.append(Permission.objects.filter(codename=perm_name)[0])
+        form = CrearRolProyectoForm(
+            initial={'nombre': rol.related_group.name,
+                     'permisos': permisos,
+                     'scrum_members': rol.related_group.user_set.all()}, slug=slug)
+        context = {
+            'form': form,
+            'proyecto': proyecto,
+            'rol': rol
+        }
+        return render(request, 'rol_proyecto/modificar_rol.html', context)
+
+    def post(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        form = CrearRolProyectoForm(request.POST, slug=slug)
+
+        if form.is_valid():
+            nombre = form.cleaned_data['nombre']
+            permissions = form.cleaned_data['permisos']
+            usuarios_a_asignar = form.cleaned_data['scrum_members']
+            remove_all_perms_from_obj_group(nombre, proyecto)
+            remove_all_users_from_obj_group(nombre)
+            for permiso in permissions:
+                add_obj_perm_to_group(nombre, permiso.codename, proyecto)
+            for user in usuarios_a_asignar:
+                add_user_to_obj_group(user, nombre)
+            messages.success(request, "Rol Modificado Correctamente!")
+        else:
+            messages.error(request, "Un Error a ocurrido")
+        return redirect('proyecto_rol', slug)

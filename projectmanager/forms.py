@@ -166,15 +166,18 @@ class CrearRolProyectoForm(forms.Form):
         super(CrearRolProyectoForm, self).__init__(*args, **kwargs)
         self.proyecto = Proyecto.objects.get(slug=self.slug)
         self.fields['scrum_members'].queryset = User.objects.filter(Q(proyecto_asignado=self.proyecto))
+        self.fields['permisos'].queryset = Permission.objects.filter(
+            Q(content_type__model='proyecto'))
 
     nombre = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
         'class': 'form-control'
     }))
-    permissions = forms.ModelMultipleChoiceField(
-        queryset=Permission.objects.filter(Q(content_type__app_label='projectmanager', content_type__model='proyecto')),
+    permisos = forms.ModelMultipleChoiceField(
+        queryset=None,
         widget=forms.CheckboxSelectMultiple(attrs={
             'class': 'check-label'
         }))
-    scrum_members = forms.ModelMultipleChoiceField(queryset=None, widget=forms.CheckboxSelectMultiple(attrs={
-        'class': 'check-label'
-    }))
+    scrum_members = forms.ModelMultipleChoiceField(queryset=None, required=False,
+                                                   widget=forms.CheckboxSelectMultiple(attrs={
+                                                       'class': 'check-label'
+                                                   }))

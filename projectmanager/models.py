@@ -105,9 +105,9 @@ class Rol(models.Model):
         ('proyecto', 'Rol de Proyecto')
     )
 
-    related_group = models.OneToOneField(Group, on_delete=models.CASCADE, related_name="rol")
+    related_group = models.OneToOneField(Group, on_delete=models.CASCADE, related_name="rol", primary_key=True)
     tipo = models.CharField(max_length=8, choices=TIPOS, default='sistema')
-    proyecto = models.ForeignKey(Proyecto, related_name="roles", on_delete=models.CASCADE, blank=True)
+    proyecto = models.ForeignKey(Proyecto, related_name="roles", on_delete=models.CASCADE, blank=True, null=True)
 
     # Bueno Bro lo que tenes que hacer hoy es:
     #     1 - Hacer que se cree una entidad rol cuando se crea un grupo
@@ -128,5 +128,5 @@ class Rol(models.Model):
         default_permissions = ()
         verbose_name_plural = 'Roles'
 
-    def __unicode__(self):
-        return self.name
+    def __str__(self):
+        return self.related_group.name

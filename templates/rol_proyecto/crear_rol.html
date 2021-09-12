@@ -1,20 +1,38 @@
 {% extends 'layout/base.html' %}
 {% block body %}
-<div class="col-md-6  "  >
-    <div class="card card-default" >
-        <div class="card-header">
-            <h3 class="card-title">
-            CREAR ROL PARA PROYECTO {{ proyecto.nombre }}
-            </h3>
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h3 class="mb-3">Gestion de Roles de proyecto {{ proyecto.nombre }}</h3>
+    </div>
+</div>
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="card card-default">
+            <div class="card-header">
+                <h4 class="card-title">
+                Crear Nuevo Rol
+                </h4>
+            </div>
+            <div class="card-body">
+                    <form action="{% url 'proyecto_rol' proyecto.slug %}" method="post">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button class="btn btn-dark" type="submit">Guardar</button>
+                    </form>
+            </div>
         </div>
-        <div class="card-body">
-                <form action="{% url 'proyecto_rol' proyecto.slug %}" method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit">Guardar</button>
-                </form>
-        </div>
-
+    </div>
+    <div class="col-md-6 mb-3">
+        <h4 class="mb-3">Roles Disponibles: </h4>
+        <ul class="list-group d-flex mb-3">
+            {% for rol in proyecto.roles.all %}
+                <li class="list-group-item">{{ rol.related_group.name }}</li>
+                <li class="list-group-item">
+                    <a class="btn btn-dark mr-2" href="{% url 'proyecto_rol_modificar' slug=proyecto.slug pk=rol.pk %}" role="button">Asignar/Modificar Rol</a>
+                    <a class="btn btn-danger mr-2" href="#" role="button">Eliminar Rol</a>
+                </li>
+            {% endfor %}
+        </ul>
     </div>
 </div>
 {% endblock %}

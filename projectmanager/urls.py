@@ -16,6 +16,7 @@ urlpatterns = [
     path('proyectos/<slug:slug>/editarsm/', views.ProyectoSMUpdate.as_view(), name="proyecto_editar_sm"),
     path('proyectos/<slug:slug>/iniciar/', views.ProyectoIniciarView.as_view(), name="proyecto_iniciar"),
     path('proyectos/<slug:slug>/roles/', views.CrearRolProyecto.as_view(), name='proyecto_rol'),
+    path('proyectos/<slug:slug>/roles/<int:pk>/', views.ModificarRolProyecto.as_view(), name='proyecto_rol_modificar'),
 
     # URLS DE ROLES
     path('roles/lista/', views.RolListView.as_view(), name='list_rol'),
