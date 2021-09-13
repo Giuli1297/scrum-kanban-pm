@@ -103,13 +103,15 @@ class Rol(models.Model):
     TIPOS = (
         ('sistema', 'Rol de Sistema'),
         ('proyecto', 'Rol de Proyecto'),
-        ('defecto', 'Roles por Defecto')
+        ('defecto', 'Roles por Defecto'),
+        ('proyimp', 'Roles de Proyecto Importados')
     )
 
     related_group = models.OneToOneField(Group, on_delete=models.CASCADE, related_name="rol", primary_key=True)
     descripcion = models.TextField(blank=True, null=True)
     tipo = models.CharField(max_length=8, choices=TIPOS, default='sistema')
     proyecto = models.ForeignKey(Proyecto, related_name="roles", on_delete=models.CASCADE, blank=True, null=True)
+    copied_from = models.CharField(max_length=255, blank=True, null=True)
 
     # Bueno Bro lo que tenes que hacer hoy es:
     #     8 - Importar y Exportar Roles

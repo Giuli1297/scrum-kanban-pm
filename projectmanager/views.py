@@ -548,11 +548,32 @@ class ImportarRolProyecto(UserAccessMixin, View):
 
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
-        roles = Rol.objects.all()
-        form = ImportarRolProyectoForm()
+        roles = Rol.objects.filter(~Q(proyecto=proyecto) & ~Q(tipo='defecto'))
+        form = ImportarRolProyectoForm(slug=slug)
         context = {
             'proyecto': proyecto,
             'roles': roles,
             'form': form
         }
         return render(request, 'rol_proyecto/importar_rol.html', context)
+
+    def post(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        form = ImportarRolProyectoForm(request.POST, slug=slug)
+        if form.is_valid():
+            roles = form.cleaned_data['roles']
+            for rol in roles:
+                print('xd1')
+                perm_names = get_perms(rol.related_group, rol.proyecto)
+                for permiso in perm_names:
+                    print('xd')
+                    add_obj_perm_to_group(rol.related_group.name + '_' + proyecto.slug, permiso,
+                                          proyecto)
+                group = Group.objects.get(name=rol.related_group.name + '_' + proyecto.slug)
+                created_rol = Rol.objects.get(related_group=group)
+                created_rol.descripcion = rol.descripcion
+                created_rol.tipo = 'proyimp'
+                created_rol.copied_from = rol.related_group.name
+                created_rol.save()
+            messages.success(request, "Roles Importados Correctamente!")
+        return redirect('proyecto_rol', slug=slug)

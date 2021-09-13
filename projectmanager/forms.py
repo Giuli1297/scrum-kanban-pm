@@ -186,5 +186,16 @@ class CrearRolProyectoForm(forms.Form):
 
 
 class ImportarRolProyectoForm(forms.Form):
-    roles = forms.ModelMultipleChoiceField(queryset=Rol.objects.filter(Q(tipo='proyecto')),
+    def __init__(self, *args, **kwargs):
+        self.slug = kwargs.pop('slug')
+        super(ImportarRolProyectoForm, self).__init__(*args, **kwargs)
+        self.proyecto = Proyecto.objects.get(slug=self.slug)
+        self.nombres = []
+        for rol in self.proyecto.roles.all():
+            self.nombres.append(rol.copied_from)
+        print(self.nombres)
+        self.fields['roles'].queryset = Rol.objects.filter(
+            ~Q(proyecto=self.proyecto) & Q(tipo='proyecto') & ~Q(related_group__name__in=self.nombres))
+
+    roles = forms.ModelMultipleChoiceField(queryset=None,
                                            widget=forms.CheckboxSelectMultiple(attrs={'class': 'check-label'}))
