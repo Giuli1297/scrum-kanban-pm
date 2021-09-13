@@ -5,6 +5,14 @@ from django.utils import timezone
 from django.template.defaultfilters import slugify
 from  django.core.validators import MinValueValidator
 from guardian.shortcuts import assign_perm
+from django.contrib.auth.models import Permission
+
+
+def get_name(self):
+    return self.name
+
+
+Permission.add_to_class("__str__", get_name)
 
 
 
@@ -64,7 +72,11 @@ class Proyecto(models.Model):
                        ('editar_proyecto', 'Puede editar un proyecto'),
                        ('ver_proyecto', 'Puede ver un proyecto en detalle'),
                        ('ver_proyectos', 'Puede ver proyectos'),
-                       ('iniciar_proyecto', 'Puede iniciar proyecto'),)
+                       ('iniciar_proyecto', 'Puede iniciar proyecto'),
+                       ('crear_roles_proyecto', 'Puede Crear Roles de Proyecto'),
+                       ('ver_roles_proyecto', 'Puede ver roles de proyecto'),
+                       ('modificar_roles_proyecto', 'Puede Modificar Roles de Proyecto'),
+                       ('eliminar_roles_proyecto', 'Puede eliminar roles de proyecto'))
         default_permissions = ()
         ordering = ('-fecha_inicio',)
 
@@ -85,11 +97,28 @@ class Proyecto(models.Model):
         return self.nombre
 
 
-class rol(Group):
+class Rol(models.Model):
     """
     Modelo que hereda de Groups todos sus metodos y atributos para crear los roles y define los permisos para el CRUD
     """
-    # usuario=models.ManyToManyField(User)
+    TIPOS = (
+        ('sistema', 'Rol de Sistema'),
+        ('proyecto', 'Rol de Proyecto')
+    )
+
+    related_group = models.OneToOneField(Group, on_delete=models.CASCADE, related_name="rol", primary_key=True,default=0)
+    tipo = models.CharField(max_length=8, choices=TIPOS, default='sistema')
+    proyecto = models.ForeignKey(Proyecto, related_name="roles", on_delete=models.CASCADE, blank=True, null=True)
+
+    # Bueno Bro lo que tenes que hacer hoy es:
+    #     1 - Hacer que se cree una entidad rol cuando se crea un grupo
+    #     2 - Que se defina el tipo de rol que se crea
+    #     3 - Que si se crea un rol nivel proyecto se linkee al proyecto (podria se m2m en vez de o2m)
+    #     4 - Completar CRUD de rol nivel proyecto
+    #     5 - Pantalla de Asinar rol nivel proyecto
+    #     6 - Que liste solo roles del proyecto actual
+    #     7 - Que liste solo roles de sistema en roles de sistema crud
+    #     8 - Importar y Exportar Roles
     class Meta:
         permissions = (('ver_roles', 'Puede ver roles'),
                        ('crear_roles', 'Puede crear roles'),
@@ -98,8 +127,8 @@ class rol(Group):
                        ('asignar_roles', 'Asigna roles a usuarios'),
                        ('quitar_roles', 'Quita rol de usuarios'))
         default_permissions = ()
-        verbose_name_plural = 'Rol'
-        ordering = ['name']
+        verbose_name_plural = 'Roles'
+
 
     def __unicode__(self):
         return self.name
@@ -121,3 +150,5 @@ class UserStory(models.Model):
     tiempoEnDesarrollo=models.IntegerField(validators=[MinValueValidator(0)],default=0)
     desarrolladorAsignado=models.ForeignKey(User,related_name='desarrollador_asignado',null=True, on_delete=models.CASCADE)
     proyecto=models.ForeignKey(Proyecto,related_name='product_backlog',null=True,on_delete=models.CASCADE)
+
+

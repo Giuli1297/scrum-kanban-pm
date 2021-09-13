@@ -15,8 +15,7 @@ from django.views.generic import (
     TemplateView,
     DetailView
 )
-from projectmanager.forms import ProyectoForm, ProyectoEditarSMForm, ActualizarUsuarioForm
-from projectmanager.forms import ProyectoForm
+from projectmanager.forms import *
 from .forms import UserForm, RolForm, UserFormDelete
 from django.shortcuts import render, redirect
 from django.views import View
@@ -25,10 +24,12 @@ from django.contrib.auth.models import User, Group
 from django.contrib import messages
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
-from .utils import account_activation_token
-
+from .utils import account_activation_token, add_user_to_obj_group, add_perm_to_group, add_obj_perm_to_group, \
+    add_users_to_obj_group, remove_all_perms_from_obj_group, remove_all_users_from_obj_group
+from guardian.shortcuts import get_perms
 # Create your views here.
 from projectmanager.models import *
+
 
 from django.http import JsonResponse
 from django.urls import reverse_lazy
@@ -290,6 +291,7 @@ class RolListView(UserAccessMixin, ListView):
     redirect_field_name = 'next'
 
     model = Group
+    queryset = Group.objects.filter(Q(rol__tipo='sistema'))
     template_name = 'rol/list.html'
 
 
@@ -315,8 +317,11 @@ class RolCreateView(UserAccessMixin, CreateView):
     template_name = 'rol/create.html'
     success_url = reverse_lazy('list_rol')
 
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
+    def form_valid(self, form):
+        """If the form is valid, save the associated model."""
+        returnValue = super().form_valid(form)
+        Rol.objects.create(related_group=self.object, tipo='sistema')
+        return returnValue
 
 
 class RolUpdateView(UserAccessMixin, UpdateView):
@@ -421,20 +426,157 @@ class EliminarRolUser(UserAccessMixin, UpdateView):
     template_name = 'rol/eliminarRolUser.html'
     success_url = reverse_lazy('list_user')
 
-##################################################################
+
 #VISTAS DE  USERS STORYS
 
-class UserStoryCreate(CreateView,ListView):
-    model = UserStory
-    fields = 'nombre', 'descripcion','proyecto'
-    template_name = 'UserStory/crearUS.html'
-    success_url = reverse_lazy('create_us')
+class UserStoryCreate(View):
+    '''
 
-class UserStoryUpdate(UpdateView,ListView):
-    model = UserStory
-    fields = 'nombre', 'descripcion','proyecto'
-    template_name = 'UserStory/crearUS.html'
-    success_url = reverse_lazy('create_us')
+    Vista para crear y listar User Storys
+    US:obtiene todos los USER STORYS en el metodo get y lisata los USER STORYS
+    En el metodo post se obtiene el proyecto en el que se está trabajando y se crea una
+    instancia de USER STORY y se le asigna los datos correspondientes del form y tambien el proyecto
+    al cual pertenece
+
+    '''
+    def get (self,request,slug,*args,**kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        US=UserStory.objects.all()
+        form=ProyectoUs()
+        context= {
+            'form':form,
+            'proyecto':proyecto,
+            'US':US
+        }
+        return render  (request,'UserStory/crearUS.html',context)
+    def post(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        form = ProyectoUs(request.POST)
+
+        if form.is_valid():
+            nombre = form.cleaned_data['nombre']
+            descripcion = form.cleaned_data['descripcion']
+            US=UserStory.objects.create(nombre=nombre,descripcion=descripcion,proyecto=proyecto)
+            US.save()
+            messages.success(request, "User Story Creado Correctamente!")
+        else:
+            messages.error(request, "Un Error a ocurrido")
+        return redirect('create_us', slug=slug)
+class UserStoryUpdate(View):
+    def get (self,request,slug,pk,*args,**kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        US=UserStory.objects.all()
+        US2=UserStory.objects.get(pk=pk)
+        form=ProyectoUs( initial={'nombre': US2.nombre,
+                     'descripcion': US2.descripcion,
+                                   })
+        context= {
+            'form':form,
+            'proyecto':proyecto,
+            'US2':US2
+        }
+        return render  (request,'UserStory/UpdateUs.html',context)
+
+    def post(self, request,slug,pk, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        US2 = UserStory.objects.get(pk=pk)
+        form = ProyectoUs(request.POST)
+
+        if form.is_valid():
+            nombre = form.cleaned_data['nombre']
+            descripcion = form.cleaned_data['descripcion']
+            US2.nombre=nombre
+            US2.descripcion=descripcion
+            US2.save()
+            messages.success(request, "User Story se actualizó Correctamente!")
+        else:
+            messages.error(request, "Un Error a ocurrido")
+        return redirect('create_us',slug=slug)
 
 
 
+
+class CrearRolProyecto(UserAccessMixin, View):
+    """
+        Vista basada en clase el sirve para crear un rol a nivel proyecto nuevo por parte del SM
+    """
+    raise_exception = False
+    permission_required = ()
+    permission_required_obj = ('projectmanager.ver_roles_proyecto',)
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+
+    def get(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        form = CrearRolProyectoForm(slug=slug)
+        context = {
+            'form': form,
+            'proyecto': proyecto
+        }
+        return render(request, 'rol_proyecto/crear_rol.html', context)
+
+
+    def post(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        form = CrearRolProyectoForm(request.POST, slug=slug)
+
+        if form.is_valid():
+            nombre = form.cleaned_data['nombre']
+            permissions = form.cleaned_data['permisos']
+            usuarios_a_asignar = form.cleaned_data['scrum_members']
+            for permiso in permissions:
+                add_obj_perm_to_group(nombre, permiso.codename, proyecto)
+            for user in usuarios_a_asignar:
+                add_user_to_obj_group(user, nombre)
+            messages.success(request, "Rol Creado Correctamente!")
+        else:
+            messages.error(request, "Un Error a ocurrido")
+        return redirect('proyecto_rol', slug=slug)
+
+
+class ModificarRolProyecto(UserAccessMixin, View):
+    """
+        Vista basada en clase el sirve para crear un rol a nivel proyecto nuevo por parte del SM
+    """
+    raise_exception = False
+    permission_required = ()
+    permission_required_obj = ('projectmanager.ver_roles_proyecto',)
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+
+    def get(self, request, slug, pk, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        rol = Rol.objects.get(pk=pk)
+        perm_names = get_perms(rol.related_group, proyecto)
+        permisos = []
+        for perm_name in perm_names:
+            permisos.append(Permission.objects.filter(codename=perm_name)[0])
+        form = CrearRolProyectoForm(
+            initial={'nombre': rol.related_group.name,
+                     'permisos': permisos,
+                     'scrum_members': rol.related_group.user_set.all()}, slug=slug)
+        context = {
+            'form': form,
+            'proyecto': proyecto,
+            'rol': rol
+        }
+        return render(request, 'rol_proyecto/modificar_rol.html', context)
+
+    def post(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        form = CrearRolProyectoForm(request.POST, slug=slug)
+
+        if form.is_valid():
+            nombre = form.cleaned_data['nombre']
+            permissions = form.cleaned_data['permisos']
+            usuarios_a_asignar = form.cleaned_data['scrum_members']
+            remove_all_perms_from_obj_group(nombre, proyecto)
+            remove_all_users_from_obj_group(nombre)
+            for permiso in permissions:
+                add_obj_perm_to_group(nombre, permiso.codename, proyecto)
+            for user in usuarios_a_asignar:
+                add_user_to_obj_group(user, nombre)
+            messages.success(request, "Rol Modificado Correctamente!")
+        else:
+            messages.error(request, "Un Error a ocurrido")
+        return redirect('proyecto_rol', slug)
