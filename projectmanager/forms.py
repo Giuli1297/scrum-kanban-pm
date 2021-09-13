@@ -193,7 +193,6 @@ class ImportarRolProyectoForm(forms.Form):
         self.nombres = []
         for rol in self.proyecto.roles.all():
             self.nombres.append(rol.copied_from)
-        print(self.nombres)
         self.fields['roles'].queryset = Rol.objects.filter(
             ~Q(proyecto=self.proyecto) & Q(tipo='proyecto') & ~Q(related_group__name__in=self.nombres))
 

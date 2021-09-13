@@ -47,13 +47,29 @@ def send_email_to_admin(request, user, **kwargs):
 @receiver(post_save, sender=Proyecto)
 def add_scrum_master_signal(sender, instance, created, **kwargs):
     if created:
+        # Scrum Master Handler
         add_obj_perm_to_group('scrum_master_' + instance.slug, 'editar_proyecto', instance)
         add_obj_perm_to_group('scrum_master_' + instance.slug, 'ver_proyecto', instance)
         add_obj_perm_to_group('scrum_master_' + instance.slug, 'iniciar_proyecto', instance)
+        add_obj_perm_to_group('scrum_master_' + instance.slug, 'crear_roles_proyecto', instance)
+        add_obj_perm_to_group('scrum_master_' + instance.slug, 'ver_roles_proyecto', instance)
+        add_obj_perm_to_group('scrum_master_' + instance.slug, 'importar_roles_proyecto', instance)
+        add_obj_perm_to_group('scrum_master_' + instance.slug, 'modificar_roles_proyecto', instance)
+        add_obj_perm_to_group('scrum_master_' + instance.slug, 'eliminar_roles_proyecto', instance)
         add_perm_to_group('scrum_master_' + instance.slug, 'ver_proyectos')
         add_user_to_obj_group(instance.scrum_master, 'scrum_master_' + instance.slug)
         add_obj_perm_to_group('scrum_member_' + instance.slug, 'ver_proyecto', instance)
         add_perm_to_group('scrum_member_' + instance.slug, 'ver_proyectos')
+
+        # Admin Handler
+        add_obj_perm_to_group('Administrador', 'editar_proyecto', instance)
+        add_obj_perm_to_group('Administrador', 'ver_proyecto', instance)
+        add_obj_perm_to_group('Administrador', 'iniciar_proyecto', instance)
+        add_obj_perm_to_group('Administrador', 'crear_roles_proyecto', instance)
+        add_obj_perm_to_group('Administrador', 'ver_roles_proyecto', instance)
+        add_obj_perm_to_group('Administrador', 'importar_roles_proyecto', instance)
+        add_obj_perm_to_group('Administrador', 'modificar_roles_proyecto', instance)
+        add_obj_perm_to_group('Administrador', 'eliminar_roles_proyecto', instance)
     else:
         remove_all_users_from_obj_group('scrum_master_' + instance.slug)
         add_user_to_obj_group(instance.scrum_master, 'scrum_master_' + instance.slug)

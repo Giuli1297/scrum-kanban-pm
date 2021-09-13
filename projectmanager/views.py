@@ -225,7 +225,7 @@ class ProyectoSMUpdate(UserAccessMixin, UpdateView):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         if not request.user.has_perms(self.permission_required_obj):
-            if not request.user.has_perms(self.permission_required_obj, self.object):
+            if not request.user.has_perms(('projectmanager.ver_proyecto',), self.object):
                 messages.error(request, "No tienes permisos para eso")
                 return redirect('/')
         return super().get(request, *args, **kwargs)
@@ -233,7 +233,7 @@ class ProyectoSMUpdate(UserAccessMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         if not request.user.has_perms(self.permission_required_obj):
-            if not request.user.has_perms(self.permission_required_obj, self.object):
+            if not request.user.has_perms(('projectmanager.editar_proyecto',), self.object):
                 messages.error(request, "No tienes permisos para eso")
                 return redirect('/')
         return super().post(request, *args, **kwargs)
@@ -434,12 +434,14 @@ class CrearRolProyecto(UserAccessMixin, View):
     """
     raise_exception = False
     permission_required = ()
-    permission_required_obj = ('projectmanager.ver_roles_proyecto',)
     permission_denied_message = "You don't have permissions"
     redirect_field_name = 'next'
 
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.ver_roles_proyecto',), proyecto):
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('/')
         form = CrearRolProyectoForm(slug=slug)
         context = {
             'form': form,
@@ -449,6 +451,9 @@ class CrearRolProyecto(UserAccessMixin, View):
 
     def post(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.crear_roles_proyecto',), proyecto):
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_rol', slug=slug)
         form = CrearRolProyectoForm(request.POST, slug=slug)
 
         if form.is_valid():
@@ -475,12 +480,14 @@ class ModificarRolProyecto(UserAccessMixin, View):
     """
     raise_exception = False
     permission_required = ()
-    permission_required_obj = ('projectmanager.ver_roles_proyecto',)
     permission_denied_message = "You don't have permissions"
     redirect_field_name = 'next'
 
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.modificar_roles_proyecto',), proyecto):
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_rol', slug=slug)
         rol = Rol.objects.get(pk=pk)
         perm_names = get_perms(rol.related_group, proyecto)
         permisos = []
@@ -500,6 +507,9 @@ class ModificarRolProyecto(UserAccessMixin, View):
 
     def post(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.modificar_roles_proyecto',), proyecto):
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_rol', slug=slug)
         form = CrearRolProyectoForm(request.POST, slug=slug)
 
         if form.is_valid():
@@ -524,11 +534,14 @@ class EliminarRolProyecto(UserAccessMixin, View):
     """
     raise_exception = False
     permission_required = ()
-    permission_required_obj = ()
     permission_denied_message = "You don't have permissions"
     redirect_field_name = 'next'
 
     def get(self, request, slug, pk, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.eliminar_roles_proyecto',), proyecto):
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_rol', slug=slug)
         rol = Rol.objects.get(pk=pk)
         related_group = rol.related_group
         related_group.delete()
@@ -542,12 +555,14 @@ class ImportarRolProyecto(UserAccessMixin, View):
     """
     raise_exception = False
     permission_required = ()
-    permission_required_obj = ()
     permission_denied_message = "You don't have permissions"
     redirect_field_name = 'next'
 
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.importar_roles_proyecto',), proyecto):
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_rol', slug=slug)
         roles = Rol.objects.filter(~Q(proyecto=proyecto) & ~Q(tipo='defecto'))
         form = ImportarRolProyectoForm(slug=slug)
         context = {
@@ -559,6 +574,9 @@ class ImportarRolProyecto(UserAccessMixin, View):
 
     def post(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.importar_roles_proyecto',), proyecto):
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_rol', slug=slug)
         form = ImportarRolProyectoForm(request.POST, slug=slug)
         if form.is_valid():
             roles = form.cleaned_data['roles']

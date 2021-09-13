@@ -75,7 +75,8 @@ class Proyecto(models.Model):
                        ('crear_roles_proyecto', 'Puede Crear Roles de Proyecto'),
                        ('ver_roles_proyecto', 'Puede ver roles de proyecto'),
                        ('modificar_roles_proyecto', 'Puede Modificar Roles de Proyecto'),
-                       ('eliminar_roles_proyecto', 'Puede eliminar roles de proyecto'))
+                       ('eliminar_roles_proyecto', 'Puede eliminar roles de proyecto'),
+                       ('importar_roles_proyecto', 'Puede Importar roles de proyecto'))
         default_permissions = ()
         ordering = ('-fecha_inicio',)
 
