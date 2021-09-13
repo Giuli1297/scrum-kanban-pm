@@ -30,7 +30,7 @@ def add_obj_perm_to_group(name, permission, instance):
         group = Group.objects.get(name=name)
     else:
         group = Group.objects.create(name=name)
-        rol = Rol.objects.create(related_group=group, tipo='objeto', proyecto=instance)
+        rol = Rol.objects.create(related_group=group, tipo='proyecto', proyecto=instance)
         rol.save()
     assign_perm(permission, group, instance)
     group.save()

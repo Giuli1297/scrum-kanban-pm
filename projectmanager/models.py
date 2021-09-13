@@ -102,21 +102,16 @@ class Rol(models.Model):
     """
     TIPOS = (
         ('sistema', 'Rol de Sistema'),
-        ('proyecto', 'Rol de Proyecto')
+        ('proyecto', 'Rol de Proyecto'),
+        ('defecto', 'Roles por Defecto')
     )
 
     related_group = models.OneToOneField(Group, on_delete=models.CASCADE, related_name="rol", primary_key=True)
+    descripcion = models.TextField(blank=True, null=True)
     tipo = models.CharField(max_length=8, choices=TIPOS, default='sistema')
     proyecto = models.ForeignKey(Proyecto, related_name="roles", on_delete=models.CASCADE, blank=True, null=True)
 
     # Bueno Bro lo que tenes que hacer hoy es:
-    #     1 - Hacer que se cree una entidad rol cuando se crea un grupo
-    #     2 - Que se defina el tipo de rol que se crea
-    #     3 - Que si se crea un rol nivel proyecto se linkee al proyecto (podria se m2m en vez de o2m)
-    #     4 - Completar CRUD de rol nivel proyecto
-    #     5 - Pantalla de Asinar rol nivel proyecto
-    #     6 - Que liste solo roles del proyecto actual
-    #     7 - Que liste solo roles de sistema en roles de sistema crud
     #     8 - Importar y Exportar Roles
     class Meta:
         permissions = (('ver_roles', 'Puede ver roles'),
@@ -129,4 +124,9 @@ class Rol(models.Model):
         verbose_name_plural = 'Roles'
 
     def __str__(self):
-        return self.related_group.name
+        if self.proyecto:
+            if self.descripcion:
+                return self.related_group.name + ' - ' + self.proyecto.nombre + ' - ' + self.descripcion
+            return self.related_group.name + ' - ' + self.proyecto.nombre
+        else:
+            return self.related_group.name

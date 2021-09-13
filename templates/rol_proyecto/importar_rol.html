@@ -1,0 +1,28 @@
+{% extends 'layout/base.html' %}
+{% block body %}
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h3 class="mb-3">Gestion de Roles de proyecto {{ proyecto.nombre }}</h3>
+    </div>
+</div>
+<div class="row mb-3">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <div class="card card-default">
+            <div class="card-header">
+                <h4 class="card-title">
+                Importar Roles
+                </h4>
+            </div>
+            <div class="card-body">
+                    <form action="#" method="post">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button class="btn btn-dark" type="submit">Importar</button>
+                    </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3"></div>
+</div>
+{% endblock %}
