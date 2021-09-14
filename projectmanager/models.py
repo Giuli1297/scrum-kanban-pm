@@ -5,6 +5,14 @@ from django.utils import timezone
 from django.template.defaultfilters import slugify
 from  django.core.validators import MinValueValidator
 from guardian.shortcuts import assign_perm
+from django.contrib.auth.models import Permission
+
+
+def get_name(self):
+    return self.name
+
+
+Permission.add_to_class("__str__", get_name)
 
 
 
@@ -54,9 +62,6 @@ class Proyecto(models.Model):
     estado = models.CharField(max_length=3, choices=ESTADOS, default='PEN')
     scrum_master = models.ForeignKey(User, related_name='proyecto_encargado', on_delete=models.CASCADE)
     scrum_member = models.ManyToManyField(User, related_name='proyecto_asignado', blank=True)
-
-    # Cambiar luego a manytomany de userstories
-    product_backlog = models.TextField(blank=True)
     # Cambiar luego a manytomany de sprints
     sprintList = models.TextField(blank=True)
 
@@ -67,7 +72,11 @@ class Proyecto(models.Model):
                        ('editar_proyecto', 'Puede editar un proyecto'),
                        ('ver_proyecto', 'Puede ver un proyecto en detalle'),
                        ('ver_proyectos', 'Puede ver proyectos'),
-                       ('iniciar_proyecto', 'Puede iniciar proyecto'),)
+                       ('iniciar_proyecto', 'Puede iniciar proyecto'),
+                       ('crear_roles_proyecto', 'Puede Crear Roles de Proyecto'),
+                       ('ver_roles_proyecto', 'Puede ver roles de proyecto'),
+                       ('modificar_roles_proyecto', 'Puede Modificar Roles de Proyecto'),
+                       ('eliminar_roles_proyecto', 'Puede eliminar roles de proyecto'))
         default_permissions = ()
         ordering = ('-fecha_inicio',)
 
@@ -88,11 +97,23 @@ class Proyecto(models.Model):
         return self.nombre
 
 
-class rol(Group):
+class Rol(models.Model):
     """
     Modelo que hereda de Groups todos sus metodos y atributos para crear los roles y define los permisos para el CRUD
     """
-    # usuario=models.ManyToManyField(User)
+    TIPOS = (
+        ('sistema', 'Rol de Sistema'),
+        ('proyecto', 'Rol de Proyecto'),
+        ('defecto', 'Roles por Defecto')
+    )
+
+    related_group = models.OneToOneField(Group, on_delete=models.CASCADE, related_name="rol", primary_key=True,default=0)
+    descripcion = models.TextField(blank=True, null=True)
+    tipo = models.CharField(max_length=8, choices=TIPOS, default='sistema')
+    proyecto = models.ForeignKey(Proyecto, related_name="roles", on_delete=models.CASCADE, blank=True, null=True)
+
+    # Bueno Bro lo que tenes que hacer hoy es:
+    #     8 - Importar y Exportar Roles
     class Meta:
         permissions = (('ver_roles', 'Puede ver roles'),
                        ('crear_roles', 'Puede crear roles'),
@@ -101,12 +122,19 @@ class rol(Group):
                        ('asignar_roles', 'Asigna roles a usuarios'),
                        ('quitar_roles', 'Quita rol de usuarios'))
         default_permissions = ()
-        verbose_name_plural = 'Rol'
-        ordering = ['name']
+        verbose_name_plural = 'Roles'
+
 
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        if self.proyecto:
+            if self.descripcion:
+                return self.related_group.name + ' - ' + self.proyecto.nombre + ' - ' + self.descripcion
+            return self.related_group.name + ' - ' + self.proyecto.nombre
+        else:
+            return self.related_group.name
 class UserStory(models.Model):
     ESTADOS = (
         ('Nuevo', 'Nuevo'),
@@ -123,3 +151,19 @@ class UserStory(models.Model):
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Nuevo')
     tiempoEnDesarrollo=models.IntegerField(validators=[MinValueValidator(0)],default=0)
     desarrolladorAsignado=models.ForeignKey(User,related_name='desarrollador_asignado',null=True, on_delete=models.CASCADE)
+    proyecto=models.ForeignKey(Proyecto,related_name='product_backlog',null=True,on_delete=models.CASCADE)
+
+    class Meta:
+        permissions = (('ver_users_storys', 'Puede ver user storys'),
+                       ('crear_users_storys', 'Puede crear users storys'),
+                       ('actualizar_users_storys', 'Puede actualizar users storys'),
+                       ('eliminar_users_storys', 'Puede ver users storys'),
+                       ('puede_asignar_users_storys', 'Asigna roles a usuarios'),
+                       ('puede_quitar_users_storys', 'Quita users storys de usuarios'))
+        default_permissions = ()
+        verbose_name_plural = 'Users Storys'
+
+        ordering = ('id',)
+
+        def __unicode__(self):
+            return self.nombre

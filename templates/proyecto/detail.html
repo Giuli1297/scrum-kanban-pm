@@ -12,10 +12,18 @@
         </form>
     </div>
     <div class="col-6">
+
+
         <form action="{% url 'proyecto_iniciar' proyecto.slug %}" method="POST">
             {% csrf_token %}
             <button class="btn btn-dark" type="submit">Iniciar Proyecto</button>
         </form>
+
+        <div style="margin-block: 10px" ><a class="btn btn-primary btn-disabled " href="{% url 'create_us' proyecto.slug %}" >Product Backlog</a></div>
+        <div style="margin-block: 10px" ><a class="btn btn-primary btn-flotante " href="{% url 'proyecto_rol' proyecto.slug %}" >Roles</a></div>
+
+
+
         <p class="mb-3">Manejo de Product Backlog Y Sprint iria aqui</p>
     </div>
 </div>

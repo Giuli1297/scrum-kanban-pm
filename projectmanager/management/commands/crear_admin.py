@@ -1,6 +1,7 @@
 import requests
 from django.contrib.auth.models import Permission, Group, User
 from django.core.management.base import BaseCommand, CommandError
+from projectmanager.models import Rol
 
 
 class Command(BaseCommand):
@@ -30,6 +31,7 @@ class Command(BaseCommand):
             admin = User.objects.create_user(username=admin_username, email=admin_email, password=admin_password)
             admin.is_staff = True
             admin_group = Group.objects.create(name='Administrador')
+            admin_rol = Rol.objects.create(related_group=admin_group, tipo='sistema')
             for permission in Permission.objects.all():
                 admin_group.permissions.add(permission)
             admin.groups.add(admin_group)

@@ -7,6 +7,7 @@ class TestUrls(SimpleTestCase):
     """
            Clase de Testing para Enlaces
     """
+
     def test_home_url_is_resolved(self):
         """
         Test para verificar que se carga correctamente la vista correspondiente
@@ -19,7 +20,7 @@ class TestUrls(SimpleTestCase):
         Test para verificar que se carga correctamente la vista correspondiente
         """
         url = reverse('proyecto_listar')
-        self.assertEquals(resolve(url).func.view_class, views.ProyectoView)
+        self.assertEquals(resolve(url).func.view_class, views.ProyectoView, 'Prueba 1')
 
     def test_crear_proyecto_url_is_resolved(self):
         """
@@ -28,7 +29,6 @@ class TestUrls(SimpleTestCase):
         url = reverse('proyecto_crear')
         self.assertEquals(resolve(url).func.view_class, views.ProyectoCreate)
 
-
     def test_editar_proyecto_url_is_resolved(self):
         """
         Test para verificar que se carga correctamente la vista correspondiente
@@ -36,14 +36,12 @@ class TestUrls(SimpleTestCase):
         url = reverse('proyecto_editar', args=['slug'])
         self.assertEquals(resolve(url).func.view_class, views.ProyectoUpdate)
 
-
     def test_editarsm_proyecto_url_is_resolved(self):
         """
         Test para verificar que se carga correctamente la vista correspondiente
         """
         url = reverse('proyecto_editar_sm', args=['slug'])
         self.assertEquals(resolve(url).func.view_class, views.ProyectoSMUpdate)
-
 
     def test_iniciar_proyecto_url_is_resolved(self):
         """
@@ -58,6 +56,7 @@ class TestUrls(SimpleTestCase):
         """
         url = reverse('list_rol')
         self.assertEquals(resolve(url).func.view_class, views.RolListView)
+
     def test_crear_roles(self):
         """
         Test para verificar que se carga correctamente la vista correspondiente para crear roles
