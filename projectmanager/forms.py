@@ -1,4 +1,5 @@
 from django import forms
+
 from projectmanager.models import *
 from django.contrib.auth.models import User
 from django.contrib.auth.models import User, Group, Permission
@@ -177,6 +178,8 @@ class CrearRolProyectoForm(forms.Form):
     nombre = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
         'class': 'form-control'
     }))
+    descripcion = forms.CharField(max_length=255,
+                                  widget=forms.Textarea(attrs={'class': 'form-control', 'rows': '4'}))
     permisos = forms.ModelMultipleChoiceField(
         queryset=None,
         widget=forms.CheckboxSelectMultiple(attrs={
@@ -187,6 +190,7 @@ class CrearRolProyectoForm(forms.Form):
                                                        'class': 'check-label'
                                                    }))
 
+
 class ProyectoUs(forms.Form):
 
     nombre = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
@@ -196,3 +200,9 @@ class ProyectoUs(forms.Form):
         'class': 'form-control'
     }))
 
+
+
+class ImportarRolProyectoForm(forms.Form):
+    roles = forms.ModelMultipleChoiceField(queryset=Rol.objects.filter(Q(tipo='proyecto')),
+                                           widget=forms.CheckboxSelectMultiple(attrs={'class': 'check-label'}))
+1

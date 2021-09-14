@@ -15,6 +15,7 @@ from django.views.generic import (
     TemplateView,
     DetailView
 )
+
 from projectmanager.forms import *
 from .forms import UserForm, RolForm, UserFormDelete
 from django.shortcuts import render, redirect
@@ -493,6 +494,13 @@ class UserStoryUpdate(View):
             messages.error(request, "Un Error a ocurrido")
         return redirect('create_us',slug=slug)
 
+class EliminarUs(View):
+    def get(self, request, slug, pk, *args, **kwargs):
+        US = UserStory.objects.get(pk=pk)
+        US.delete()
+        messages.success(request, "Rol Eliminado")
+        return redirect('create_us', slug=slug)
+
 
 
 
@@ -522,12 +530,16 @@ class CrearRolProyecto(UserAccessMixin, View):
 
         if form.is_valid():
             nombre = form.cleaned_data['nombre']
+            descripcion = form.cleaned_data['descripcion']
             permissions = form.cleaned_data['permisos']
             usuarios_a_asignar = form.cleaned_data['scrum_members']
             for permiso in permissions:
-                add_obj_perm_to_group(nombre, permiso.codename, proyecto)
+                group = add_obj_perm_to_group(nombre, permiso.codename, proyecto)
             for user in usuarios_a_asignar:
                 add_user_to_obj_group(user, nombre)
+            rol = Rol.objects.get(related_group=group)
+            rol.descripcion = descripcion
+            rol.save()
             messages.success(request, "Rol Creado Correctamente!")
         else:
             messages.error(request, "Un Error a ocurrido")
@@ -536,7 +548,7 @@ class CrearRolProyecto(UserAccessMixin, View):
 
 class ModificarRolProyecto(UserAccessMixin, View):
     """
-        Vista basada en clase el sirve para crear un rol a nivel proyecto nuevo por parte del SM
+        Vista basada en clase el sirve para modificar un rol a nivel proyecto nuevo por parte del SM
     """
     raise_exception = False
     permission_required = ()
@@ -553,6 +565,7 @@ class ModificarRolProyecto(UserAccessMixin, View):
             permisos.append(Permission.objects.filter(codename=perm_name)[0])
         form = CrearRolProyectoForm(
             initial={'nombre': rol.related_group.name,
+                     'descripcion': rol.descripcion,
                      'permisos': permisos,
                      'scrum_members': rol.related_group.user_set.all()}, slug=slug)
         context = {
@@ -580,3 +593,43 @@ class ModificarRolProyecto(UserAccessMixin, View):
         else:
             messages.error(request, "Un Error a ocurrido")
         return redirect('proyecto_rol', slug)
+
+
+class EliminarRolProyecto(UserAccessMixin, View):
+    """
+    Vista basada en clase el sirve para eliminar un rol a nivel proyecto nuevo por parte del SM
+    """
+    raise_exception = False
+    permission_required = ()
+    permission_required_obj = ()
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+
+    def get(self, request, slug, pk, *args, **kwargs):
+        rol = Rol.objects.get(pk=pk)
+        related_group = rol.related_group
+        related_group.delete()
+        messages.success(request, "Rol Eliminado")
+        return redirect('proyecto_rol', slug)
+
+
+class ImportarRolProyecto(UserAccessMixin, View):
+    """
+    Vista basada en clase el sirve para eliminar un rol a nivel proyecto nuevo por parte del SM
+    """
+    raise_exception = False
+    permission_required = ()
+    permission_required_obj = ()
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+
+    def get(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        roles = Rol.objects.all()
+        form = ImportarRolProyectoForm()
+        context = {
+            'proyecto': proyecto,
+            'roles': roles,
+            'form': form
+        }
+        return render(request, 'rol_proyecto/importar_rol.html', context)
