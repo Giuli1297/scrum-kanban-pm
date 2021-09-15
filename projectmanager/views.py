@@ -434,10 +434,8 @@ class UserStoryCreate(View):
     '''
 
     Vista para crear y listar User Storys
-    US:obtiene todos los USER STORYS en el metodo get y lisata los USER STORYS
-    En el metodo post se obtiene el proyecto en el que se está trabajando y se crea una
-    instancia de USER STORY y se le asigna los datos correspondientes del form y tambien el proyecto
-    al cual pertenece
+    US:obtiene todos los USER STORYS en el metodo get y lisat a los USER STORYS
+
 
     '''
     def get (self,request,slug,*args,**kwargs):
@@ -451,6 +449,11 @@ class UserStoryCreate(View):
         }
         return render  (request,'UserStory/crearUS.html',context)
     def post(self, request, slug, *args, **kwargs):
+        """
+        Se obtiene el proyecto en el que se está trabajando y se crea una
+        instancia de USER STORY y se le asigna los datos correspondientes del form y tambien el proyecto
+        al cual pertenece
+        """
         proyecto = Proyecto.objects.get(slug=slug)
         form = ProyectoUs(request.POST)
 
