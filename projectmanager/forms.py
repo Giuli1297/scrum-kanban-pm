@@ -1,5 +1,6 @@
 from django import forms
-from projectmanager.models import Proyecto, Rol
+
+from projectmanager.models import *
 from django.contrib.auth.models import User
 from django.contrib.auth.models import User, Group, Permission
 from django.db.models import Q
@@ -43,14 +44,18 @@ class ProyectoEditarSMForm(forms.ModelForm):
 
         fields = [
             'scrum_member',
+
         ]
 
         labels = {
-            'scrum_member': 'Scrum Members'
+            'scrum_member': 'Scrum Members',
+
+
         }
 
         widgets = {
             'scrum_member': forms.CheckboxSelectMultiple(attrs={'class': 'check-label'}),
+
         }
 
 
@@ -160,6 +165,7 @@ class UserFormDelete(forms.ModelForm):
         exclude = ['user_permissions', 'last_login', 'date_joined', 'is_superuser', 'is_active', 'is_staff']
 
 
+
 class CrearRolProyectoForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.slug = kwargs.pop('slug')
@@ -185,6 +191,17 @@ class CrearRolProyectoForm(forms.Form):
                                                    }))
 
 
+class ProyectoUs(forms.Form):
+
+    nombre = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
+        'class': 'form-control'
+    }))
+    descripcion = forms.CharField(max_length=100, widget=forms.Textarea(attrs={
+        'class': 'form-control'
+    }))
+
+
+
 class ImportarRolProyectoForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.slug = kwargs.pop('slug')
@@ -198,3 +215,4 @@ class ImportarRolProyectoForm(forms.Form):
 
     roles = forms.ModelMultipleChoiceField(queryset=None,
                                            widget=forms.CheckboxSelectMultiple(attrs={'class': 'check-label'}))
+1

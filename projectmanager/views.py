@@ -15,9 +15,8 @@ from django.views.generic import (
     TemplateView,
     DetailView
 )
-from projectmanager.forms import ProyectoForm, ProyectoEditarSMForm, ActualizarUsuarioForm, CrearRolProyectoForm, \
-    ImportarRolProyectoForm
-from projectmanager.forms import ProyectoForm
+
+from projectmanager.forms import *
 from .forms import UserForm, RolForm, UserFormDelete
 from django.shortcuts import render, redirect
 from django.views import View
@@ -30,7 +29,8 @@ from .utils import account_activation_token, add_user_to_obj_group, add_perm_to_
     add_users_to_obj_group, remove_all_perms_from_obj_group, remove_all_users_from_obj_group
 from guardian.shortcuts import get_perms
 # Create your views here.
-from projectmanager.models import Proyecto, Rol
+from projectmanager.models import *
+
 
 from django.http import JsonResponse
 from django.urls import reverse_lazy
@@ -428,6 +428,82 @@ class EliminarRolUser(UserAccessMixin, UpdateView):
     success_url = reverse_lazy('list_user')
 
 
+#VISTAS DE  USERS STORYS
+
+class UserStoryCreate(View):
+    '''
+
+    Vista para crear y listar User Storys
+    US:obtiene todos los USER STORYS en el metodo get y lisata los USER STORYS
+    En el metodo post se obtiene el proyecto en el que se está trabajando y se crea una
+    instancia de USER STORY y se le asigna los datos correspondientes del form y tambien el proyecto
+    al cual pertenece
+
+    '''
+    def get (self,request,slug,*args,**kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        US=UserStory.objects.all()
+        form=ProyectoUs()
+        context= {
+            'form':form,
+            'proyecto':proyecto,
+            'US':US
+        }
+        return render  (request,'UserStory/crearUS.html',context)
+    def post(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        form = ProyectoUs(request.POST)
+
+        if form.is_valid():
+            nombre = form.cleaned_data['nombre']
+            descripcion = form.cleaned_data['descripcion']
+            US=UserStory.objects.create(nombre=nombre,descripcion=descripcion,proyecto=proyecto)
+            US.save()
+            messages.success(request, "User Story Creado Correctamente!")
+        else:
+            messages.error(request, "Un Error a ocurrido")
+        return redirect('create_us', slug=slug)
+class UserStoryUpdate(View):
+    def get (self,request,slug,pk,*args,**kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        US=UserStory.objects.all()
+        US2=UserStory.objects.get(pk=pk)
+        form=ProyectoUs( initial={'nombre': US2.nombre,
+                     'descripcion': US2.descripcion,
+                                   })
+        context= {
+            'form':form,
+            'proyecto':proyecto,
+            'US2':US2
+        }
+        return render  (request,'UserStory/UpdateUs.html',context)
+
+    def post(self, request,slug,pk, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        US2 = UserStory.objects.get(pk=pk)
+        form = ProyectoUs(request.POST)
+
+        if form.is_valid():
+            nombre = form.cleaned_data['nombre']
+            descripcion = form.cleaned_data['descripcion']
+            US2.nombre=nombre
+            US2.descripcion=descripcion
+            US2.save()
+            messages.success(request, "User Story se actualizó Correctamente!")
+        else:
+            messages.error(request, "Un Error a ocurrido")
+        return redirect('create_us',slug=slug)
+
+class EliminarUs(View):
+    def get(self, request, slug, pk, *args, **kwargs):
+        US = UserStory.objects.get(pk=pk)
+        US.delete()
+        messages.success(request, "Rol Eliminado")
+        return redirect('create_us', slug=slug)
+
+
+
+
 class CrearRolProyecto(UserAccessMixin, View):
     """
         Vista basada en clase el sirve para crear un rol a nivel proyecto nuevo por parte del SM
@@ -448,6 +524,7 @@ class CrearRolProyecto(UserAccessMixin, View):
             'proyecto': proyecto
         }
         return render(request, 'rol_proyecto/crear_rol.html', context)
+
 
     def post(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
