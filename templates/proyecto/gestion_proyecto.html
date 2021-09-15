@@ -1,0 +1,112 @@
+{% extends "layout/base.html" %}
+{% load guardian_tags %}
+{% load projectmanager_extras %}
+{% block content %}
+    {% get_obj_perms request.user for proyecto as "proyecto_perms" %}
+<div class="row">
+    <div class="col-md-4"></div>
+    <div class="col-md-4">
+        <h2 class="mb-2">{{ proyecto.nombre }}</h2>
+    </div>
+    <div class="col-md-4"></div>
+</div>
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+        <p class="mb-2">{{ proyecto.descripcion }}</p>
+        <hr/>
+    </div>
+    <div class="col-md-2"></div>
+</div>
+<div class="row">
+    <div class="col-md-5 border border-2">
+        <div class="row m-1">
+            <div class="col-md-4">
+                <h4>Scrum Members</h4>
+            </div>
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+                {% if "agregar_smember" in proyecto_perms %}
+                    <a class="btn btn-dark" href="{% url 'proyecto_agregar_sm' proyecto.slug %}">Editar Scrum Members</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row m-1">
+        <table class="table mb-2">
+          <thead>
+            <tr>
+              <th scope="col">Usuario</th>
+              <th scope="col">Email</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for scrum_member in proyecto.scrum_member.all %}
+                <tr>
+                  <th scope="row">{{ scrum_member.username }}</th>
+                  <td>{{ scrum_member.email }}</td>
+                </tr>
+            {% empty %}
+                <div class="mb-2">
+                    <p>No tienes Scrum Members, agregalos!</p>
+                </div>
+            {% endfor %}
+          </tbody>
+        </table>
+        <div style="margin-block: 10px" ><a class="btn btn-dark btn-flotante align-center" href="{% url 'proyecto_rol' proyecto.slug %}" >Roles</a></div>
+        </div>
+    </div>
+    <div class="col-md-1"></div>
+    <div class="col-md-6 border border-2">
+        <div class="row m-1">
+            <div class="col-md-4">
+                <h4>Product Backlog</h4>
+            </div>
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+                {% if "crear_user_stories" in proyecto_perms %}
+                    <a class="btn btn-dark" href="{% url 'create_us' proyecto.slug %}">Editar User Stories</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row m-1">
+            <table class="table mb-2">
+              <thead>
+                <tr>
+                  <th scope="col">Nombre</th>
+                  <th scope="col">Descripcion</th>
+                  <th scope="col">Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for ustory in proyecto.product_backlog.all %}
+                    <tr>
+                      <th scope="row">{{ ustory.nombre }}</th>
+                      <td>{{ ustory.descripcion }}</td>
+                      <td>{{ ustory.estado }}</td>
+                    </tr>
+                {% empty %}
+                    <div class="mb-2">
+                        <p>No tienes UserStories, agregalos!</p>
+                    </div>
+                {% endfor %}
+              </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+<div class="row m-2">
+    <p>
+        {% if proyecto.estado != 'Cancelado' and request.user|has_group:"Administrador" %}
+            {% if proyecto.estado != 'Finalizado' %}
+                <a class="btn btn-dark" href="{% url 'proyecto_editar' proyecto.slug %}">Editar Proyecto</a>
+            {% endif %}
+        {% endif%}
+    </p>
+    <p>
+        {% if "iniciar_proyecto" in proyecto_perms %}
+            <a class="btn btn-dark" href="{% url 'proyecto_iniciar' proyecto.slug %}">Iniciar</a>
+        {% endif %}
+    </p>
+</div>
+{% endblock %}

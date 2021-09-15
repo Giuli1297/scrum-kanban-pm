@@ -31,7 +31,6 @@ from guardian.shortcuts import get_perms
 # Create your views here.
 from projectmanager.models import *
 
-
 from django.http import JsonResponse
 from django.urls import reverse_lazy
 
@@ -197,7 +196,27 @@ class ProyectoUpdate(UserAccessMixin, UpdateView):
     success_url = reverse_lazy('proyecto_listar')  # Redireccionar
 
 
-class ProyectoSMUpdate(UserAccessMixin, UpdateView):
+class GestionProyectoView(UserAccessMixin, View):
+    """
+        Vista Que Administra la pantalla de gestion de proyecto
+    """
+    raise_exception = False
+    permission_required = ()
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+
+    def get(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.ver_proyecto',), proyecto):
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('/')
+        context = {
+            'proyecto': proyecto
+        }
+        return render(request, 'proyecto/gestion_proyecto.html', context)
+
+
+class AgregarSMember(UserAccessMixin, UpdateView):
     """
     Vista basada en clase el sirve para editar un proyecto nuevo por parte del SM
 
@@ -428,7 +447,7 @@ class EliminarRolUser(UserAccessMixin, UpdateView):
     success_url = reverse_lazy('list_user')
 
 
-#VISTAS DE  USERS STORYS
+# VISTAS DE  USERS STORYS
 
 class UserStoryCreate(View):
     '''
@@ -440,16 +459,18 @@ class UserStoryCreate(View):
     al cual pertenece
 
     '''
-    def get (self,request,slug,*args,**kwargs):
+
+    def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
-        US=UserStory.objects.all()
-        form=ProyectoUs()
-        context= {
-            'form':form,
-            'proyecto':proyecto,
-            'US':US
+        US = UserStory.objects.all()
+        form = ProyectoUs()
+        context = {
+            'form': form,
+            'proyecto': proyecto,
+            'US': US
         }
-        return render  (request,'UserStory/crearUS.html',context)
+        return render(request, 'UserStory/crearUS.html', context)
+
     def post(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         form = ProyectoUs(request.POST)
@@ -457,28 +478,30 @@ class UserStoryCreate(View):
         if form.is_valid():
             nombre = form.cleaned_data['nombre']
             descripcion = form.cleaned_data['descripcion']
-            US=UserStory.objects.create(nombre=nombre,descripcion=descripcion,proyecto=proyecto)
+            US = UserStory.objects.create(nombre=nombre, descripcion=descripcion, proyecto=proyecto)
             US.save()
             messages.success(request, "User Story Creado Correctamente!")
         else:
             messages.error(request, "Un Error a ocurrido")
         return redirect('create_us', slug=slug)
-class UserStoryUpdate(View):
-    def get (self,request,slug,pk,*args,**kwargs):
-        proyecto = Proyecto.objects.get(slug=slug)
-        US=UserStory.objects.all()
-        US2=UserStory.objects.get(pk=pk)
-        form=ProyectoUs( initial={'nombre': US2.nombre,
-                     'descripcion': US2.descripcion,
-                                   })
-        context= {
-            'form':form,
-            'proyecto':proyecto,
-            'US2':US2
-        }
-        return render  (request,'UserStory/UpdateUs.html',context)
 
-    def post(self, request,slug,pk, *args, **kwargs):
+
+class UserStoryUpdate(View):
+    def get(self, request, slug, pk, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        US = UserStory.objects.all()
+        US2 = UserStory.objects.get(pk=pk)
+        form = ProyectoUs(initial={'nombre': US2.nombre,
+                                   'descripcion': US2.descripcion,
+                                   })
+        context = {
+            'form': form,
+            'proyecto': proyecto,
+            'US2': US2
+        }
+        return render(request, 'UserStory/UpdateUs.html', context)
+
+    def post(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         US2 = UserStory.objects.get(pk=pk)
         form = ProyectoUs(request.POST)
@@ -486,13 +509,14 @@ class UserStoryUpdate(View):
         if form.is_valid():
             nombre = form.cleaned_data['nombre']
             descripcion = form.cleaned_data['descripcion']
-            US2.nombre=nombre
-            US2.descripcion=descripcion
+            US2.nombre = nombre
+            US2.descripcion = descripcion
             US2.save()
             messages.success(request, "User Story se actualizó Correctamente!")
         else:
             messages.error(request, "Un Error a ocurrido")
-        return redirect('create_us',slug=slug)
+        return redirect('create_us', slug=slug)
+
 
 class EliminarUs(View):
     def get(self, request, slug, pk, *args, **kwargs):
@@ -500,8 +524,6 @@ class EliminarUs(View):
         US.delete()
         messages.success(request, "Rol Eliminado")
         return redirect('create_us', slug=slug)
-
-
 
 
 class CrearRolProyecto(UserAccessMixin, View):
@@ -524,7 +546,6 @@ class CrearRolProyecto(UserAccessMixin, View):
             'proyecto': proyecto
         }
         return render(request, 'rol_proyecto/crear_rol.html', context)
-
 
     def post(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)

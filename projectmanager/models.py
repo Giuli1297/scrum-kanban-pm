@@ -3,7 +3,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.template.defaultfilters import slugify
-from  django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator
 from guardian.shortcuts import assign_perm
 from django.contrib.auth.models import Permission
 
@@ -13,7 +13,6 @@ def get_name(self):
 
 
 Permission.add_to_class("__str__", get_name)
-
 
 
 # Create your models here.
@@ -65,19 +64,25 @@ class Proyecto(models.Model):
     # Cambiar luego a manytomany de sprints
     sprintList = models.TextField(blank=True)
 
-
     class Meta:
         verbose_name = 'Proyectos'
         permissions = (('crear_proyecto', 'Puede crear un proyecto'),
                        ('editar_proyecto', 'Puede editar un proyecto'),
                        ('ver_proyecto', 'Puede ver un proyecto en detalle'),
                        ('ver_proyectos', 'Puede ver proyectos'),
+                       ('agregar_smember', 'Puede agregar nuevos Scrum Members'),
                        ('iniciar_proyecto', 'Puede iniciar proyecto'),
                        ('crear_roles_proyecto', 'Puede Crear Roles de Proyecto'),
                        ('ver_roles_proyecto', 'Puede ver roles de proyecto'),
                        ('modificar_roles_proyecto', 'Puede Modificar Roles de Proyecto'),
                        ('eliminar_roles_proyecto', 'Puede eliminar roles de proyecto'),
-                       ('importar_roles_proyecto', 'Puede Importar roles de proyecto'))
+                       ('importar_roles_proyecto', 'Puede Importar roles de proyecto'),
+                       ('ver_user_stories', 'Puede ver user storys'),
+                       ('crear_user_stories', 'Puede crear users storys'),
+                       ('actualizar_user_stories', 'Puede actualizar users storys'),
+                       ('eliminar_user_stories', 'Puede ver users storys'),
+                       ('puede_asignar_user_stories', 'Asigna roles a usuarios'),
+                       ('puede_quitar_user_stories', 'Quita users storys de usuarios'))
         default_permissions = ()
         ordering = ('-fecha_inicio',)
 
@@ -109,7 +114,8 @@ class Rol(models.Model):
         ('proyimp', 'Roles de Proyecto Importados')
     )
 
-    related_group = models.OneToOneField(Group, on_delete=models.CASCADE, related_name="rol", primary_key=True,default=0)
+    related_group = models.OneToOneField(Group, on_delete=models.CASCADE, related_name="rol", primary_key=True,
+                                         default=0)
     descripcion = models.TextField(blank=True, null=True)
     tipo = models.CharField(max_length=8, choices=TIPOS, default='sistema')
     proyecto = models.ForeignKey(Proyecto, related_name="roles", on_delete=models.CASCADE, blank=True, null=True)
@@ -127,7 +133,6 @@ class Rol(models.Model):
         default_permissions = ()
         verbose_name_plural = 'Roles'
 
-
     def __unicode__(self):
         return self.name
 
@@ -138,31 +143,29 @@ class Rol(models.Model):
             return self.related_group.name + ' - ' + self.proyecto.nombre
         else:
             return self.related_group.name
+
+
 class UserStory(models.Model):
     ESTADOS = (
         ('Nuevo', 'Nuevo'),
         ('Cancelado', 'Cancelado'),
         ('To-Do', 'To-Do'),
         ('Doing', 'Doing'),
-        ('Done','Done'),
-        ('QA','QA'),
-        ('Release','Release')
+        ('Done', 'Done'),
+        ('QA', 'QA'),
+        ('Release', 'Release')
     )
-    nombre=models.CharField(max_length=100,unique=True)
-    descripcion=models.TextField(max_length=255)
-    tiempoEstimado=models.IntegerField(validators=[MinValueValidator(0)],default=0)
+    nombre = models.CharField(max_length=100, unique=True)
+    descripcion = models.TextField(max_length=255)
+    tiempoEstimado = models.IntegerField(validators=[MinValueValidator(0)], default=0)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Nuevo')
-    tiempoEnDesarrollo=models.IntegerField(validators=[MinValueValidator(0)],default=0)
-    desarrolladorAsignado=models.ForeignKey(User,related_name='desarrollador_asignado',null=True, on_delete=models.CASCADE)
-    proyecto=models.ForeignKey(Proyecto,related_name='product_backlog',null=True,on_delete=models.CASCADE)
+    tiempoEnDesarrollo = models.IntegerField(validators=[MinValueValidator(0)], default=0)
+    desarrolladorAsignado = models.ForeignKey(User, related_name='desarrollador_asignado', null=True,
+                                              on_delete=models.CASCADE)
+    proyecto = models.ForeignKey(Proyecto, related_name='product_backlog', null=True, on_delete=models.CASCADE)
 
     class Meta:
-        permissions = (('ver_users_storys', 'Puede ver user storys'),
-                       ('crear_users_storys', 'Puede crear users storys'),
-                       ('actualizar_users_storys', 'Puede actualizar users storys'),
-                       ('eliminar_users_storys', 'Puede ver users storys'),
-                       ('puede_asignar_users_storys', 'Asigna roles a usuarios'),
-                       ('puede_quitar_users_storys', 'Quita users storys de usuarios'))
+        permissions = ()
         default_permissions = ()
         verbose_name_plural = 'Users Storys'
 
