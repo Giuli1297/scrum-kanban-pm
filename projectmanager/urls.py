@@ -33,4 +33,8 @@ urlpatterns = [
     path('proyectos/<slug:slug>/createUs/',views.UserStoryCreate.as_view(),name='create_us'),
     path('proyectos/<slug:slug>/updateUs/<int:pk>/',views.UserStoryUpdate.as_view(),name='update_us'),
     path('proyectos/<slug:slug>/eliminarUs/<int:pk>/',views.EliminarUs.as_view(),name='elimnar_us'),
+    path('proyectos/<slug:slug>/crearSprint/',views.CrearSprint.as_view(),name='crear_sprint'),
+    path('proyectos/<slug:slug>/actualizarSprint/<int:pk>/',views.ActualizarSprint.as_view(),name='actualizar_sprint'),
+    path('proyectos/<slug:slug>/listarSprintBacklog/<int:pk>/',views.listaUsSprintBacklog.as_view(),name='sprint_backlog'),
+    path('proyectos/<slug:slug>/configurarUS/<int:pk>/',views.UserStoryUpdateSprint.as_view(),name='configurar_us'),
 ]

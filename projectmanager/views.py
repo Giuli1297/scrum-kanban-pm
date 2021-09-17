@@ -442,7 +442,7 @@ class UserStoryCreate(View):
     '''
     def get (self,request,slug,*args,**kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
-        US=UserStory.objects.all()
+        US=UserStory.objects.filter(proyecto=proyecto)
         form=ProyectoUs()
         context= {
             'form':form,
@@ -633,3 +633,115 @@ class ImportarRolProyecto(UserAccessMixin, View):
             'form': form
         }
         return render(request, 'rol_proyecto/importar_rol.html', context)
+
+
+class CrearSprint(View):
+    def get (self,request,slug,*args,**kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        sprint=Sprint.objects.all()
+        form=SprintFormCreate(slug=slug)
+        context= {
+            'form':form,
+            'proyecto':proyecto,
+            'sprint':sprint
+        }
+        return render  (request,'sprint/crearSprint.html',context)
+    def post(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        form = SprintFormCreate(request.POST,slug=slug)
+
+        if form.is_valid():
+            nombre = form.cleaned_data['nombre']
+            US = form.cleaned_data['UserStorys']
+            #fecha_inicio = form.cleaned_data['fecha_inicio']
+            duracion_estimada = form.cleaned_data['duracion_estimanda']
+            #fecha_finalizacion = form.cleaned_data['fecha_finalizacion']
+            sprint=Sprint.objects.create(nombre=nombre,proyecto=proyecto,duracion_estimada=duracion_estimada)
+            sprint.save()
+            for us in US:
+                userStory=UserStory.objects.get(nombre=us)
+                userStory.sprint=sprint
+                userStory.save()
+            messages.success(request, "Sprint Creado Correctamente!")
+        else:
+            messages.error(request, "Un Error a ocurrido")
+        return redirect('crear_sprint', slug=slug)
+
+class ActualizarSprint(View):
+
+    def get (self,request,slug,pk,*args,**kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        sprint = Sprint.objects.get(pk=pk)
+        form=SprintFormCreate( initial={'nombre': sprint.nombre,
+                     'UserStorys': sprint.Sprint.all(),'duracion_estimanda':sprint.duracion_estimada},slug=slug)
+        context= {
+            'form':form,
+            'proyecto':proyecto,
+            'sprint':sprint
+        }
+        return render  (request,'sprint/actualizarSprint.html',context)
+
+    def post(self, request,slug,pk, *args, **kwargs):
+        sprint = Sprint.objects.get(pk=pk)
+
+        form = SprintFormCreate(request.POST,slug=slug)
+
+        if form.is_valid():
+            nombre = form.cleaned_data['nombre']
+            US = form.cleaned_data['UserStorys']
+            duracion_estimada = form.cleaned_data['duracion_estimanda']
+            sprint.nombre=nombre
+            sprint.duracion_estimada=duracion_estimada
+            sprint.save()
+            for us in Sprint.objects.get(pk=pk).Sprint.all():
+                userStory = UserStory.objects.get(nombre=us)
+                userStory.sprint=None
+                userStory.save()
+            for us in US:
+                userStory=UserStory.objects.get(nombre=us)
+                userStory.sprint=sprint
+                userStory.save()
+
+            messages.success(request, "User Story se actualizó Correctamente!")
+        else:
+            messages.error(request, "Un Error a ocurrido")
+        return redirect('crear_sprint',slug=slug)
+
+class listaUsSprintBacklog(View):
+    def get (self,request,slug,pk,*args,**kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        sprint=Sprint.objects.get(pk=pk).Sprint.all()
+       # form=SprintFormCreate(slug=slug)
+        context= {
+            'proyecto':proyecto,
+            'US':sprint
+        }
+        return render  (request,'sprint_backlog/userStorySprint.html',context)
+
+
+
+class UserStoryUpdateSprint(View):
+    def get (self,request,slug,pk,*args,**kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        US=UserStory.objects.all()
+        US2=UserStory.objects.get(pk=pk)
+        form=AsignarDesarrolladorUs(slug=slug)
+        context= {
+            'form':form,
+            'proyecto':proyecto,
+            'US2':US2
+        }
+        return render  (request,'sprint_backlog/updateUsSprint.html',context)
+
+    def post(self, request,slug,pk, *args, **kwargs):
+        US2 = UserStory.objects.get(pk=pk)
+        form = AsignarDesarrolladorUs(request.POST,slug=slug)
+        print("asdsadsadsada",form)
+        if form.is_valid():
+            desarrollador=form.cleaned_data['desarrolladorAsignado']
+            US2.desarrolladorAsignado=desarrollador
+            US2.save()
+            messages.success(request, "User Story se actualizó Correctamente!")
+        else:
+            messages.error(request, "Un Error a ocurrido")
+        return redirect('sprint_backlog',slug=slug,pk=US2.sprint.pk)

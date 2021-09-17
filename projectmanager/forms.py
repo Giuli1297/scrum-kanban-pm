@@ -192,7 +192,6 @@ class CrearRolProyectoForm(forms.Form):
 
 
 class ProyectoUs(forms.Form):
-
     nombre = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
         'class': 'form-control'
     }))
@@ -200,9 +199,56 @@ class ProyectoUs(forms.Form):
         'class': 'form-control'
     }))
 
-
-
 class ImportarRolProyectoForm(forms.Form):
     roles = forms.ModelMultipleChoiceField(queryset=Rol.objects.filter(Q(tipo='proyecto')),
                                            widget=forms.CheckboxSelectMultiple(attrs={'class': 'check-label'}))
-1
+
+class SprintFormCreate(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.slug = kwargs.pop('slug')
+        super(SprintFormCreate, self).__init__(*args, **kwargs)
+        self.proyecto = Proyecto.objects.get(slug=self.slug)
+        self.fields['UserStorys'].queryset = UserStory.objects.filter(proyecto=self.proyecto)
+
+    nombre = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
+        'class': 'form-control'
+    }))
+    UserStorys = forms.ModelMultipleChoiceField(
+        queryset=None,
+        widget=forms.CheckboxSelectMultiple(attrs={
+            'class': 'check-label'
+        }))
+
+    duracion_estimanda = forms.IntegerField( widget=forms.TextInput(attrs={
+           'class': 'form-control'
+       }))
+
+class SprintFormUpdate(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.slug = kwargs.pop('slug')
+        super(SprintFormCreate, self).__init__(*args, **kwargs)
+        self.proyecto = Proyecto.objects.get(slug=self.slug)
+        self.fields['UserStorys'].queryset = UserStory.objects.filter(proyecto=self.proyecto)
+
+    nombre = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
+        'class': 'form-control'
+    }))
+    UserStorys = forms.ModelMultipleChoiceField(
+        queryset=None,
+        widget=forms.CheckboxSelectMultiple(attrs={
+            'class': 'check-label'
+        }))
+
+
+class AsignarDesarrolladorUs(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.slug = kwargs.pop('slug')
+        super(AsignarDesarrolladorUs, self).__init__(*args, **kwargs)
+        self.proyecto = Proyecto.objects.get(slug=self.slug)
+        self.fields['desarrolladorAsignado'].queryset = User.objects.filter(proyecto_asignado=self.proyecto)
+
+    desarrolladorAsignado = forms.ModelChoiceField(
+        queryset=None,
+        widget=forms.Select(attrs={
+            'class': 'check-label'
+        }))

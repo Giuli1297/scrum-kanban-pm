@@ -8,4 +8,6 @@ admin.site.register(Proyecto)
 admin.site.register(UserStory)
 
 admin.site.register(Rol)
+admin.site.register(Sprint)
+
 
