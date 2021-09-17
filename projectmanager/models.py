@@ -126,9 +126,6 @@ class Rol(models.Model):
         default_permissions = ()
         verbose_name_plural = 'Roles'
 
-    def __unicode__(self):
-        return self.name
-
     def __str__(self):
         if self.proyecto:
             if self.descripcion:
@@ -166,3 +163,11 @@ class UserStory(models.Model):
 
         def __unicode__(self):
             return self.nombre
+
+
+class UserInfo(models.Model):
+    """
+    Modelo que guarda informacion util sobre cada usuario del sistema
+    """
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='info', primary_key=True)
+    horasDisponibles = models.PositiveIntegerField(default=40)

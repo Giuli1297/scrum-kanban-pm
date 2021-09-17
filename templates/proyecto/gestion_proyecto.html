@@ -26,9 +26,11 @@
             </div>
             <div class="col-md-4"></div>
             <div class="col-md-4">
+            {% if proyecto.estado != 'CAN' and proyecto.estado != 'FIN' %}
                 {% if "gestionar_scrum_members" in proyecto_perms or request.user|has_group:'Administrador' %}
                     <a class="btn btn-dark" href="{% url 'proyecto_agregar_sm' proyecto.slug %}">Editar</a>
                 {% endif %}
+            {% endif %}
             </div>
         </div>
         <div class="row m-1">
@@ -37,6 +39,7 @@
                 <tr>
                   <th scope="col">Usuario</th>
                   <th scope="col">Email</th>
+                    <th scope="col">Horas Disponibles (5 prox dias)</th>
                 </tr>
               </thead>
               <tbody>
@@ -44,6 +47,7 @@
                     <tr>
                       <th scope="row">{{ scrum_member.username }}</th>
                       <td>{{ scrum_member.email }}</td>
+                     <td>{{ scrum_member.info.horasDisponibles }} hs</td>
                     </tr>
                 {% empty %}
                     <div class="mb-2">
@@ -53,11 +57,13 @@
               </tbody>
             </table>
             <div style="margin-block: 10px" >
+            {% if proyecto.estado != 'CAN' and proyecto.estado != 'FIN' %}
                 {% if 'gestionar_roles_proyecto' in proyecto_perms or request.user|has_group:'Administrador' %}
                     <a class="btn btn-dark btn-flotante align-center" href="{% url 'proyecto_rol' proyecto.slug %}" >
                         Roles
                     </a>
                 {% endif %}
+            {% endif %}
             </div>
         </div>
     </div>
@@ -68,9 +74,11 @@
             </div>
             <div class="col-md-4"></div>
             <div class="col-md-4">
+            {% if proyecto.estado != 'CAN' and proyecto.estado != 'FIN' %}
                 {% if "gestionar_user_stories" in proyecto_perms or request.user|has_group:'Administrador' %}
                     <a class="btn btn-dark" href="{% url 'create_us' proyecto.slug %}">Editar</a>
                 {% endif %}
+            {% endif %}
             </div>
         </div>
         <div class="row m-1">
