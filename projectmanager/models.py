@@ -145,7 +145,7 @@ class Rol(models.Model):
 
 
 class Sprint(models.Model):
-    nombre=models.CharField(max_length=250,unique=True)
+    nombre=models.CharField(max_length=250)
     fecha_inicio=models.DateTimeField(null=True,blank=True)
     duracion_estimada=models.IntegerField(null=True,blank=True)
     fecha_finalización=models.DateTimeField(null=True,blank=True)
@@ -167,7 +167,7 @@ class UserStory(models.Model):
         ('QA','QA'),
         ('Release','Release')
     )
-    nombre=models.CharField(blank=True,max_length=100,unique=True)
+    nombre=models.CharField(blank=True,max_length=100)
     descripcion=models.TextField(blank=True,max_length=255)
     tiempoEstimado=models.IntegerField(validators=[MinValueValidator(0)],default=0)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Nuevo')

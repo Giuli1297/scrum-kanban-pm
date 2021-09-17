@@ -457,9 +457,13 @@ class UserStoryCreate(View):
         if form.is_valid():
             nombre = form.cleaned_data['nombre']
             descripcion = form.cleaned_data['descripcion']
-            US=UserStory.objects.create(nombre=nombre,descripcion=descripcion,proyecto=proyecto)
-            US.save()
-            messages.success(request, "User Story Creado Correctamente!")
+            validar=UserStory.objects.filter(nombre=nombre).exists()
+            if(validar):
+                messages.error(request, "Ya existe User Sotry con ese nombre")
+            else:
+                US=UserStory.objects.create(nombre=nombre,descripcion=descripcion,proyecto=proyecto)
+                US.save()
+                messages.success(request, "User Story Creado Correctamente!")
         else:
             messages.error(request, "Un Error a ocurrido")
         return redirect('create_us', slug=slug)
@@ -498,7 +502,7 @@ class EliminarUs(View):
     def get(self, request, slug, pk, *args, **kwargs):
         US = UserStory.objects.get(pk=pk)
         US.delete()
-        messages.success(request, "Rol Eliminado")
+        messages.success(request, "User Story Eliminado")
         return redirect('create_us', slug=slug)
 
 
@@ -653,16 +657,19 @@ class CrearSprint(View):
         if form.is_valid():
             nombre = form.cleaned_data['nombre']
             US = form.cleaned_data['UserStorys']
-            #fecha_inicio = form.cleaned_data['fecha_inicio']
-            duracion_estimada = form.cleaned_data['duracion_estimanda']
-            #fecha_finalizacion = form.cleaned_data['fecha_finalizacion']
-            sprint=Sprint.objects.create(nombre=nombre,proyecto=proyecto,duracion_estimada=duracion_estimada)
-            sprint.save()
-            for us in US:
-                userStory=UserStory.objects.get(nombre=us)
-                userStory.sprint=sprint
-                userStory.save()
-            messages.success(request, "Sprint Creado Correctamente!")
+            #duracion_estimada = form.cleaned_data['duracion_estimanda']
+            validar=Sprint.objects.filter(nombre=nombre).exists()
+            if(validar):
+                messages.error(request, "Ya existe Sprint con ese nombre")
+            else:
+
+                sprint=Sprint.objects.create(nombre=nombre,proyecto=proyecto)
+                sprint.save()
+                for us in US:
+                    userStory=UserStory.objects.get(nombre=us)
+                    userStory.sprint=sprint
+                    userStory.save()
+                messages.success(request, "Sprint Creado Correctamente!")
         else:
             messages.error(request, "Un Error a ocurrido")
         return redirect('crear_sprint', slug=slug)

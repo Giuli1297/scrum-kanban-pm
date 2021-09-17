@@ -219,9 +219,9 @@ class SprintFormCreate(forms.Form):
             'class': 'check-label'
         }))
 
-    duracion_estimanda = forms.IntegerField( widget=forms.TextInput(attrs={
+    '''duracion_estimanda = forms.IntegerField( widget=forms.TextInput(attrs={
            'class': 'form-control'
-       }))
+       }))'''
 
 class SprintFormUpdate(forms.Form):
     def __init__(self, *args, **kwargs):
