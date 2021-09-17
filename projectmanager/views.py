@@ -7,7 +7,7 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth.models import Permission
 from django.contrib import messages
 from django.db.models import Q
-
+import logging
 from django.views.generic import (
     ListView,
     CreateView,
@@ -90,33 +90,33 @@ class HomePage(LoginRequiredMixin, TemplateView):
         return context
 
 
-class ProyectoDetailView(UserAccessMixin, DetailView):
-    """
-    Presenta la pagina principla para la gestion de un proyecto
-
-    """
-    raise_exception = False
-    permission_required = ()
-    permission_required_obj = ('projectmanager.ver_proyecto',)
-    permission_denied_message = "You don't have permissions"
-    redirect_field_name = 'next'
-
-    model = Proyecto
-    template_name = 'proyecto/detail.html'
-    context_object_name = 'proyecto'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        if not request.user.has_perms(self.permission_required_obj):
-            if not request.user.has_perms(self.permission_required_obj, self.object):
-                messages.error(request, "No tienes permisos para eso")
-                return redirect('/')
-        context = self.get_context_data(object=self.object)
-        return self.render_to_response(context)
+# class ProyectoDetailView(UserAccessMixin, DetailView):
+#     """
+#     Presenta la pagina principla para la gestion de un proyecto
+#
+#     """
+#     raise_exception = False
+#     permission_required = ()
+#     permission_required_obj = ('projectmanager.ver_proyecto',)
+#     permission_denied_message = "You don't have permissions"
+#     redirect_field_name = 'next'
+#
+#     model = Proyecto
+#     template_name = 'proyecto/detail.html'
+#     context_object_name = 'proyecto'
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         return context
+#
+#     def get(self, request, *args, **kwargs):
+#         self.object = self.get_object()
+#         if not request.user.has_perms(self.permission_required_obj):
+#             if not request.user.has_perms(self.permission_required_obj, self.object):
+#                 messages.error(request, "No tienes permisos para eso")
+#                 return redirect('/')
+#         context = self.get_context_data(object=self.object)
+#         return self.render_to_response(context)
 
 
 class ProyectoCreate(UserAccessMixin, CreateView):
@@ -195,6 +195,20 @@ class ProyectoUpdate(UserAccessMixin, UpdateView):
     template_name = 'proyecto/proyecto_form.html'  # Indicar el template
     success_url = reverse_lazy('proyecto_listar')  # Redireccionar
 
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.object.estado != 'PEN':
+            return super().get(request, *args, **kwargs)
+        messages.error(request, "No se puede editar este proyecto")
+        return redirect('proyecto_gestion', slug=self.object.slug)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not self.object.estado != 'PEN':
+            return super().get(request, *args, **kwargs)
+        messages.error(request, "No se puede editar este proyecto")
+        return redirect('proyecto_gestion', slug=self.object.slug)
+
 
 class GestionProyectoView(UserAccessMixin, View):
     """
@@ -207,7 +221,8 @@ class GestionProyectoView(UserAccessMixin, View):
 
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
-        if not request.user.has_perms(('projectmanager.ver_proyecto',), proyecto):
+        if not request.user.has_perms(('projectmanager.ver_proyecto',), proyecto) and not request.user.groups.filter(
+                name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('/')
         context = {
@@ -243,41 +258,69 @@ class AgregarSMember(UserAccessMixin, UpdateView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if not request.user.has_perms(self.permission_required_obj):
-            if not request.user.has_perms(('projectmanager.ver_proyecto',), self.object):
-                messages.error(request, "No tienes permisos para eso")
-                return redirect('/')
+        if not request.user.has_perms(('projectmanager.gestionar_scrum_members',),
+                                      self.object) and not request.user.groups.filter(
+            name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('/')
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if not request.user.has_perms(self.permission_required_obj):
-            if not request.user.has_perms(('projectmanager.editar_proyecto',), self.object):
-                messages.error(request, "No tienes permisos para eso")
-                return redirect('/')
+        if not request.user.has_perms(('projectmanager.gestionar_scrum_members',),
+                                      self.object) and not request.user.groups.filter(
+            name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('/')
         return super().post(request, *args, **kwargs)
 
 
+# TO-DO: Quitar editar cuando se inicie el proyecto y habilitar sprint
 class ProyectoIniciarView(UserAccessMixin, View):
     """
         Vista basada en clase el sirve para iniciar un proyecto nuevo por parte del SM
     """
     raise_exception = False
     permission_required = ()
-    permission_required_obj = ('projectmanager.iniciar_proyecto',)
     permission_denied_message = "You don't have permissions"
     redirect_field_name = 'next'
 
-    def post(self, request, *args, **kwargs):
-        project = Proyecto.objects.get(scrum_master=request.user)
-        if not request.user.has_perms(self.permission_required_obj):
-            if not request.user.has_perms(self.permission_required_obj, project):
-                messages.error(request, "No tienes permisos para eso")
-                return redirect('/')
+    def get(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.iniciar_proyecto',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('/')
 
-        project.estado = 'ACT'
-        project.save()
-        return redirect(reverse_lazy('proyecto_listar'))
+        if proyecto.estado == 'PEN':
+            proyecto.estado = 'ACT'
+            proyecto.save()
+        else:
+            messages.error(request, "Proyecto no se puede cancelar")
+            return redirect('proyecto_gestion', slug=slug)
+        messages.success(request, "Proyecto Iniciado")
+        return redirect('proyecto_gestion', slug=proyecto.slug)
+
+
+class ProyectoCancelarView(UserAccessMixin, View):
+    """
+    Vista Basada en clase que sirve para cancelar un proyecto con estado pendiente
+    """
+    raise_exception = False
+    permission_required = ('projectmanager.cancelar_proyecto',)
+    permission_denied_message = "You don't have permissions"
+    redirect_field_name = 'next'
+
+    def get(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        if proyecto.estado == 'PEN':
+            proyecto.estado = 'CAN'
+            proyecto.save()
+        else:
+            messages.error(request, "Proyecto no se puede cancelar")
+            return redirect('proyecto_gestion', slug=slug)
+        messages.success(request, "Proyecto Cancelado")
+        return redirect('proyecto_listar')
 
 
 @login_required
@@ -462,7 +505,11 @@ class UserStoryCreate(View):
 
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
-        US = UserStory.objects.all()
+        if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=slug)
+        US = UserStory.objects.filter(proyecto=proyecto)
         form = ProyectoUs()
         context = {
             'form': form,
@@ -473,6 +520,10 @@ class UserStoryCreate(View):
 
     def post(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=slug)
         form = ProyectoUs(request.POST)
 
         if form.is_valid():
@@ -489,6 +540,10 @@ class UserStoryCreate(View):
 class UserStoryUpdate(View):
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=slug)
         US = UserStory.objects.all()
         US2 = UserStory.objects.get(pk=pk)
         form = ProyectoUs(initial={'nombre': US2.nombre,
@@ -503,6 +558,10 @@ class UserStoryUpdate(View):
 
     def post(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=slug)
         US2 = UserStory.objects.get(pk=pk)
         form = ProyectoUs(request.POST)
 
@@ -520,6 +579,11 @@ class UserStoryUpdate(View):
 
 class EliminarUs(View):
     def get(self, request, slug, pk, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=slug)
         US = UserStory.objects.get(pk=pk)
         US.delete()
         messages.success(request, "Rol Eliminado")
@@ -537,7 +601,8 @@ class CrearRolProyecto(UserAccessMixin, View):
 
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
-        if not request.user.has_perms(('projectmanager.ver_roles_proyecto',), proyecto):
+        if not request.user.has_perms(('projectmanager.gestionar_roles_proyecto',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('/')
         form = CrearRolProyectoForm(slug=slug)
@@ -549,7 +614,8 @@ class CrearRolProyecto(UserAccessMixin, View):
 
     def post(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
-        if not request.user.has_perms(('projectmanager.crear_roles_proyecto',), proyecto):
+        if not request.user.has_perms(('projectmanager.gestionar_roles_proyecto',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('proyecto_rol', slug=slug)
         form = CrearRolProyectoForm(request.POST, slug=slug)
@@ -583,7 +649,8 @@ class ModificarRolProyecto(UserAccessMixin, View):
 
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
-        if not request.user.has_perms(('projectmanager.modificar_roles_proyecto',), proyecto):
+        if not request.user.has_perms(('projectmanager.gestionar_roles_proyecto',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('proyecto_rol', slug=slug)
         rol = Rol.objects.get(pk=pk)
@@ -605,7 +672,8 @@ class ModificarRolProyecto(UserAccessMixin, View):
 
     def post(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
-        if not request.user.has_perms(('projectmanager.modificar_roles_proyecto',), proyecto):
+        if not request.user.has_perms(('projectmanager.gestionar_roles_proyecto',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('proyecto_rol', slug=slug)
         form = CrearRolProyectoForm(request.POST, slug=slug)
@@ -637,7 +705,8 @@ class EliminarRolProyecto(UserAccessMixin, View):
 
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
-        if not request.user.has_perms(('projectmanager.eliminar_roles_proyecto',), proyecto):
+        if not request.user.has_perms(('projectmanager.gestionar_roles_proyecto',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('proyecto_rol', slug=slug)
         rol = Rol.objects.get(pk=pk)
@@ -658,7 +727,8 @@ class ImportarRolProyecto(UserAccessMixin, View):
 
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
-        if not request.user.has_perms(('projectmanager.importar_roles_proyecto',), proyecto):
+        if not request.user.has_perms(('projectmanager.importar_roles_proyecto',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('proyecto_rol', slug=slug)
         roles = Rol.objects.filter(~Q(proyecto=proyecto) & ~Q(tipo='defecto'))
@@ -672,7 +742,8 @@ class ImportarRolProyecto(UserAccessMixin, View):
 
     def post(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
-        if not request.user.has_perms(('projectmanager.importar_roles_proyecto',), proyecto):
+        if not request.user.has_perms(('projectmanager.importar_roles_proyecto',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('proyecto_rol', slug=slug)
         form = ImportarRolProyectoForm(request.POST, slug=slug)

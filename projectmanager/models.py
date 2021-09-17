@@ -70,19 +70,12 @@ class Proyecto(models.Model):
                        ('editar_proyecto', 'Puede editar un proyecto'),
                        ('ver_proyecto', 'Puede ver un proyecto en detalle'),
                        ('ver_proyectos', 'Puede ver proyectos'),
-                       ('agregar_smember', 'Puede agregar nuevos Scrum Members'),
+                       ('cancelar_proyecto', 'Puede cancelar un proyecto en estado pendiente'),
+                       ('gestionar_scrum_members', 'Puede Agregar/Quitar Scrum Members de un proyecto'),
                        ('iniciar_proyecto', 'Puede iniciar proyecto'),
-                       ('crear_roles_proyecto', 'Puede Crear Roles de Proyecto'),
-                       ('ver_roles_proyecto', 'Puede ver roles de proyecto'),
-                       ('modificar_roles_proyecto', 'Puede Modificar Roles de Proyecto'),
-                       ('eliminar_roles_proyecto', 'Puede eliminar roles de proyecto'),
+                       ('gestionar_roles_proyecto', 'Puede Agregar/Asignar/Modificar/Eliminar Roles de un Proyecto'),
                        ('importar_roles_proyecto', 'Puede Importar roles de proyecto'),
-                       ('ver_user_stories', 'Puede ver user storys'),
-                       ('crear_user_stories', 'Puede crear users storys'),
-                       ('actualizar_user_stories', 'Puede actualizar users storys'),
-                       ('eliminar_user_stories', 'Puede ver users storys'),
-                       ('puede_asignar_user_stories', 'Asigna roles a usuarios'),
-                       ('puede_quitar_user_stories', 'Quita users storys de usuarios'))
+                       ('gestionar_user_stories', 'Puede Agregar/Modificar/Eliminar User Stories de un proyecto'),)
         default_permissions = ()
         ordering = ('-fecha_inicio',)
 
