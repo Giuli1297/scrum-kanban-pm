@@ -135,6 +135,21 @@ class Rol(models.Model):
             return self.related_group.name
 
 
+class Sprint(models.Model):
+    nombre = models.CharField(max_length=250, unique=True)
+    fecha_inicio = models.DateTimeField(null=True, blank=True)
+    duracion_estimada = models.IntegerField(null=True, blank=True)
+    fecha_finalización = models.DateTimeField(null=True, blank=True)
+    proyecto = models.ForeignKey(Proyecto, related_name="proyecto", on_delete=models.CASCADE, blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Sprint'
+        verbose_name_plural = 'Sprints'
+
+    def __str__(self):
+        return self.nombre
+
+
 class UserStory(models.Model):
     ESTADOS = (
         ('Nuevo', 'Nuevo'),
@@ -145,24 +160,18 @@ class UserStory(models.Model):
         ('QA', 'QA'),
         ('Release', 'Release')
     )
-    nombre = models.CharField(max_length=100, unique=True)
-    descripcion = models.TextField(max_length=255)
+    nombre = models.CharField(blank=True, max_length=100, unique=True)
+    descripcion = models.TextField(blank=True, max_length=255)
     tiempoEstimado = models.IntegerField(validators=[MinValueValidator(0)], default=0)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Nuevo')
     tiempoEnDesarrollo = models.IntegerField(validators=[MinValueValidator(0)], default=0)
     desarrolladorAsignado = models.ForeignKey(User, related_name='desarrollador_asignado', null=True,
                                               on_delete=models.CASCADE)
     proyecto = models.ForeignKey(Proyecto, related_name='product_backlog', null=True, on_delete=models.CASCADE)
+    sprint = models.ForeignKey(Sprint, related_name='Sprint', null=True, blank=True, on_delete=models.SET_NULL)
 
     class Meta:
-        permissions = ()
-        default_permissions = ()
         verbose_name_plural = 'Users Storys'
-
-        ordering = ('id',)
-
-        def __unicode__(self):
-            return self.nombre
 
 
 class UserInfo(models.Model):
