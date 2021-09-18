@@ -20,6 +20,7 @@ def add_perm_to_group(name, permission):
     else:
         group = Group.objects.create(name=name)
         Rol.objects.create(related_group=group, tipo='sistema')
+
     group.permissions.add(Permission.objects.get(codename=permission))
     group.save()
     return group
@@ -30,7 +31,10 @@ def add_obj_perm_to_group(name, permission, instance):
         group = Group.objects.get(name=name)
     else:
         group = Group.objects.create(name=name)
-        rol = Rol.objects.create(related_group=group, tipo='proyecto', proyecto=instance)
+        if 'scrum_master' in group.name or 'scrum_member' in group.name:
+            rol = Rol.objects.create(related_group=group, tipo='defecto', proyecto=instance)
+        else:
+            rol = Rol.objects.create(related_group=group, tipo='proyecto', proyecto=instance)
         rol.save()
     assign_perm(permission, group, instance)
     group.save()

@@ -23,20 +23,12 @@
 	<tbody>
 		{% if object_list %}
 		{% for proyecto in object_list %}
-            <tr onclick="document.location = '{% url 'proyecto_editar_sm' proyecto.slug %}';">
+            <tr onclick="document.location = '{% url 'proyecto_gestion' proyecto.slug %}';">
                 <th scope="row">{{ forloop.counter }}</th>
                 <td>{{ proyecto.nombre }}</td>
                 <td>{{ proyecto.estado }}</td>
                 <td>{{ proyecto.fecha_inicio }}</td>
                 <td>{{ proyecto.scrum_master }}</td>
-                <td>
-                {% if proyecto.estado != 'Cancelado' and request.user|has_group:"Administrador" %}
-                    {% if proyecto.estado != 'Finalizado' %}
-                        <a class="btn btn-primary" href="{% url 'proyecto_editar' proyecto.slug %}">Modificar</a>
-                    {% endif %}
-                {% endif%}
-
-                </td>
             </tr>
 		{% endfor %}
 		{% else %}
