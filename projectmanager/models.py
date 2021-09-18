@@ -3,7 +3,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.template.defaultfilters import slugify
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator,MaxValueValidator
 from guardian.shortcuts import assign_perm
 from django.contrib.auth.models import Permission
 
@@ -176,7 +176,7 @@ class UserStory(models.Model):
     desarrolladorAsignado=models.ForeignKey(User,related_name='desarrollador_asignado',null=True, on_delete=models.CASCADE)
     proyecto=models.ForeignKey(Proyecto,related_name='product_backlog',null=True,on_delete=models.CASCADE)
     sprint=models.ForeignKey(Sprint,related_name='sprint_backlog',null=True,blank=True,on_delete=models.SET_NULL)
-    prioridad=models.IntegerField(validators=[MinValueValidator(1)],default=1)
+    prioridad=models.IntegerField(validators=[MinValueValidator(1),MaxValueValidator(10) ], default=1)
     class Meta:
         verbose_name='User Story'
         verbose_name_plural = 'Users Storys'
