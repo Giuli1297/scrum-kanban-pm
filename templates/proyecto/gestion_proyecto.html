@@ -87,7 +87,7 @@
                 <tr>
                   <th scope="col">Descripcion</th>
                   <th scope="col">Estado</th>
-                    {% if proyecto.estado == 'ACT' %}
+                    {% if proyecto.estado == 'ACT' and proyecto.sprint_actual.estado == 'conf1' %}
                         <th scope="col">Agregar a Sprint Backlog</th>
                     {% endif %}
                 </tr>
@@ -98,13 +98,13 @@
                         <tr>
                           <td>{{ ustory.descripcion }}</td>
                           <td>{{ ustory.estado }}</td>
-                        {% if proyecto.estado == 'ACT' %}
-                            <th scope="col">
+                        {% if proyecto.estado == 'ACT' and proyecto.sprint_actual.estado == 'conf1' %}
+                            <td>
                                 <a class="btn btn-success"
                                    href="{% url 'cargar_sprint_backlog' usPk=ustory.pk sprintPk=proyecto.sprint_actual.pk %}">
                                     <h4>+</h4>
                                 </a>
-                            </th>
+                            </td>
                         {% endif %}
                         </tr>
                     {% endif %}

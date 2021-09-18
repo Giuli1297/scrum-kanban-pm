@@ -278,8 +278,8 @@ class AsignarYEstimarUserStoryForm(forms.Form):
             'class': 'check-label'
         }))
 
-    horas_estimadas = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    horas_estimadas = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
 
 
 class PlanningPokerSMemberForm(forms.Form):
-    horas_estimadas = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    horas_estimadas = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
