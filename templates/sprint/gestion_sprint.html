@@ -69,10 +69,12 @@
               </tbody>
             </table>
             <div style="margin-block: 10px;">
-                {% if 'iniciar_ppoker_proyecto' in proyecto_perms or request.user|has_group:'Administrador' and proyecto.sprint_actual.estado == 'conf1' %}
-                    <a class="btn btn-dark btn-flotante align-center" href="{% url 'planning_poker_smaster' slug=proyecto.slug %}" >
-                        Realizar Planning Poker
-                    </a>
+                {% if 'iniciar_ppoker_proyecto' in proyecto_perms or request.user|has_group:'Administrador' %}
+                    {% if proyecto.sprint_actual.estado == 'conf1' %}
+                        <a class="btn btn-dark btn-flotante align-center" href="{% url 'planning_poker_smaster' slug=proyecto.slug %}" >
+                            Realizar Planning Poker
+                        </a>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>
