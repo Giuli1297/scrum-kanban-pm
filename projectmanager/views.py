@@ -497,7 +497,7 @@ class UserStoryCreate(View):
     '''
 
     Vista para crear y listar User Storys
-    US:obtiene todos los USER STORYS en el metodo get y lisata los USER STORYS
+    US:obtiene todos los USER STORYS en el metodo get y lista los USER STORYS
     En el metodo post se obtiene el proyecto en el que se está trabajando y se crea una
     instancia de USER STORY y se le asigna los datos correspondientes del form y tambien el proyecto
     al cual pertenece
@@ -528,18 +528,28 @@ class UserStoryCreate(View):
         form = ProyectoUs(request.POST)
 
         if form.is_valid():
-            descripcion = form.cleaned_data['descripcion']
-            prioridad=form.cleaned_data['prioridad']
-
-            US=UserStory.objects.create(descripcion=descripcion,proyecto=proyecto,prioridad=prioridad)
-            US.save()
-            messages.success(request, "User Story Creado Correctamente!")
+            descripcion = form.cleaned_data['descripción_de_user_story']
+            prioridad=form.cleaned_data['prioridad_1_al_10']
+            if prioridad>0 and prioridad <11:
+                US=UserStory.objects.create(descripcion=descripcion,proyecto=proyecto,prioridad=prioridad)
+                US.save()
+                messages.success(request, "User Story Creado Correctamente!")
+            else:
+                messages.error(request, "Prioridad invalida, fuera del rango 1 al 10")
         else:
             messages.error(request, "Un Error a ocurrido")
         return redirect('create_us', slug=slug)
 
 
 class UserStoryUpdate(View):
+    '''
+
+        Vista para actualizar los datos de descripcion y prioridad de un User Story
+        US:obtiene el user story con metodo get y su pk
+        En el metodo post se obtiene el objeto del User Story actual y se actualiza
+        con los nuevos datos de entrada
+
+        '''
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
@@ -548,8 +558,8 @@ class UserStoryUpdate(View):
             return redirect('proyecto_gestion', slug=slug)
         US2 = UserStory.objects.get(pk=pk)
         form = ProyectoUs(initial={
-                                   'descripcion': US2.descripcion,
-                                    'prioridad':US2.prioridad
+                                   'descripción_de_user_story': US2.descripcion,
+                                    'prioridad_1_al_10':US2.prioridad
                                    })
         context = {
             'form': form,
@@ -568,18 +578,28 @@ class UserStoryUpdate(View):
         form = ProyectoUs(request.POST)
 
         if form.is_valid():
-            descripcion = form.cleaned_data['descripcion']
-            prioridad=form.cleaned_data['prioridad']
-            US2.descripcion = descripcion
-            US2.prioridad=prioridad
-            US2.save()
-            messages.success(request, "User Story se actualizó Correctamente!")
+            descripcion = form.cleaned_data['descripción_de_user_story']
+            prioridad=form.cleaned_data['prioridad_1_al_10']
+            if prioridad > 0 and prioridad < 11:
+                US2.descripcion = descripcion
+                US2.prioridad=prioridad
+                US2.save()
+                messages.success(request, "User Story se actualizó Correctamente!")
+            else:
+                messages.error(request, "Prioridad invalida, fuera del rango 1 al 10")
+
         else:
             messages.error(request, "Un Error a ocurrido")
         return redirect('create_us', slug=slug)
 
 
 class EliminarUs(View):
+    '''
+
+        Clase para eliminar un user story
+        Se obtiene el objeto por su pk y se hace un delete
+
+    '''
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.gestionar_user_stories',),

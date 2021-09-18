@@ -1,5 +1,5 @@
 from django import forms
-
+from django.db import models
 from projectmanager.models import *
 from django.contrib.auth.models import User
 from django.contrib.auth.models import User, Group, Permission
@@ -190,10 +190,10 @@ class CrearRolProyectoForm(forms.Form):
 
 
 class ProyectoUs(forms.Form):
-    descripcion = forms.CharField(max_length=100, widget=forms.Textarea(attrs={
+    descripción_de_user_story = forms.CharField(max_length=100, widget=forms.Textarea(attrs={
         'class': 'form-control'
     }))
-    prioridad=forms.IntegerField(widget=forms.NumberInput(attrs={
+    prioridad_1_al_10=forms.IntegerField(widget=forms.NumberInput(attrs={
         'class': 'form-control'
     }))
 

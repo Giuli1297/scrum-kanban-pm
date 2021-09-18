@@ -69,7 +69,6 @@ right: 20px;
                 <table class="table" id="data">
                     {% for list in US.all %}
                         <tr>
-                            <td>{{ list.nombre }}</td>
                             <td>{{ list.descripcion }}</td>
                           <td> <a class="btn btn-primary btn-warning " href="{% url 'update_us'  slug=proyecto.slug pk=list.pk %}" >Editar</a></td>
                             <td> <a class="btn btn-danger btn-flat" href="{% url 'elimnar_us' slug=proyecto.slug pk=list.pk %}" >Eliminar</a></td>

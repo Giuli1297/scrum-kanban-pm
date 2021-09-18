@@ -158,7 +158,14 @@ class Sprint(models.Model):
     class Meta:
         verbose_name = 'Sprint'
         verbose_name_plural = 'Sprints'
-
+class IntegerRangeField(models.IntegerField):
+    def __init__(self, verbose_name=None, name=None, min_value=None, max_value=None, **kwargs):
+        self.min_value, self.max_value = min_value, max_value
+        models.IntegerField.__init__(self, verbose_name, name, **kwargs)
+    def formfield(self, **kwargs):
+        defaults = {'min_value': self.min_value, 'max_value':self.max_value}
+        defaults.update(kwargs)
+        return super(IntegerRangeField, self).formfield(**defaults)
 class UserStory(models.Model):
     ESTADOS = (
         ('Nuevo', 'Nuevo'),
@@ -176,7 +183,7 @@ class UserStory(models.Model):
     desarrolladorAsignado=models.ForeignKey(User,related_name='desarrollador_asignado',null=True, on_delete=models.CASCADE)
     proyecto=models.ForeignKey(Proyecto,related_name='product_backlog',null=True,on_delete=models.CASCADE)
     sprint=models.ForeignKey(Sprint,related_name='sprint_backlog',null=True,blank=True,on_delete=models.SET_NULL)
-    prioridad=models.IntegerField(validators=[MinValueValidator(1),MaxValueValidator(10) ], default=1)
+    prioridad=models.IntegerField(default=1)
     class Meta:
         verbose_name='User Story'
         verbose_name_plural = 'Users Storys'
@@ -191,3 +198,5 @@ class UserInfo(models.Model):
     """
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='info', primary_key=True)
     horasDisponibles = models.PositiveIntegerField(default=40)
+
+
