@@ -263,3 +263,23 @@ class AsignarDesarrolladorUs(forms.Form):
         widget=forms.Select(attrs={
             'class': 'check-label'
         }))
+
+
+class AsignarYEstimarUserStoryForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.usPk = kwargs.pop('usPk')
+        super(AsignarYEstimarUserStoryForm, self).__init__(*args, **kwargs)
+        self.ustory = UserStory.objects.get(pk=self.usPk)
+        self.fields['scrum_member_asignado'].queryset = User.objects.filter(proyecto_asignado=self.ustory.proyecto)
+
+    scrum_member_asignado = forms.ModelChoiceField(
+        queryset=None,
+        widget=forms.Select(attrs={
+            'class': 'check-label'
+        }))
+
+    horas_estimadas = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
+
+
+class PlanningPokerSMemberForm(forms.Form):
+    horas_estimadas = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control'}))

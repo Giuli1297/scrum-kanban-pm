@@ -15,8 +15,9 @@ from django.views.generic import (
     TemplateView,
     DetailView
 )
-
+from scrum_kanban_pm.settings.development import EMAIL_HOST_USER
 from projectmanager.forms import *
+from django.core.mail import EmailMessage
 from .forms import UserForm, RolForm, UserFormDelete
 from django.shortcuts import render, redirect
 from django.views import View
@@ -28,11 +29,14 @@ from django.utils.http import urlsafe_base64_decode
 from .utils import account_activation_token, add_user_to_obj_group, add_perm_to_group, add_obj_perm_to_group, \
     add_users_to_obj_group, remove_all_perms_from_obj_group, remove_all_users_from_obj_group
 from guardian.shortcuts import get_perms
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 # Create your views here.
 from projectmanager.models import *
 
 from django.http import JsonResponse
 from django.urls import reverse_lazy
+from django.contrib.sites.shortcuts import get_current_site
 
 
 class UserAccessMixin(PermissionRequiredMixin):
@@ -896,6 +900,103 @@ class QuitarUSFromSprintBacklog(View):
     def get(self, request, usPk, *args, **kwargs):
         ustory = UserStory.objects.get(pk=usPk)
         ustory.sprint = None
+        ustory.desarrolladorAsignado = None
+        ustory.tiempoEstimado = 0
         ustory.save()
         messages.success(request, 'User Story removido del SprintBacklog')
         return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
+
+
+class AsignarYEstimarUserStoryView(View):
+    def get(self, request, usPk, *args, **kwargs):
+        ustory = UserStory.objects.get(pk=usPk)
+        form = AsignarYEstimarUserStoryForm(usPk=usPk, initial={
+            'horas_estimadas': ustory.tiempoEstimado,
+            'scrum_member_asignado': ustory.desarrolladorAsignado
+        })
+        context = {
+            'ustory': ustory,
+            'form': form
+        }
+        return render(request, 'sprint/estimar_us_sm.html', context)
+
+    def post(self, request, usPk, *args, **kwargs):
+        ustory = UserStory.objects.get(pk=usPk)
+        form = AsignarYEstimarUserStoryForm(request.POST, usPk=usPk)
+        if form.is_valid():
+            horasEstimadas = form.cleaned_data['horas_estimadas']
+            sm_asignado = form.cleaned_data['scrum_member_asignado']
+            ustory.desarrolladorAsignado = sm_asignado
+            ustory.tiempoEstimado = horasEstimadas
+            ustory.save()
+        else:
+            messages.error(request, "Un error a ocurrido")
+            return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
+        messages.success(request, "Se ha asignado y estimado el User Story")
+        return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
+
+
+class PlanningPokerView(View):
+    def get(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        for us in proyecto.sprint_actual.sprint_backlog.all():
+            if not us.desarrolladorAsignado != None:
+                messages.error(request, "Debes asignar todos los User Stories")
+                return redirect('proyecto_gestion', slug=slug)
+        for us in proyecto.sprint_actual.sprint_backlog.all():
+            current_site = get_current_site(request)
+            email_body = {
+                'user': us.desarrolladorAsignado,
+                'domain': current_site.domain,
+                'uid': urlsafe_base64_encode(force_bytes(us.desarrolladorAsignado.pk)),
+                'token': account_activation_token.make_token(us.desarrolladorAsignado),
+                'usPk': us.pk
+            }
+
+            link = reverse('planning_poker_smember', kwargs={
+                'uidb64': email_body['uid'], 'token': email_body['token'], 'usPk': email_body['usPk']})
+
+            email_subject = 'Planning Poker User Storie: ' + us.descripcion
+
+            activate_url = 'http://' + current_site.domain + link
+
+            email = EmailMessage(
+                email_subject,
+                'Realize su estimacions del user story: ' + activate_url,
+                EMAIL_HOST_USER,
+                [us.desarrolladorAsignado.email],
+            )
+            email.send(fail_silently=False)
+        return redirect('proyecto_gestion', slug=proyecto.slug)
+
+
+class PlanningPokerSMemberView(View):
+    def get(self, request, uidb64, token, usPk, *args, **kwargs):
+        try:
+            id = force_text(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=id)
+
+            if not account_activation_token.check_token(user, token):
+                messages.error(request, "Toke incorrecto")
+                return redirect('home')
+
+            ustory = UserStory.objects.get(pk=usPk)
+            form = PlanningPokerSMemberForm()
+            context = {
+                'user_story': ustory,
+                'form': form
+            }
+            return render(request, 'sprint/planning_poker_scrummember.html', context)
+        except Exception as ex:
+            messages.error(request, "Error de Token")
+            return redirect('home')
+
+    def post(self, request, usPk, *args, **kwargs):
+        user_story = UserStory.objects.get(pk=usPk)
+        form = PlanningPokerSMemberForm(request.POST)
+        if form.is_valid():
+            horas_estimadas_smember = int(form.cleaned_data['horas_estimadas'])
+            horas_estimadas_smaster = int(user_story.tiempoEstimado)
+            user_story.tiempoEstimado = int((horas_estimadas_smaster + horas_estimadas_smember) / 2)
+            user_story.save()
+        return redirect('proyecto_gestion', slug=user_story.proyecto.slug)

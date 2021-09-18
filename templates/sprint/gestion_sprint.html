@@ -23,12 +23,26 @@
                 {% for user_story in proyecto.sprint_actual.sprint_backlog.all %}
                     <tr>
                         <th scope="row">{{ user_story.descripcion }}</th>
-                        <td>Boton Asignar</td>
                         <td>
-                            <a class="btn btn-danger"
-                               href="{% url 'quitar_us_de_sbacklog' usPk=user_story.pk %}">
-                                <h4>-</h4>
-                            </a>
+                            {% if user_story.desarrolladorAsignado == null %}
+                                <a class="btn btn-dark"
+                                   href="{% url 'asignar_estimar_user_story' usPk=user_story.pk %}">
+                                    Asignar/Estimar
+                                </a>
+                            {% else %}
+                                Ya esta Asignado y Estimado
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user_story.sprint.estado == 'conf1' %}
+                                <a class="btn btn-danger"
+                                   href="{% url 'quitar_us_de_sbacklog' usPk=user_story.pk %}">
+                                    <h4>-</h4>
+                                </a>
+                            {% else %}
+                                -
+                            {% endif %}
+
                         </td>
                     </tr>
                 {% empty %}
@@ -40,7 +54,7 @@
             </table>
             <div style="margin-block: 10px;">
                 {% if 'gestionar_roles_proyecto' in proyecto_perms or request.user|has_group:'Administrador' %}
-                    <a class="btn btn-dark btn-flotante align-center" href="{% url 'proyecto_rol' proyecto.slug %}" >
+                    <a class="btn btn-dark btn-flotante align-center" href="{% url 'planning_poker_smaster' slug=proyecto.slug %}" >
                         Realizar Planning Poker
                     </a>
                 {% endif %}

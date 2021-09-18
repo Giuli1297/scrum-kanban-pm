@@ -49,4 +49,9 @@ urlpatterns = [
          name='cargar_sprint_backlog'),
     path('proyectos/quitarUSFromSprintBacklog/<int:usPk>/', views.QuitarUSFromSprintBacklog.as_view(),
          name='quitar_us_de_sbacklog'),
+    path('proyectos/asignarYEstimarUS/<int:usPk>/', views.AsignarYEstimarUserStoryView.as_view(),
+         name='asignar_estimar_user_story'),
+    path('planningPoker/<slug:slug>/', views.PlanningPokerView.as_view(), name='planning_poker_smaster'),
+    path('planningPoker/<uidb64>/<token>/<int:usPk>/', views.PlanningPokerSMemberView.as_view(),
+         name='planning_poker_smember'),
 ]
