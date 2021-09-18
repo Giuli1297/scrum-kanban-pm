@@ -61,8 +61,6 @@ class Proyecto(models.Model):
     estado = models.CharField(max_length=3, choices=ESTADOS, default='PEN')
     scrum_master = models.ForeignKey(User, related_name='proyecto_encargado', on_delete=models.CASCADE)
     scrum_member = models.ManyToManyField(User, related_name='proyecto_asignado', blank=True)
-    # Cambiar luego a manytomany de sprints
-    sprintList = models.TextField(blank=True)
 
     class Meta:
         verbose_name = 'Proyectos'
@@ -73,6 +71,7 @@ class Proyecto(models.Model):
                        ('cancelar_proyecto', 'Puede cancelar un proyecto en estado pendiente'),
                        ('gestionar_scrum_members', 'Puede Agregar/Quitar Scrum Members de un proyecto'),
                        ('iniciar_proyecto', 'Puede iniciar proyecto'),
+
 
                        ('crear_roles_proyecto', 'Puede Crear Roles de Proyecto'),
                        ('ver_roles_proyecto', 'Puede ver roles de proyecto'),
@@ -87,6 +86,7 @@ class Proyecto(models.Model):
                        ('gestionar_roles_proyecto', 'Puede Agregar/Asignar/Modificar/Eliminar Roles de un Proyecto'),
                        ('importar_roles_proyecto', 'Puede Importar roles de proyecto'),
                        ('gestionar_user_stories', 'Puede Agregar/Modificar/Eliminar User Stories de un proyecto'),)
+
 
         default_permissions = ()
         ordering = ('-fecha_inicio',)
@@ -138,9 +138,6 @@ class Rol(models.Model):
         default_permissions = ()
         verbose_name_plural = 'Roles'
 
-    def __unicode__(self):
-        return self.name
-
     def __str__(self):
         if self.proyecto:
             if self.descripcion:
@@ -152,18 +149,15 @@ class Rol(models.Model):
 
 
 class Sprint(models.Model):
-    nombre=models.CharField(max_length=250)
-    fecha_inicio=models.DateTimeField(null=True,blank=True)
-    duracion_estimada=models.IntegerField(null=True,blank=True)
-    fecha_finalización=models.DateTimeField(null=True,blank=True)
-    proyecto = models.ForeignKey(Proyecto, related_name="proyecto", on_delete=models.CASCADE, blank=True, null=True)
+    fecha_inicio = models.DateTimeField(null=True, blank=True)
+    duracion_estimada = models.IntegerField(null=True, blank=True)
+    fecha_finalizacion = models.DateTimeField(null=True, blank=True)
+    proyecto = models.ForeignKey(Proyecto, related_name="registro_sprints", on_delete=models.CASCADE)
+    proyecto_actual = models.OneToOneField(Proyecto, related_name="sprint_actual", blank=True, null=True,
+                                           on_delete=models.CASCADE)
     class Meta:
-        verbose_name='Sprint'
+        verbose_name = 'Sprint'
         verbose_name_plural = 'Sprints'
-
-    def __str__(self):
-        return self.nombre
-
 
 class UserStory(models.Model):
     ESTADOS = (
@@ -175,22 +169,25 @@ class UserStory(models.Model):
         ('QA', 'QA'),
         ('Release', 'Release')
     )
-
-    nombre=models.CharField(blank=True,max_length=100)
     descripcion=models.TextField(blank=True,max_length=255)
     tiempoEstimado=models.IntegerField(validators=[MinValueValidator(0)],default=0)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Nuevo')
     tiempoEnDesarrollo=models.IntegerField(validators=[MinValueValidator(0)],default=0)
     desarrolladorAsignado=models.ForeignKey(User,related_name='desarrollador_asignado',null=True, on_delete=models.CASCADE)
     proyecto=models.ForeignKey(Proyecto,related_name='product_backlog',null=True,on_delete=models.CASCADE)
-    sprint=models.ForeignKey(Sprint,related_name='Sprint',null=True,blank=True,on_delete=models.SET_NULL)
+    sprint=models.ForeignKey(Sprint,related_name='sprint_backlog',null=True,blank=True,on_delete=models.SET_NULL)
+    prioridad=models.IntegerField(validators=[MinValueValidator(1)],default=1)
     class Meta:
         verbose_name='User Story'
         verbose_name_plural = 'Users Storys'
+        ordering=['-prioridad']
     def __str__(self):
-        return self.nombre
+        return self.descripcion
 
 
-
-
-
+class UserInfo(models.Model):
+    """
+    Modelo que guarda informacion util sobre cada usuario del sistema
+    """
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='info', primary_key=True)
+    horasDisponibles = models.PositiveIntegerField(default=40)

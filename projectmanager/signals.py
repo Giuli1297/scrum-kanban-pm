@@ -10,7 +10,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_encode
 from .utils import account_activation_token
 from django.urls import reverse
-from .models import Proyecto
+from .models import Proyecto, UserInfo
 from .utils import add_obj_perm_to_group, add_user_to_obj_group, add_perm_to_group, remove_all_users_from_obj_group, \
     add_users_to_obj_group
 
@@ -20,6 +20,7 @@ def send_email_to_admin(request, user, **kwargs):
     admin = User.objects.get(groups__name='Administrador')
     user.is_active = False
     user.save()
+    UserInfo.objects.create(usuario=user)
     current_site = get_current_site(request)
     email_body = {
         'user': user,

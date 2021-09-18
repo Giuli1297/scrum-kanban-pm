@@ -11,3 +11,4 @@ admin.site.register(Rol)
 admin.site.register(Sprint)
 
 
+admin.site.register(UserInfo)

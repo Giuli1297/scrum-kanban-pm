@@ -190,10 +190,10 @@ class CrearRolProyectoForm(forms.Form):
 
 
 class ProyectoUs(forms.Form):
-    nombre = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
+    descripcion = forms.CharField(max_length=100, widget=forms.Textarea(attrs={
         'class': 'form-control'
     }))
-    descripcion = forms.CharField(max_length=100, widget=forms.Textarea(attrs={
+    prioridad=forms.IntegerField(widget=forms.NumberInput(attrs={
         'class': 'form-control'
     }))
 
@@ -210,6 +210,7 @@ class ImportarRolProyectoForm(forms.Form):
 
     roles = forms.ModelMultipleChoiceField(queryset=None,
                                            widget=forms.CheckboxSelectMultiple(attrs={'class': 'check-label'}))
+
 
 class SprintFormCreate(forms.Form):
     def __init__(self, *args, **kwargs):
@@ -234,7 +235,7 @@ class SprintFormCreate(forms.Form):
 class SprintFormUpdate(forms.Form):
     def __init__(self, *args, **kwargs):
         self.slug = kwargs.pop('slug')
-        super(SprintFormCreate, self).__init__(*args, **kwargs)
+        super(SprintFormUpdate, self).__init__(*args, **kwargs)
         self.proyecto = Proyecto.objects.get(slug=self.slug)
         self.fields['UserStorys'].queryset = UserStory.objects.filter(proyecto=self.proyecto)
 
