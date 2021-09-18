@@ -28,7 +28,7 @@
             <div class="col-md-4">
             {% if proyecto.estado != 'CAN' and proyecto.estado != 'FIN' %}
                 {% if "gestionar_scrum_members" in proyecto_perms or request.user|has_group:'Administrador' %}
-                    <a class="btn btn-dark" href="{% url 'proyecto_agregar_sm' proyecto.slug %}">Editar</a>
+                    <a class="btn btn-dark" href="{% url 'proyecto_agregar_sm' proyecto.slug %}">Agregar/Quitar</a>
                 {% endif %}
             {% endif %}
             </div>
@@ -85,18 +85,29 @@
             <table class="table mb-2">
               <thead>
                 <tr>
-                  <th scope="col">Nombre</th>
                   <th scope="col">Descripcion</th>
                   <th scope="col">Estado</th>
+                    {% if proyecto.estado == 'ACT' %}
+                        <th scope="col">Agregar a Sprint Backlog</th>
+                    {% endif %}
                 </tr>
               </thead>
               <tbody>
                 {% for ustory in proyecto.product_backlog.all %}
-                    <tr>
-                      <th scope="row">{{ ustory.nombre }}</th>
-                      <td>{{ ustory.descripcion }}</td>
-                      <td>{{ ustory.estado }}</td>
-                    </tr>
+                    {% if not ustory.sprint != null %}
+                        <tr>
+                          <td>{{ ustory.descripcion }}</td>
+                          <td>{{ ustory.estado }}</td>
+                        {% if proyecto.estado == 'ACT' %}
+                            <th scope="col">
+                                <a class="btn btn-success"
+                                   href="{% url 'cargar_sprint_backlog' usPk=ustory.pk sprintPk=proyecto.sprint_actual.pk %}">
+                                    <h4>+</h4>
+                                </a>
+                            </th>
+                        {% endif %}
+                        </tr>
+                    {% endif %}
                 {% empty %}
                     <div class="mb-2">
                         <p>No tienes UserStories, agregalos!</p>
@@ -110,8 +121,8 @@
 {% if proyecto.estado == 'PEN' %}
     <div class="row m-2">
         <div class="col-md-2">
-            {% if proyecto.estado != 'Cancelado' and request.user|has_group:"Administrador" %}
-                {% if proyecto.estado != 'Finalizado' %}
+            {% if proyecto.estado != 'CAN' and request.user|has_group:"Administrador" %}
+                {% if proyecto.estado != 'FIN' %}
                     <a class="btn btn-dark m-1" href="{% url 'proyecto_editar' proyecto.slug %}">Editar Proyecto</a>
                 {% endif %}
             {% endif%}
@@ -123,5 +134,8 @@
             {% endif %}
         </div>
     </div>
+{% endif %}
+{% if proyecto.estado == 'ACT' %}
+    {% include 'sprint/gestion_sprint.html' %}
 {% endif %}
 {% endblock %}

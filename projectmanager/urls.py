@@ -45,4 +45,8 @@ urlpatterns = [
     path('proyectos/<slug:slug>/listarSprintBacklog/<int:pk>/', views.listaUsSprintBacklog.as_view(),
          name='sprint_backlog'),
     path('proyectos/<slug:slug>/configurarUS/<int:pk>/', views.UserStoryUpdateSprint.as_view(), name='configurar_us'),
+    path('proyectos/cargarSprintBacklog/<int:usPk>/<int:sprintPk>/', views.CargarSprintBacklog.as_view(),
+         name='cargar_sprint_backlog'),
+    path('proyectos/quitarUSFromSprintBacklog/<int:usPk>/', views.QuitarUSFromSprintBacklog.as_view(),
+         name='quitar_us_de_sbacklog'),
 ]

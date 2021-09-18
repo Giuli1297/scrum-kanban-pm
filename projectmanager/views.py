@@ -294,9 +294,10 @@ class ProyectoIniciarView(UserAccessMixin, View):
 
         if proyecto.estado == 'PEN':
             proyecto.estado = 'ACT'
+            sprint = Sprint.objects.create(proyecto=proyecto, proyecto_actual=proyecto)
             proyecto.save()
         else:
-            messages.error(request, "Proyecto no se puede cancelar")
+            messages.error(request, "Proyecto no se puede iniciar")
             return redirect('proyecto_gestion', slug=slug)
         messages.success(request, "Proyecto Iniciado")
         return redirect('proyecto_gestion', slug=proyecto.slug)
@@ -879,3 +880,22 @@ class UserStoryUpdateSprint(View):
         else:
             messages.error(request, "Un Error a ocurrido")
         return redirect('sprint_backlog', slug=slug, pk=US2.sprint.pk)
+
+
+class CargarSprintBacklog(View):
+    def get(self, request, usPk, sprintPk, *args, **kwargs):
+        sprint = Sprint.objects.get(pk=sprintPk)
+        ustory = UserStory.objects.get(pk=usPk)
+        ustory.sprint = sprint
+        ustory.save()
+        messages.success(request, 'User Story agregado al SprintBacklog')
+        return redirect('proyecto_gestion', slug=sprint.proyecto_actual.slug)
+
+
+class QuitarUSFromSprintBacklog(View):
+    def get(self, request, usPk, *args, **kwargs):
+        ustory = UserStory.objects.get(pk=usPk)
+        ustory.sprint = None
+        ustory.save()
+        messages.success(request, 'User Story removido del SprintBacklog')
+        return redirect('proyecto_gestion', slug=ustory.proyecto.slug)

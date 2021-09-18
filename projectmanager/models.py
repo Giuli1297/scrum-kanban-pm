@@ -61,8 +61,6 @@ class Proyecto(models.Model):
     estado = models.CharField(max_length=3, choices=ESTADOS, default='PEN')
     scrum_master = models.ForeignKey(User, related_name='proyecto_encargado', on_delete=models.CASCADE)
     scrum_member = models.ManyToManyField(User, related_name='proyecto_asignado', blank=True)
-    # Cambiar luego a manytomany de sprints
-    sprintList = models.TextField(blank=True)
 
     class Meta:
         verbose_name = 'Proyectos'
@@ -136,18 +134,16 @@ class Rol(models.Model):
 
 
 class Sprint(models.Model):
-    nombre = models.CharField(max_length=250, unique=True)
     fecha_inicio = models.DateTimeField(null=True, blank=True)
     duracion_estimada = models.IntegerField(null=True, blank=True)
-    fecha_finalización = models.DateTimeField(null=True, blank=True)
-    proyecto = models.ForeignKey(Proyecto, related_name="proyecto", on_delete=models.CASCADE, blank=True, null=True)
+    fecha_finalizacion = models.DateTimeField(null=True, blank=True)
+    proyecto = models.ForeignKey(Proyecto, related_name="registro_sprints", on_delete=models.CASCADE)
+    proyecto_actual = models.OneToOneField(Proyecto, related_name="sprint_actual", blank=True, null=True,
+                                           on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Sprint'
         verbose_name_plural = 'Sprints'
-
-    def __str__(self):
-        return self.nombre
 
 
 class UserStory(models.Model):
@@ -165,10 +161,10 @@ class UserStory(models.Model):
     tiempoEstimado = models.IntegerField(validators=[MinValueValidator(0)], default=0)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Nuevo')
     tiempoEnDesarrollo = models.IntegerField(validators=[MinValueValidator(0)], default=0)
-    desarrolladorAsignado = models.ForeignKey(User, related_name='desarrollador_asignado', null=True,
+    desarrolladorAsignado = models.ForeignKey(User, related_name='desarrollador_asignado', null=True, blank=True,
                                               on_delete=models.CASCADE)
     proyecto = models.ForeignKey(Proyecto, related_name='product_backlog', null=True, on_delete=models.CASCADE)
-    sprint = models.ForeignKey(Sprint, related_name='Sprint', null=True, blank=True, on_delete=models.SET_NULL)
+    sprint = models.ForeignKey(Sprint, related_name='sprint_backlog', null=True, blank=True, on_delete=models.SET_NULL)
 
     class Meta:
         verbose_name_plural = 'Users Storys'
