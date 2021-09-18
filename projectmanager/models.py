@@ -73,7 +73,8 @@ class Proyecto(models.Model):
                        ('iniciar_proyecto', 'Puede iniciar proyecto'),
                        ('gestionar_roles_proyecto', 'Puede Agregar/Asignar/Modificar/Eliminar Roles de un Proyecto'),
                        ('importar_roles_proyecto', 'Puede Importar roles de proyecto'),
-                       ('gestionar_user_stories', 'Puede Agregar/Modificar/Eliminar User Stories de un proyecto'),)
+                       ('gestionar_user_stories', 'Puede Agregar/Modificar/Eliminar User Stories de un proyecto'),
+                       ('iniciar_ppoker_proyecto', 'Puede iniciar planning poker de un sprint'),)
         default_permissions = ()
         ordering = ('-fecha_inicio',)
 
@@ -141,7 +142,7 @@ class Sprint(models.Model):
         ('en_desarrollo', 'Sprint en desarrollo'),
     )
     fecha_inicio = models.DateTimeField(null=True, blank=True)
-    duracion_estimada = models.IntegerField(null=True, blank=True)
+    duracion_estimada = models.FloatField(null=True, blank=True)
     fecha_finalizacion = models.DateTimeField(null=True, blank=True)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='conf1')
     proyecto = models.ForeignKey(Proyecto, related_name="registro_sprints", on_delete=models.CASCADE, null=True)
@@ -165,9 +166,10 @@ class UserStory(models.Model):
     )
     nombre = models.CharField(blank=True, max_length=100, unique=True)
     descripcion = models.TextField(blank=True, max_length=255)
-    tiempoEstimado = models.IntegerField(validators=[MinValueValidator(0)], default=0)
+    tiempoEstimadoSMaster = models.FloatField(default=0.0)
+    tiempoEstimado = models.FloatField(validators=[MinValueValidator(0)], default=0)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Nuevo')
-    tiempoEnDesarrollo = models.IntegerField(validators=[MinValueValidator(0)], default=0)
+    tiempoEnDesarrollo = models.FloatField(validators=[MinValueValidator(0)], default=0)
     desarrolladorAsignado = models.ForeignKey(User, related_name='desarrollador_asignado', null=True, blank=True,
                                               on_delete=models.CASCADE)
     proyecto = models.ForeignKey(Proyecto, related_name='product_backlog', null=True, on_delete=models.CASCADE)
@@ -182,4 +184,4 @@ class UserInfo(models.Model):
     Modelo que guarda informacion util sobre cada usuario del sistema
     """
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='info', primary_key=True)
-    horasDisponibles = models.PositiveIntegerField(default=40)
+    horasDisponibles = models.FloatField(default=40.0)

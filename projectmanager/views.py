@@ -262,6 +262,7 @@ class AgregarSMember(UserAccessMixin, UpdateView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
+        self.success_url = reverse_lazy('proyecto_gestion', slug=self.object.slug)
         if not request.user.has_perms(('projectmanager.gestionar_scrum_members',),
                                       self.object) and not request.user.groups.filter(
             name='Administrador').exists():
@@ -277,6 +278,9 @@ class AgregarSMember(UserAccessMixin, UpdateView):
             messages.error(request, "No tienes permisos para eso")
             return redirect('/')
         return super().post(request, *args, **kwargs)
+
+    def get_success_url(self, *args, **kwargs):
+        return reverse_lazy('proyecto_gestion', args=[self.kwargs['slug']])
 
 
 # TO-DO: Quitar editar cuando se inicie el proyecto y habilitar sprint
@@ -927,7 +931,7 @@ class AsignarYEstimarUserStoryView(View):
             horasEstimadas = form.cleaned_data['horas_estimadas']
             sm_asignado = form.cleaned_data['scrum_member_asignado']
             ustory.desarrolladorAsignado = sm_asignado
-            ustory.tiempoEstimado = horasEstimadas
+            ustory.tiempoEstimadoSMaster = horasEstimadas
             ustory.save()
         else:
             messages.error(request, "Un error a ocurrido")
@@ -939,10 +943,15 @@ class AsignarYEstimarUserStoryView(View):
 class PlanningPokerView(View):
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
+        if proyecto.sprint_actual.estado != 'conf1':
+            messages.error(request, 'No se puede realizar planning poker')
+            return redirect('proyecto_gestion', slug=proyecto.slug)
         for us in proyecto.sprint_actual.sprint_backlog.all():
             if not us.desarrolladorAsignado != None:
                 messages.error(request, "Debes asignar todos los User Stories")
                 return redirect('proyecto_gestion', slug=slug)
+        proyecto.sprint_actual.estado = 'conf2'
+        proyecto.sprint_actual.save()
         for us in proyecto.sprint_actual.sprint_backlog.all():
             current_site = get_current_site(request)
             email_body = {
@@ -977,10 +986,13 @@ class PlanningPokerSMemberView(View):
             user = User.objects.get(pk=id)
 
             if not account_activation_token.check_token(user, token):
-                messages.error(request, "Toke incorrecto")
+                messages.error(request, "Token incorrecto")
                 return redirect('home')
 
             ustory = UserStory.objects.get(pk=usPk)
+            if ustory.tiempoEstimado != 0:
+                messages.error(request, 'Este User Story ya a sido estimado')
+                return redirect('home')
             form = PlanningPokerSMemberForm()
             context = {
                 'user_story': ustory,
@@ -991,12 +1003,29 @@ class PlanningPokerSMemberView(View):
             messages.error(request, "Error de Token")
             return redirect('home')
 
-    def post(self, request, usPk, *args, **kwargs):
-        user_story = UserStory.objects.get(pk=usPk)
-        form = PlanningPokerSMemberForm(request.POST)
-        if form.is_valid():
-            horas_estimadas_smember = int(form.cleaned_data['horas_estimadas'])
-            horas_estimadas_smaster = int(user_story.tiempoEstimado)
-            user_story.tiempoEstimado = int((horas_estimadas_smaster + horas_estimadas_smember) / 2)
-            user_story.save()
-        return redirect('proyecto_gestion', slug=user_story.proyecto.slug)
+    def post(self, request, uidb64, token, usPk, *args, **kwargs):
+
+        try:
+            id = force_text(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=id)
+
+            if not account_activation_token.check_token(user, token):
+                messages.error(request, "Token incorrecto")
+                return redirect('home')
+
+            user_story = UserStory.objects.get(pk=usPk)
+
+            if user_story.tiempoEstimado != 0:
+                messages.error(request, 'Este User Story ya a sido estimado')
+                return redirect('home')
+
+            form = PlanningPokerSMemberForm(request.POST)
+            if form.is_valid():
+                horas_estimadas_smember = int(form.cleaned_data['horas_estimadas'])
+                horas_estimadas_smaster = int(user_story.tiempoEstimadoSMaster)
+                user_story.tiempoEstimado = int((horas_estimadas_smaster + horas_estimadas_smember) / 2)
+                user_story.save()
+            return redirect('proyecto_gestion', slug=user_story.proyecto.slug)
+        except Exception as ex:
+            messages.error(request, "Error de Token")
+            return redirect('home')
