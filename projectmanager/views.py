@@ -505,7 +505,7 @@ class UserStoryCreate(View):
     '''
 
     Vista para crear y listar User Storys
-    US:obtiene todos los USER STORYS en el metodo get y lisata los USER STORYS
+    US:obtiene todos los USER STORYS en el metodo get y lista los USER STORYS
     En el metodo post se obtiene el proyecto en el que se está trabajando y se crea una
     instancia de USER STORY y se le asigna los datos correspondientes del form y tambien el proyecto
     al cual pertenece
@@ -536,28 +536,40 @@ class UserStoryCreate(View):
         form = ProyectoUs(request.POST)
 
         if form.is_valid():
-            nombre = form.cleaned_data['nombre']
-            descripcion = form.cleaned_data['descripcion']
-            US = UserStory.objects.create(nombre=nombre, descripcion=descripcion, proyecto=proyecto)
-            US.save()
-            messages.success(request, "User Story Creado Correctamente!")
+            descripcion = form.cleaned_data['descripción_de_user_story']
+            prioridad = form.cleaned_data['prioridad_1_al_10']
+            if prioridad > 0 and prioridad < 11:
+                US = UserStory.objects.create(descripcion=descripcion, proyecto=proyecto, prioridad=prioridad)
+                US.save()
+                messages.success(request, "User Story Creado Correctamente!")
+            else:
+                messages.error(request, "Prioridad invalida, fuera del rango 1 al 10")
         else:
             messages.error(request, "Un Error a ocurrido")
         return redirect('create_us', slug=slug)
 
 
 class UserStoryUpdate(View):
+    '''
+
+        Vista para actualizar los datos de descripcion y prioridad de un User Story
+        US:obtiene el user story con metodo get y su pk
+        En el metodo post se obtiene el objeto del User Story actual y se actualiza
+        con los nuevos datos de entrada
+
+        '''
+
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
                                       proyecto) and not request.user.groups.filter(name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('proyecto_gestion', slug=slug)
-        US = UserStory.objects.all()
         US2 = UserStory.objects.get(pk=pk)
-        form = ProyectoUs(initial={'nombre': US2.nombre,
-                                   'descripcion': US2.descripcion,
-                                   })
+        form = ProyectoUs(initial={
+            'descripción_de_user_story': US2.descripcion,
+            'prioridad_1_al_10': US2.prioridad
+        })
         context = {
             'form': form,
             'proyecto': proyecto,
@@ -575,18 +587,29 @@ class UserStoryUpdate(View):
         form = ProyectoUs(request.POST)
 
         if form.is_valid():
-            nombre = form.cleaned_data['nombre']
-            descripcion = form.cleaned_data['descripcion']
-            US2.nombre = nombre
-            US2.descripcion = descripcion
-            US2.save()
-            messages.success(request, "User Story se actualizó Correctamente!")
+            descripcion = form.cleaned_data['descripción_de_user_story']
+            prioridad = form.cleaned_data['prioridad_1_al_10']
+            if prioridad > 0 and prioridad < 11:
+                US2.descripcion = descripcion
+                US2.prioridad = prioridad
+                US2.save()
+                messages.success(request, "User Story se actualizó Correctamente!")
+            else:
+                messages.error(request, "Prioridad invalida, fuera del rango 1 al 10")
+
         else:
             messages.error(request, "Un Error a ocurrido")
         return redirect('create_us', slug=slug)
 
 
 class EliminarUs(View):
+    '''
+
+        Clase para eliminar un user story
+        Se obtiene el objeto por su pk y se hace un delete
+
+    '''
+
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
@@ -595,7 +618,7 @@ class EliminarUs(View):
             return redirect('proyecto_gestion', slug=slug)
         US = UserStory.objects.get(pk=pk)
         US.delete()
-        messages.success(request, "Rol Eliminado")
+        messages.success(request, "User Story Eliminado")
         return redirect('create_us', slug=slug)
 
 
@@ -802,16 +825,19 @@ class CrearSprint(View):
         if form.is_valid():
             nombre = form.cleaned_data['nombre']
             US = form.cleaned_data['UserStorys']
-            # fecha_inicio = form.cleaned_data['fecha_inicio']
-            duracion_estimada = form.cleaned_data['duracion_estimanda']
-            # fecha_finalizacion = form.cleaned_data['fecha_finalizacion']
-            sprint = Sprint.objects.create(nombre=nombre, proyecto=proyecto, duracion_estimada=duracion_estimada)
-            sprint.save()
-            for us in US:
-                userStory = UserStory.objects.get(nombre=us)
-                userStory.sprint = sprint
-                userStory.save()
-            messages.success(request, "Sprint Creado Correctamente!")
+            # duracion_estimada = form.cleaned_data['duracion_estimanda']
+            validar = Sprint.objects.filter(nombre=nombre).exists()
+            if (validar):
+                messages.error(request, "Ya existe Sprint con ese nombre")
+            else:
+
+                sprint = Sprint.objects.create(nombre=nombre, proyecto=proyecto)
+                sprint.save()
+                for us in US:
+                    userStory = UserStory.objects.get(nombre=us)
+                    userStory.sprint = sprint
+                    userStory.save()
+                messages.success(request, "Sprint Creado Correctamente!")
         else:
             messages.error(request, "Un Error a ocurrido")
         return redirect('crear_sprint', slug=slug)
@@ -995,6 +1021,9 @@ class PlanningPokerView(View):
                                       proyecto) and not request.user.groups.filter(
             name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=proyecto.slug)
+        if not proyecto.sprint_actual.sprint_backlog.exists():
+            messages.error(request, 'No tienes user stories!')
             return redirect('proyecto_gestion', slug=proyecto.slug)
         if proyecto.sprint_actual.estado != 'conf1':
             messages.error(request, 'No se puede realizar planning poker')

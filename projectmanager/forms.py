@@ -1,5 +1,5 @@
 from django import forms
-
+from django.db import models
 from projectmanager.models import *
 from django.contrib.auth.models import User
 from django.contrib.auth.models import User, Group, Permission
@@ -190,13 +190,12 @@ class CrearRolProyectoForm(forms.Form):
 
 
 class ProyectoUs(forms.Form):
-    nombre = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
+    descripción_de_user_story = forms.CharField(max_length=100, widget=forms.Textarea(attrs={
         'class': 'form-control'
     }))
-    descripcion = forms.CharField(max_length=100, widget=forms.Textarea(attrs={
+    prioridad_1_al_10=forms.IntegerField(widget=forms.NumberInput(attrs={
         'class': 'form-control'
     }))
-
 
 class ImportarRolProyectoForm(forms.Form):
     def __init__(self, *args, **kwargs):
@@ -229,10 +228,9 @@ class SprintFormCreate(forms.Form):
             'class': 'check-label'
         }))
 
-    duracion_estimanda = forms.IntegerField(widget=forms.TextInput(attrs={
-        'class': 'form-control'
-    }))
-
+    '''duracion_estimanda = forms.IntegerField( widget=forms.TextInput(attrs={
+           'class': 'form-control'
+       }))'''
 
 class SprintFormUpdate(forms.Form):
     def __init__(self, *args, **kwargs):

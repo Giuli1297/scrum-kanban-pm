@@ -3,7 +3,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.template.defaultfilters import slugify
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from guardian.shortcuts import assign_perm
 from django.contrib.auth.models import Permission
 
@@ -156,6 +156,17 @@ class Sprint(models.Model):
         verbose_name_plural = 'Sprints'
 
 
+class IntegerRangeField(models.IntegerField):
+    def __init__(self, verbose_name=None, name=None, min_value=None, max_value=None, **kwargs):
+        self.min_value, self.max_value = min_value, max_value
+        models.IntegerField.__init__(self, verbose_name, name, **kwargs)
+
+    def formfield(self, **kwargs):
+        defaults = {'min_value': self.min_value, 'max_value': self.max_value}
+        defaults.update(kwargs)
+        return super(IntegerRangeField, self).formfield(**defaults)
+
+
 class UserStory(models.Model):
     ESTADOS = (
         ('Nuevo', 'Nuevo'),
@@ -166,7 +177,6 @@ class UserStory(models.Model):
         ('QA', 'QA'),
         ('Release', 'Release')
     )
-    nombre = models.CharField(blank=True, max_length=100, unique=True)
     descripcion = models.TextField(blank=True, max_length=255)
     tiempoEstimadoSMaster = models.FloatField(default=0.0)
     tiempoEstimado = models.FloatField(validators=[MinValueValidator(0)], default=0)
@@ -176,9 +186,15 @@ class UserStory(models.Model):
                                               on_delete=models.CASCADE)
     proyecto = models.ForeignKey(Proyecto, related_name='product_backlog', null=True, on_delete=models.CASCADE)
     sprint = models.ForeignKey(Sprint, related_name='sprint_backlog', null=True, blank=True, on_delete=models.SET_NULL)
+    prioridad = models.IntegerField(default=1)
 
     class Meta:
+        verbose_name = 'User Story'
         verbose_name_plural = 'Users Storys'
+        ordering = ['-prioridad']
+
+    def __str__(self):
+        return self.descripcion
 
 
 class UserInfo(models.Model):
