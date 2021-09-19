@@ -11,6 +11,8 @@ class ProyectoForm(forms.ModelForm):
        Clase de formulario para el modelo Proyecto
 
     """
+    scrum_master = forms.ModelChoiceField(
+        queryset=User.objects.filter(~Q(username='AnonymousUser') & ~Q(username='admin')))
 
     class Meta:
         model = Proyecto
@@ -38,6 +40,10 @@ class ProyectoEditarSMForm(forms.ModelForm):
     """
            Clase de formulario para editar datos de un proyecto
     """
+    scrum_member = forms.ModelMultipleChoiceField(
+        queryset=User.objects.filter(
+            ~Q(username='AnonymousUser') & ~Q(username='admin') & Q(desarrollador_asignado=None)),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'check-label'}))
 
     class Meta:
         model = Proyecto
@@ -49,11 +55,6 @@ class ProyectoEditarSMForm(forms.ModelForm):
 
         labels = {
             'scrum_member': 'Scrum Members',
-
-        }
-
-        widgets = {
-            'scrum_member': forms.CheckboxSelectMultiple(attrs={'class': 'check-label'}),
 
         }
 
@@ -193,9 +194,10 @@ class ProyectoUs(forms.Form):
     descripción_de_user_story = forms.CharField(max_length=100, widget=forms.Textarea(attrs={
         'class': 'form-control'
     }))
-    prioridad_1_al_10=forms.IntegerField(widget=forms.NumberInput(attrs={
+    prioridad_1_al_10 = forms.IntegerField(widget=forms.NumberInput(attrs={
         'class': 'form-control'
     }))
+
 
 class ImportarRolProyectoForm(forms.Form):
     def __init__(self, *args, **kwargs):
@@ -231,6 +233,7 @@ class SprintFormCreate(forms.Form):
     '''duracion_estimanda = forms.IntegerField( widget=forms.TextInput(attrs={
            'class': 'form-control'
        }))'''
+
 
 class SprintFormUpdate(forms.Form):
     def __init__(self, *args, **kwargs):
