@@ -12,3 +12,5 @@ admin.site.register(Sprint)
 
 
 admin.site.register(UserInfo)
+admin.site.register(HistorialUs)
+

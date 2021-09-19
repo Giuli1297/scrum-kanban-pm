@@ -158,14 +158,10 @@ class Sprint(models.Model):
     class Meta:
         verbose_name = 'Sprint'
         verbose_name_plural = 'Sprints'
-class IntegerRangeField(models.IntegerField):
-    def __init__(self, verbose_name=None, name=None, min_value=None, max_value=None, **kwargs):
-        self.min_value, self.max_value = min_value, max_value
-        models.IntegerField.__init__(self, verbose_name, name, **kwargs)
-    def formfield(self, **kwargs):
-        defaults = {'min_value': self.min_value, 'max_value':self.max_value}
-        defaults.update(kwargs)
-        return super(IntegerRangeField, self).formfield(**defaults)
+
+
+
+
 class UserStory(models.Model):
     ESTADOS = (
         ('Nuevo', 'Nuevo'),
@@ -184,6 +180,9 @@ class UserStory(models.Model):
     proyecto=models.ForeignKey(Proyecto,related_name='product_backlog',null=True,on_delete=models.CASCADE)
     sprint=models.ForeignKey(Sprint,related_name='sprint_backlog',null=True,blank=True,on_delete=models.SET_NULL)
     prioridad=models.IntegerField(default=1)
+    def historial(self):
+        return HistorialUs.objects.filter(descripcion=self).order_by('version')
+
     class Meta:
         verbose_name='User Story'
         verbose_name_plural = 'Users Storys'
@@ -191,7 +190,27 @@ class UserStory(models.Model):
     def __str__(self):
         return self.descripcion
 
+class HistorialUs(models.Model):
+    version=models.IntegerField(editable=False)
+    ESTADOS = (
+        ('Nuevo', 'Nuevo'),
+        ('Cancelado', 'Cancelado'),
+        ('To-Do', 'To-Do'),
+        ('Doing', 'Doing'),
+        ('Done', 'Done'),
+        ('QA', 'QA'),
+        ('Release', 'Release')
+    )
+    us=models.ForeignKey(UserStory,related_name='UsHistorial',null=True,on_delete=models.CASCADE)
+    descripcion=models.TextField(blank=True,max_length=255)
 
+
+    class Meta:
+        unique_together=('version','us')
+    def save(self, *args, **kwargs):
+        cont_version=HistorialUs.objects.filter(us=self.us).order_by('-version')[:1]
+        self.version=cont_version[0].version + 1 if cont_version else 1
+        super(HistorialUs, self).save(*args,**kwargs)
 class UserInfo(models.Model):
     """
     Modelo que guarda informacion util sobre cada usuario del sistema
