@@ -45,7 +45,7 @@ class Proyecto(models.Model):
         scrum_member
             Lista de miembros del equipo
 
-        """
+    """
     ESTADOS = (
         ('PEN', 'Pendiente'),
         ('CAN', 'Cancelado'),
@@ -101,6 +101,18 @@ class Proyecto(models.Model):
 class Rol(models.Model):
     """
     Modelo que hereda de Groups todos sus metodos y atributos para crear los roles y define los permisos para el CRUD
+
+    Atributos:
+
+    Parameters
+    -----------
+
+    descipcion
+        descripcion del rol
+
+    tipo
+        define que tipo de rol es, ya sea de sistema, proyecto, por default o importado
+
     """
     TIPOS = (
         ('sistema', 'Rol de Sistema'),
@@ -138,6 +150,29 @@ class Rol(models.Model):
 
 
 class Sprint(models.Model):
+    """
+    Spring: es un periodo de tiempo en el que se realizan una cantidad de userstoies
+
+    Atributos:
+
+    Parameters
+    ----------
+
+    estado
+        Define el estado del sprint
+
+    fecha_inicio
+        fecha de inicio de spriot
+
+    duracion_estiamda
+        duracion estimada del Sprint
+
+    fecha_finalizacion
+        fecha en la que finalizara el sprint
+
+    proyecto
+        proyecto al cual esta ligado el sprint
+    """
     ESTADOS = (
         ('conf1', 'Carga de Sprint Backlog'),
         ('conf2', 'Planning Poker'),
@@ -159,6 +194,34 @@ class Sprint(models.Model):
 
 
 class UserStory(models.Model):
+    """
+    Clase que representa a los USerStory
+
+    Atributos:
+
+    Parameters
+    -----------
+    estado
+        Define el estado del UserStory
+
+    nombre
+        Define el nombre del UserStory
+
+    descripcion
+        Breve descripcion del UserStory
+
+    tiempoEstimado
+        tiempo estimado para realizar el UserStory
+
+    desarrolladorAsignado
+        desarrollador asignado para realizar el UserStory
+
+    proyecto
+        Proyecto al cual esta ligado el UserStory
+
+    Sprint
+        Sprint en donde esta contenido el UserStory
+    """
     ESTADOS = (
         ('Nuevo', 'Nuevo'),
         ('Cancelado', 'Cancelado'),
@@ -221,6 +284,17 @@ class UserInfo(models.Model):
 class UserWorkTime(models.Model):
     """
     Modelo que sirve para administrar las horas de trabajo de un usuario
+
+    Atributos:
+
+    Parameters
+    -----------
+
+    dias_laborales
+        dias laborales, lunes a viernes
+
+
+
     """
     DIAS_LABORALES = (
         ('LUN', 'LUNES'),
