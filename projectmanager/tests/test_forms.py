@@ -1,5 +1,5 @@
 from django.test import SimpleTestCase, Client, TestCase
-from projectmanager.forms import ProyectoForm
+from projectmanager.forms import ProyectoForm, ProyectoUs
 from projectmanager.models import Proyecto
 from django.contrib.auth.models import User
 
@@ -43,4 +43,17 @@ class TestForms(TestCase):
         })
 
         self.assertFalse(form.is_valid())
-        self.assertEquals(len(form.errors), 1)
+        self.assertEquals(len(form.errors), 1) 
+    
+    def test_crear_user_story(self):
+        """
+        Test para verificar sin los datos ingresados son correctos en la cración de user story
+        """
+        form = ProyectoUs(data={
+            'descripción_de_user_story': 'crear un servidor',
+            'prioridad_1_al_10': 10
+        })
+
+        self.assertTrue(form.is_valid())
+    
+
