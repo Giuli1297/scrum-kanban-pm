@@ -74,5 +74,6 @@ urlpatterns = [
     path('planningPoker/<slug:slug>/', views.PlanningPokerView.as_view(), name='planning_poker_smaster'),
     path('planningPoker/<uidb64>/<token>/<int:usPk>/', views.PlanningPokerSMemberView.as_view(),
          name='planning_poker_smember'),
+    path('planningPoker/<slug:slug>/estimarSprint/', views.EstimarSprint.as_view(),name='estimar_sprint')
 
 ]

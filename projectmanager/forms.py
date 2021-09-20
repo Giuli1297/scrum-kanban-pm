@@ -300,3 +300,7 @@ class AsignarYEstimarUserStoryForm(forms.Form):
 
 class PlanningPokerSMemberForm(forms.Form):
     horas_estimadas = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
+
+
+class EstimacionSprint(forms.Form):
+    horas_estimadas = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}))

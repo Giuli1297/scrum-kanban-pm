@@ -76,7 +76,8 @@ class Proyecto(models.Model):
                        ('gestionar_user_stories', 'Puede Agregar/Modificar/Eliminar User Stories de un proyecto'),
                        ('iniciar_ppoker_proyecto', 'Puede iniciar planning poker de un sprint'),
                        ('estimar_userstory_proyecto', 'Puede estimar User Stories en el Sprint Backlog'),
-                       ('cargar_sprint_backlog_proyecto', 'Puede cargar User Stories en el Sprint Backlog'))
+                       ('cargar_sprint_backlog_proyecto', 'Puede cargar User Stories en el Sprint Backlog'),
+                       ('estimar_sprint','Puede estimar sprint'))
         default_permissions = ()
         ordering = ('-fecha_inicio',)
 

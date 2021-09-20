@@ -1236,3 +1236,33 @@ class PlanningPokerSMemberView(View):
             return redirect('home')
 
 
+class EstimarSprint(View):
+    def get(self, request, slug, *args, **kwargs):
+        form = EstimacionSprint()
+        proyecto = Proyecto.objects.get(slug=slug)
+        sprint = proyecto.sprint_actual
+        horas = 0
+        for i in sprint.sprint_backlog.all():
+            horas = horas + i.tiempoEstimado
+
+        # proyecto.sprint_actual.duracion_estimada
+        context = {
+            'horas': horas,
+            'form': form
+        }
+        return render(request, 'sprint/estimarSprint.html', context)
+    def post(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        sprint = proyecto.sprint_actual
+        form=EstimacionSprint(request.POST)
+
+        if form.is_valid():
+            horasEstimadas = form.cleaned_data['horas_estimadas']
+            sprint.duracion_estimada=horasEstimadas
+            sprint.estado='conf3'
+            sprint.save()
+            messages.success(request, "Se ha asignado la estimación al Sprint")
+        else:
+            messages.error(request, "Un error a ocurrido")
+
+        return redirect('proyecto_gestion', slug=slug)
