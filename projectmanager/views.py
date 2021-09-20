@@ -287,6 +287,12 @@ class AgregarSMember(UserAccessMixin, View):
             miercoles = form.cleaned_data['miercoles']
             jueves = form.cleaned_data['jueves']
             viernes = form.cleaned_data['viernes']
+            if lunes < 0 or martes < 0 or miercoles < 0 or jueves < 0 or viernes < 0:
+                messages.error(request, 'No puedes ingresar numeros negativos')
+                return redirect('proyecto_agregar_sm', slug=proyecto.slug)
+            if lunes == 0 and martes == 0 and miercoles == 0 and jueves == 0 and viernes == 0:
+                messages.error(request, 'Agrega horas de trabajo')
+                return redirect('proyecto_agregar_sm', slug=proyecto.slug)
             worktimes = scrum_member.tiempos_de_trabajo.all()
             horas_ocupadas_lunes = 0
             horas_ocupadas_martes = 0
