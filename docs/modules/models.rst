@@ -1,6 +1,5 @@
-Models
-======
+Modelos
+========
 
 .. automodule:: projectmanager.models
    :members:
-   :undoc-members:

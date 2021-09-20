@@ -1,5 +1,6 @@
-{% extends "account/base.html" %}
+{% extends "layout/base2.html" %}
 
+<<<<<<< HEAD
 {% load socialaccount %} 
 
 {% block content %}
@@ -32,4 +33,38 @@
             </div>
         </div>
     </div>
+=======
+{% load account socialaccount %}
+
+{% load crispy_forms_filters %}
+
+
+{% block content %} 
+
+  <div class="d-flex vw-100 vh-100 justify-content-center align-items-center">
+    <div class="rounded border border-2 d-flex flex-column" style="height:450px; width: 400px;">
+      <h1 class="w-100 bg-secondary text-white d-flex justify-content-center align-items-center" style="height: 80px;">
+        Iniciar Sesión
+      </h1>
+      <div class="mt-1 w-100 d-flex justify-content-center">
+        <a href="{% provider_login_url 'google' process="login" %}" class="btn btn-primary">Login con Google</a>
+      </div>
+      <div class="mt-3 w-100 d-flex flex-column align-items-center">
+        <form class="w-75" method="POST" action="{% url 'account_login' %}">
+          {% csrf_token %}
+          {{ form|crispy }}
+          {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+          {% endif %}
+          <button class="mt-1 btn btn-success w-50" type="submit">Login</button>
+        </form>
+        <a class="mt-3 text-dark text-center" href="{% url 'account_reset_password' %}">Olvidé mi contraseña</a>
+       <!-- <div class="mt-3">
+          <p class="h6">¿No tienes una cuenta? <a href="{{ signup_url }}" class="text-primary">Registrate</a></p>
+        </div>-->
+      </div>
+    </div>
+  </div>
+
+>>>>>>> nelson
 {% endblock %}

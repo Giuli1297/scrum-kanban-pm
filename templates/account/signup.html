@@ -1,0 +1,26 @@
+{% extends "layout/base2.html" %}
+
+{% load crispy_forms_filters %}
+
+{% block content %} 
+  <div class="d-flex vw-100 vh-100 justify-content-center align-items-center">
+    <div class="rounded border border-2 d-flex flex-column" style="height:auto; width: 400px;">
+      <h1 class="w-100 h-25 bg-secondary text-white d-flex justify-content-center align-items-center">
+        Registrarse
+      </h1>
+      <p class="mt-1 w-100 d-flex justify-content-center">Tienes una cuenta? <a href="{{ login_url }}"> Iniciar sesion</a></p>
+      <div class="w-100 mt-2 d-flex justify-content-center">
+        <form class="w-75" id="signup_form" method="post" action="{% url 'account_signup' %}">
+          {% csrf_token %}
+          {{ form|crispy }}
+          {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+          {% endif %}
+          <div class="d-grid mt-3 mb-2">
+              <button class="btn btn-dark" type="submit">Registrarse</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>  
+{% endblock %}

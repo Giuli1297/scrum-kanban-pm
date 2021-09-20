@@ -1,0 +1,40 @@
+{% extends 'layout/base.html' %}
+{% block body %}
+<div class="col-md-6  "  >
+            <div class="card card-default" >
+              <div class="card-header">
+                <h3 class="card-title">
+
+                    ROLES
+                </h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <table class="table" id="data">
+
+                      <tbody>
+                      {% block rows %}
+                        {% for c in object_list %}
+                            <tr>
+                             <td>{{ c }}</td>
+                                {% ifnotequal c.name 'Administrador' %}
+                                    <td> <a class="btn btn-primary btn-warning " href="{% url 'update_rol' c.id %}" >Editar Rol</a></td>
+                                    <td> <a class="btn btn-danger btn-flat" href="{% url 'delete_rol' c.id %}" >Elimina Rol</a></td>
+                                {% endifnotequal %}
+                            </td>
+                            </tr>
+                        {% endfor %}
+                      {% endblock %}
+
+                      </tbody>
+                    </table>
+              </div>
+                <div class="card-footer">
+                    <td> <a class="btn btn-primary btn-flat " href="{% url 'create_rol' %}" >Nuevo Rol</a></td>
+                    <td> <a class="btn btn-success btn-flat " href="{% url 'list_user' %}" >Asignar Rol</a></td>
+                </div>
+            </div>
+          </div>
+{% endblock %}
+
+

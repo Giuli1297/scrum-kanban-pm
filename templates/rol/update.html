@@ -1,0 +1,27 @@
+
+{% extends 'layout/base.html' %}
+{% block body %}
+<div class="col-md-6  "  >
+            <div class="card card-default" >
+              <div class="card-header">
+                <h3 class="card-title">
+                    Usuarios
+                </h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <table class="table" id="data">
+
+                     <form action="." method="post">
+	                	{% csrf_token %}
+	                    	{{ form.as_p }}
+		                    <button type="submit" >Guardar</button>
+	                </form>
+                    </table>
+              </div>
+
+            </div>
+          </div>
+{% endblock %}
+
+
