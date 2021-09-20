@@ -55,6 +55,9 @@ class UserAccessMixin(PermissionRequiredMixin):
 
 
 class VerificationView(View):
+    """
+        Vista que verifica si el usuario ya fue habilitado por el administrador
+    """
     def get(self, request, uidb64, token):
         try:
             id = force_text(urlsafe_base64_decode(uidb64))
@@ -360,6 +363,9 @@ class AgregarSMember(UserAccessMixin, View):
 
 
 class QuitarSMember(View):
+    """
+        Vista basada en clase para quitar un Scrum Member
+    """
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.gestionar_scrum_members',),
@@ -449,6 +455,9 @@ class ProyectoCancelarView(UserAccessMixin, View):
 
 @login_required
 def perfilUsuario(request):
+    """
+        Funcion para administrar el perfil de usuario
+    """
     if request.method == "POST":
         form = ActualizarUsuarioForm(request.POST, instance=request.user)
 
@@ -617,16 +626,12 @@ class EliminarRolUser(UserAccessMixin, UpdateView):
 # VISTAS DE  USERS STORYS
 
 class UserStoryCreate(View):
-    '''
-
+    """
     Vista para crear y listar User Storys
-    US:obtiene todos los USER STORYS en el metodo get y lista los USER STORYS
-    En el metodo post se obtiene el proyecto en el que se está trabajando y se crea una
-    instancia de USER STORY y se le asigna los datos correspondientes del form y tambien el proyecto
-    al cual pertenece
 
-    '''
-
+    US
+        obtiene todos los USER STORYS en el metodo get y lista los USER STORYS
+    """
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
@@ -643,6 +648,10 @@ class UserStoryCreate(View):
         return render(request, 'UserStory/crearUS.html', context)
 
     def post(self, request, slug, *args, **kwargs):
+        """
+        Se obtiene el proyecto en el que se está trabajando y se crea una instancia de USER STORY y se le asigna los datos correspondientes del form y tambien el proyecto
+        al cual pertenece
+        """
         proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
                                       proyecto) and not request.user.groups.filter(name='Administrador').exists():
@@ -665,14 +674,15 @@ class UserStoryCreate(View):
 
 
 class UserStoryUpdate(View):
-    '''
-
+    """
         Vista para actualizar los datos de descripcion y prioridad de un User Story
-        US:obtiene el user story con metodo get y su pk
-        En el metodo post se obtiene el objeto del User Story actual y se actualiza
-        con los nuevos datos de entrada
 
-        '''
+        US
+            obtiene el user story con metodo get y su pk
+
+    """
+
+
 
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
@@ -696,6 +706,10 @@ class UserStoryUpdate(View):
         return render(request, 'UserStory/UpdateUs.html', context)
 
     def post(self, request, slug, pk, *args, **kwargs):
+        """
+        Se obtiene el objeto del User Story actual y se actualiza
+        con los nuevos datos de entrada
+        """
         proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
                                       proyecto) and not request.user.groups.filter(name='Administrador').exists():
@@ -727,12 +741,11 @@ class UserStoryUpdate(View):
 
 
 class EliminarUs(View):
-    '''
+    """
+    Clase para eliminar un user story
+    Se obtiene el objeto por su pk y se hace un delete
+    """
 
-        Clase para eliminar un user story
-        Se obtiene el objeto por su pk y se hace un delete
-
-    '''
 
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
@@ -799,7 +812,7 @@ class CrearRolProyecto(UserAccessMixin, View):
 
 class ModificarRolProyecto(UserAccessMixin, View):
     """
-        Vista basada en clase el sirve para modificar un rol a nivel proyecto nuevo por parte del SM
+    Vista basada en clase el sirve para modificar un rol a nivel proyecto nuevo por parte del SM
     """
     raise_exception = False
     permission_required = ()
@@ -926,6 +939,9 @@ class ImportarRolProyecto(UserAccessMixin, View):
 
 
 class CrearSprint(View):
+    """
+    Vista basada en clase utilizada para la creacion de Sprint
+    """
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.gestionar_sprint_proyecto',),
@@ -971,6 +987,9 @@ class CrearSprint(View):
 
 
 class ActualizarSprint(View):
+    """
+    Vista basada en clases para la actualizacion de Sprint
+    """
 
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
@@ -1022,6 +1041,9 @@ class ActualizarSprint(View):
 
 
 class listaUsSprintBacklog(View):
+    """
+    Lista basada en clases que muestra el Sprint Backlog
+    """
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.gestionar_sprint_proyecto',),
@@ -1038,6 +1060,9 @@ class listaUsSprintBacklog(View):
 
 
 class UserStoryUpdateSprint(View):
+    """
+    Vista basada en clases utilizada para la actualizacion de User Stories
+    """
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.gestionar_sprint_proyecto',),
@@ -1071,6 +1096,9 @@ class UserStoryUpdateSprint(View):
 
 
 class CargarSprintBacklog(View):
+    """
+    Vista basada en clase que sirve para cargar el sprint backlog
+    """
     def get(self, request, usPk, sprintPk, *args, **kwargs):
         sprint = Sprint.objects.get(pk=sprintPk)
         if not request.user.has_perms(('projectmanager.cargar_sprint_backlog_proyecto',),
@@ -1089,6 +1117,9 @@ class CargarSprintBacklog(View):
 
 
 class QuitarUSFromSprintBacklog(View):
+    """
+    Vista basada en clase utilizada para quitar un User Story del sprint backlog
+    """
     def get(self, request, usPk, *args, **kwargs):
         ustory = UserStory.objects.get(pk=usPk)
         if not request.user.has_perms(('projectmanager.cargar_sprint_backlog_proyecto',),
@@ -1105,7 +1136,10 @@ class QuitarUSFromSprintBacklog(View):
 
 
 class listarHistorial(View):
-    def get(self, request, slug, pk):
+    """
+    Vista basada en clase utilizada para mostrar el hisotrial de cambio de un User Story
+    """
+    def get(self,request,slug,pk):
         proyecto = Proyecto.objects.get(slug=slug)
         ustory = UserStory.objects.get(pk=pk).UsHistorial.all()
         us=UserStory.objects.get(pk=pk)
@@ -1118,6 +1152,9 @@ class listarHistorial(View):
 
 
 class AsignarYEstimarUserStoryView(View):
+    """
+    Vista basada en clases para estimar y asignar user story
+    """
     def get(self, request, usPk, *args, **kwargs):
         ustory = UserStory.objects.get(pk=usPk)
         if not request.user.has_perms(('projectmanager.estimar_userstory_proyecto',),
@@ -1157,6 +1194,9 @@ class AsignarYEstimarUserStoryView(View):
 
 
 class PlanningPokerView(View):
+    """
+    Vista basada en clase para la gestion de planning poker
+    """
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.iniciar_ppoker_proyecto',),
@@ -1204,6 +1244,9 @@ class PlanningPokerView(View):
 
 
 class PlanningPokerSMemberView(View):
+    """
+    Vista basada en clases pra la visualizacion de miembros del planning poker
+    """
     def get(self, request, uidb64, token, usPk, *args, **kwargs):
         try:
             id = force_text(urlsafe_base64_decode(uidb64))

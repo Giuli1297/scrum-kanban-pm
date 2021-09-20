@@ -38,7 +38,7 @@ class ProyectoForm(forms.ModelForm):
 
 class AgregarScrumMemberForm(forms.Form):
     """
-           Clase de formulario para editar datos de un proyecto
+        Clase de formulario para editar datos de un proyecto
     """
 
     def __init__(self, *args, **kwargs):
@@ -60,7 +60,7 @@ class AgregarScrumMemberForm(forms.Form):
 
 class QuitarScrumMemberForm(forms.Form):
     """
-           Clase de formulario para editar datos de un proyecto
+        Clase de formulario para editar datos de un proyecto
     """
 
     def __init__(self, *args, **kwargs):
@@ -78,7 +78,6 @@ class QuitarScrumMemberForm(forms.Form):
 class ActualizarUsuarioForm(forms.ModelForm):
     """
         Formulario para la actualizacion de datos de usuario
-
     """
     email = forms.EmailField()
 
@@ -94,8 +93,7 @@ class ActualizarUsuarioForm(forms.ModelForm):
 
 class RolForm(forms.ModelForm):
     """
-           Clase de formulario para el modelo Rol
-
+        Clase de formulario para el modelo Rol
     """
 
     def __init__(self, *args, **kwargs):
@@ -129,7 +127,7 @@ class RolForm(forms.ModelForm):
 
 class UserForm(forms.ModelForm):
     """
-           Clase de formulario para el modelo User
+        Clase de formulario para el modelo User
     """
 
     def __init__(self, *args, **kwargs):
@@ -156,7 +154,7 @@ class UserForm(forms.ModelForm):
 
 class UserFormDelete(forms.ModelForm):
     """
-           Clase de formulario para eliminar rol del User
+        Clase de formulario para eliminar rol del User
     """
 
     def __init__(self, *args, **kwargs):
@@ -182,6 +180,9 @@ class UserFormDelete(forms.ModelForm):
 
 
 class CrearRolProyectoForm(forms.Form):
+    """
+        Clase formulario para la creacion de rol a nivel de proyecto
+    """
     def __init__(self, *args, **kwargs):
         self.slug = kwargs.pop('slug')
         super(CrearRolProyectoForm, self).__init__(*args, **kwargs)
@@ -216,6 +217,9 @@ class ProyectoUs(forms.Form):
 
 
 class ImportarRolProyectoForm(forms.Form):
+    """
+        Clase formulario para la importacion de un rol de prouecto de un proyecto a otro
+    """
     def __init__(self, *args, **kwargs):
         self.slug = kwargs.pop('slug')
         super(ImportarRolProyectoForm, self).__init__(*args, **kwargs)
@@ -231,6 +235,9 @@ class ImportarRolProyectoForm(forms.Form):
 
 
 class SprintFormCreate(forms.Form):
+    """
+        Clase formulario para la creacion de spriat
+    """
     def __init__(self, *args, **kwargs):
         self.slug = kwargs.pop('slug')
         super(SprintFormCreate, self).__init__(*args, **kwargs)
@@ -252,6 +259,9 @@ class SprintFormCreate(forms.Form):
 
 
 class SprintFormUpdate(forms.Form):
+    """
+        Clase formulario para la actualizacion de un sprint
+    """
     def __init__(self, *args, **kwargs):
         self.slug = kwargs.pop('slug')
         super(SprintFormUpdate, self).__init__(*args, **kwargs)
@@ -269,6 +279,9 @@ class SprintFormUpdate(forms.Form):
 
 
 class AsignarDesarrolladorUs(forms.Form):
+    """
+        Clase formulario para la asignacion de un usuario a un User Story
+    """
     def __init__(self, *args, **kwargs):
         self.slug = kwargs.pop('slug')
         super(AsignarDesarrolladorUs, self).__init__(*args, **kwargs)
@@ -283,6 +296,9 @@ class AsignarDesarrolladorUs(forms.Form):
 
 
 class AsignarYEstimarUserStoryForm(forms.Form):
+    """
+        Clase formulario para la esstimacion y asignacion de de User Story a un desarrollador
+    """
     def __init__(self, *args, **kwargs):
         self.usPk = kwargs.pop('usPk')
         super(AsignarYEstimarUserStoryForm, self).__init__(*args, **kwargs)
@@ -299,6 +315,9 @@ class AsignarYEstimarUserStoryForm(forms.Form):
 
 
 class PlanningPokerSMemberForm(forms.Form):
+    """
+        Clase formulario para el planning poker
+    """
     horas_estimadas = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
 
 
