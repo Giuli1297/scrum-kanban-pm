@@ -1,5 +1,5 @@
 from django import forms
-
+from django.db import models
 from projectmanager.models import *
 from django.contrib.auth.models import User
 from django.contrib.auth.models import User, Group, Permission
@@ -49,7 +49,6 @@ class ProyectoEditarSMForm(forms.ModelForm):
 
         labels = {
             'scrum_member': 'Scrum Members',
-
 
         }
 
@@ -165,7 +164,6 @@ class UserFormDelete(forms.ModelForm):
         exclude = ['user_permissions', 'last_login', 'date_joined', 'is_superuser', 'is_active', 'is_staff']
 
 
-
 class CrearRolProyectoForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.slug = kwargs.pop('slug')
@@ -173,7 +171,7 @@ class CrearRolProyectoForm(forms.Form):
         self.proyecto = Proyecto.objects.get(slug=self.slug)
         self.fields['scrum_members'].queryset = User.objects.filter(Q(proyecto_asignado=self.proyecto))
         self.fields['permisos'].queryset = Permission.objects.filter(
-            Q(content_type__model='proyecto'))
+            Q(content_type__model='proyecto', content_type__app_label='projectmanager', ))
 
     nombre = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
         'class': 'form-control'
@@ -192,17 +190,74 @@ class CrearRolProyectoForm(forms.Form):
 
 
 class ProyectoUs(forms.Form):
+    descripción_de_user_story = forms.CharField(max_length=100, widget=forms.Textarea(attrs={
+        'class': 'form-control'
+    }))
+    prioridad_1_al_10=forms.IntegerField(widget=forms.NumberInput(attrs={
+        'class': 'form-control'
+    }))
+
+class ImportarRolProyectoForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.slug = kwargs.pop('slug')
+        super(ImportarRolProyectoForm, self).__init__(*args, **kwargs)
+        self.proyecto = Proyecto.objects.get(slug=self.slug)
+        self.nombres = []
+        for rol in self.proyecto.roles.all():
+            self.nombres.append(rol.copied_from)
+        self.fields['roles'].queryset = Rol.objects.filter(
+            ~Q(proyecto=self.proyecto) & Q(tipo='proyecto') & ~Q(related_group__name__in=self.nombres))
+
+    roles = forms.ModelMultipleChoiceField(queryset=None,
+                                           widget=forms.CheckboxSelectMultiple(attrs={'class': 'check-label'}))
+
+
+class SprintFormCreate(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.slug = kwargs.pop('slug')
+        super(SprintFormCreate, self).__init__(*args, **kwargs)
+        self.proyecto = Proyecto.objects.get(slug=self.slug)
+        self.fields['UserStorys'].queryset = UserStory.objects.filter(proyecto=self.proyecto)
 
     nombre = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
         'class': 'form-control'
     }))
-    descripcion = forms.CharField(max_length=100, widget=forms.Textarea(attrs={
+    UserStorys = forms.ModelMultipleChoiceField(
+        queryset=None,
+        widget=forms.CheckboxSelectMultiple(attrs={
+            'class': 'check-label'
+        }))
+
+    '''duracion_estimanda = forms.IntegerField( widget=forms.TextInput(attrs={
+           'class': 'form-control'
+       }))'''
+
+class SprintFormUpdate(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.slug = kwargs.pop('slug')
+        super(SprintFormUpdate, self).__init__(*args, **kwargs)
+        self.proyecto = Proyecto.objects.get(slug=self.slug)
+        self.fields['UserStorys'].queryset = UserStory.objects.filter(proyecto=self.proyecto)
+
+    nombre = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
         'class': 'form-control'
     }))
+    UserStorys = forms.ModelMultipleChoiceField(
+        queryset=None,
+        widget=forms.CheckboxSelectMultiple(attrs={
+            'class': 'check-label'
+        }))
 
 
+class AsignarDesarrolladorUs(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.slug = kwargs.pop('slug')
+        super(AsignarDesarrolladorUs, self).__init__(*args, **kwargs)
+        self.proyecto = Proyecto.objects.get(slug=self.slug)
+        self.fields['desarrolladorAsignado'].queryset = User.objects.filter(proyecto_asignado=self.proyecto)
 
-class ImportarRolProyectoForm(forms.Form):
-    roles = forms.ModelMultipleChoiceField(queryset=Rol.objects.filter(Q(tipo='proyecto')),
-                                           widget=forms.CheckboxSelectMultiple(attrs={'class': 'check-label'}))
-1
+    desarrolladorAsignado = forms.ModelChoiceField(
+        queryset=None,
+        widget=forms.Select(attrs={
+            'class': 'check-label'
+        }))

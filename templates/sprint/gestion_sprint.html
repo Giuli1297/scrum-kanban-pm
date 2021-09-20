@@ -1,0 +1,50 @@
+{% load projectmanager_extras %}
+<div class="row mt-2">
+    <h4>Configura el proximo Sprint</h4>
+</div>
+<div class="row mt-2">
+    <div class="col-md-6 border border-2">
+        <div class="row m-1">
+            <div class="col-md-4">
+                <h4>Sprint Backlog</h4>
+            </div>
+            <div class="col-md-8"></div>
+        </div>
+        <div class="row m-1">
+            <table class="table mb-2">
+              <thead>
+                <tr>
+                    <th scope="col">User Story</th>
+                    <th scope="col">Asignar</th>
+                    <th scope="col">Remover</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user_story in proyecto.sprint_actual.sprint_backlog.all %}
+                    <tr>
+                        <th scope="row">{{ user_story.descripcion }}</th>
+                        <td>Boton Asignar</td>
+                        <td>
+                            <a class="btn btn-danger"
+                               href="{% url 'quitar_us_de_sbacklog' usPk=user_story.pk %}">
+                                <h4>-</h4>
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <div class="mb-2">
+                        <p>No tienes US en tu SB, agregalos!</p>
+                    </div>
+                {% endfor %}
+              </tbody>
+            </table>
+            <div style="margin-block: 10px;">
+                {% if 'gestionar_roles_proyecto' in proyecto_perms or request.user|has_group:'Administrador' %}
+                    <a class="btn btn-dark btn-flotante align-center" href="{% url 'proyecto_rol' proyecto.slug %}" >
+                        Realizar Planning Poker
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>

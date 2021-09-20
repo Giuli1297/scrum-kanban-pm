@@ -15,7 +15,7 @@
                 </h4>
             </div>
             <div class="card-body">
-                    <form action="#" method="post">
+                    <form action="{% url 'proyecto_rol_importar' slug=proyecto.slug %}" method="post">
                         {% csrf_token %}
                         {{ form.as_p }}
                         <button class="btn btn-dark" type="submit">Importar</button>

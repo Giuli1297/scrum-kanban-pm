@@ -2,15 +2,15 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-6">
-        <h3 class="mb-2">{{ proyecto.nombre }}</h3>
-        <p class="mb-3">{{ proyecto.descripcion }}</p>
+    <div class="col-md-4"></div>
+    <div class="col-md-4">
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
             <button class="btn btn-dark" type="submit">Guardar</button>
         </form>
     </div>
+
     <div class="col-6">
 
 
@@ -21,10 +21,16 @@
 
         <div style="margin-block: 10px" ><a class="btn btn-primary btn-disabled " href="{% url 'create_us' proyecto.slug %}" >Product Backlog</a></div>
         <div style="margin-block: 10px" ><a class="btn btn-primary btn-flotante " href="{% url 'proyecto_rol' proyecto.slug %}" >Roles</a></div>
+        <div style="margin-block: 10px" ><a class="btn btn-primary btn-flotante " href="{% url 'crear_sprint' proyecto.slug %}" >Crear Sprint</a></div>
 
 
 
         <p class="mb-3">Manejo de Product Backlog Y Sprint iria aqui</p>
     </div>
+
+    <div class="col-md-4"></div>
+
+
+    <div class="col-md-4"></div>
 </div>
 {% endblock %}
