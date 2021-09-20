@@ -12,6 +12,7 @@
             {{ form.as_p }}
             <button class="btn btn-dark" type="submit">Guardar</button>
         </form>
+        <a class="mb-3 btn btn-danger" href="{% url 'proyecto_gestion' slug=proyecto.slug %}">Volver</a>
     </div>
 </div>
 {% endblock %}
