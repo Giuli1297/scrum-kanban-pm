@@ -11,4 +11,8 @@ admin.site.register(Rol)
 admin.site.register(Sprint)
 
 admin.site.register(UserInfo)
+
+admin.site.register(HistorialUs)
+
+
 admin.site.register(UserWorkTime)
