@@ -11,6 +11,8 @@ class ProyectoForm(forms.ModelForm):
        Clase de formulario para el modelo Proyecto
 
     """
+    scrum_master = forms.ModelChoiceField(
+        queryset=User.objects.filter(~Q(username='AnonymousUser') & ~Q(username='admin')))
 
     class Meta:
         model = Proyecto
@@ -34,28 +36,43 @@ class ProyectoForm(forms.ModelForm):
         }
 
 
-class ProyectoEditarSMForm(forms.ModelForm):
+class AgregarScrumMemberForm(forms.Form):
     """
            Clase de formulario para editar datos de un proyecto
     """
 
-    class Meta:
-        model = Proyecto
+    def __init__(self, *args, **kwargs):
+        self.slug = kwargs.pop('slug')
+        super(AgregarScrumMemberForm, self).__init__(*args, **kwargs)
+        self.proyecto = Proyecto.objects.get(slug=self.slug)
+        self.fields['scrum_member'].queryset = User.objects.filter(
+            ~Q(proyecto_asignado=self.proyecto) & ~Q(username='AnonymousUser') & ~Q(username='admin'))
 
-        fields = [
-            'scrum_member',
+    scrum_member = forms.ModelChoiceField(
+        queryset=None,
+        widget=forms.Select(attrs={'class': 'check-label'}))
+    lunes = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}), initial=0)
+    martes = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}), initial=0)
+    miercoles = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}), initial=0)
+    jueves = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}), initial=0)
+    viernes = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}), initial=0)
 
-        ]
 
-        labels = {
-            'scrum_member': 'Scrum Members',
+class QuitarScrumMemberForm(forms.Form):
+    """
+           Clase de formulario para editar datos de un proyecto
+    """
 
-        }
+    def __init__(self, *args, **kwargs):
+        self.slug = kwargs.pop('slug')
+        super(QuitarScrumMemberForm, self).__init__(*args, **kwargs)
+        self.proyecto = Proyecto.objects.get(slug=self.slug)
+        self.fields['scrum_member'].queryset = User.objects.filter(
+            Q(proyecto_asignado=self.proyecto) & ~Q(username='AnonymousUser') & ~Q(username='admin'))
 
-        widgets = {
-            'scrum_member': forms.CheckboxSelectMultiple(attrs={'class': 'check-label'}),
-
-        }
+    scrum_member = forms.ModelChoiceField(
+        queryset=None,
+        widget=forms.Select(attrs={'class': 'check-label'}))
 
 
 class ActualizarUsuarioForm(forms.ModelForm):
@@ -193,9 +210,10 @@ class ProyectoUs(forms.Form):
     descripción_de_user_story = forms.CharField(max_length=100, widget=forms.Textarea(attrs={
         'class': 'form-control'
     }))
-    prioridad_1_al_10=forms.IntegerField(widget=forms.NumberInput(attrs={
+    prioridad_1_al_10 = forms.IntegerField(widget=forms.NumberInput(attrs={
         'class': 'form-control'
     }))
+
 
 class ImportarRolProyectoForm(forms.Form):
     def __init__(self, *args, **kwargs):
@@ -232,6 +250,7 @@ class SprintFormCreate(forms.Form):
            'class': 'form-control'
        }))'''
 
+
 class SprintFormUpdate(forms.Form):
     def __init__(self, *args, **kwargs):
         self.slug = kwargs.pop('slug')
@@ -261,3 +280,23 @@ class AsignarDesarrolladorUs(forms.Form):
         widget=forms.Select(attrs={
             'class': 'check-label'
         }))
+
+
+class AsignarYEstimarUserStoryForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.usPk = kwargs.pop('usPk')
+        super(AsignarYEstimarUserStoryForm, self).__init__(*args, **kwargs)
+        self.ustory = UserStory.objects.get(pk=self.usPk)
+        self.fields['scrum_member_asignado'].queryset = User.objects.filter(proyecto_asignado=self.ustory.proyecto)
+
+    scrum_member_asignado = forms.ModelChoiceField(
+        queryset=None,
+        widget=forms.Select(attrs={
+            'class': 'check-label'
+        }))
+
+    horas_estimadas = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
+
+
+class PlanningPokerSMemberForm(forms.Form):
+    horas_estimadas = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}))

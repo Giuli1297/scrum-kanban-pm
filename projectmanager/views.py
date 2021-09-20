@@ -15,8 +15,9 @@ from django.views.generic import (
     TemplateView,
     DetailView
 )
-
+from scrum_kanban_pm.settings.development import EMAIL_HOST_USER
 from projectmanager.forms import *
+from django.core.mail import EmailMessage
 from .forms import UserForm, RolForm, UserFormDelete
 from django.shortcuts import render, redirect
 from django.views import View
@@ -28,11 +29,14 @@ from django.utils.http import urlsafe_base64_decode
 from .utils import account_activation_token, add_user_to_obj_group, add_perm_to_group, add_obj_perm_to_group, \
     add_users_to_obj_group, remove_all_perms_from_obj_group, remove_all_users_from_obj_group
 from guardian.shortcuts import get_perms
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 # Create your views here.
 from projectmanager.models import *
 
 from django.http import JsonResponse
 from django.urls import reverse_lazy
+from django.contrib.sites.shortcuts import get_current_site
 
 
 class UserAccessMixin(PermissionRequiredMixin):
@@ -225,13 +229,18 @@ class GestionProyectoView(UserAccessMixin, View):
                 name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('/')
+        tiempos_totales = {}
+        for scrum_member in proyecto.scrum_member.all():
+            for work in scrum_member.tiempos_de_trabajo.all():
+                if work.proyecto == proyecto:
+                    tiempos_totales[scrum_member.username] = work.totalEnProyecto
         context = {
             'proyecto': proyecto
         }
         return render(request, 'proyecto/gestion_proyecto.html', context)
 
 
-class AgregarSMember(UserAccessMixin, UpdateView):
+class AgregarSMember(UserAccessMixin, View):
     """
     Vista basada en clase el sirve para editar un proyecto nuevo por parte del SM
 
@@ -239,40 +248,148 @@ class AgregarSMember(UserAccessMixin, UpdateView):
 
         Parameters
         ----------
-        model
-            Modelo a utilizar seria el de Proyecto
 
         formclass
             El formulario a utilizar es el FormProyecto
     """
     raise_exception = False
     permission_required = ()
-    permission_required_obj = ('projectmanager.editar_proyecto',)
     permission_denied_message = "You don't have permissions"
     redirect_field_name = 'next'
 
-    model = Proyecto  # Indicar el modelo a utilizar
-    form_class = ProyectoEditarSMForm  # Indicar el formulario
-    template_name = 'proyecto/detail.html'  # Indicar el template
-    success_url = reverse_lazy('proyecto_listar')  # Redireccionar
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
+    def get(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.gestionar_scrum_members',),
-                                      self.object) and not request.user.groups.filter(
+                                      proyecto) and not request.user.groups.filter(
             name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('/')
-        return super().get(request, *args, **kwargs)
+        form = AgregarScrumMemberForm(slug=slug)
+        context = {
+            'proyecto': proyecto,
+            'form': form
+        }
+        return render(request, 'proyecto/agregar_scrum_member.html', context)
 
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
+    def post(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.gestionar_scrum_members',),
-                                      self.object) and not request.user.groups.filter(
+                                      proyecto) and not request.user.groups.filter(
             name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('/')
-        return super().post(request, *args, **kwargs)
+        form = AgregarScrumMemberForm(request.POST, slug=slug)
+        confirmation = False
+        if form.is_valid():
+            scrum_member = form.cleaned_data['scrum_member']
+            lunes = form.cleaned_data['lunes']
+            martes = form.cleaned_data['martes']
+            miercoles = form.cleaned_data['miercoles']
+            jueves = form.cleaned_data['jueves']
+            viernes = form.cleaned_data['viernes']
+            worktimes = scrum_member.tiempos_de_trabajo.all()
+            horas_ocupadas_lunes = 0
+            horas_ocupadas_martes = 0
+            horas_ocupadas_miercoles = 0
+            horas_ocupadas_jueves = 0
+            horas_ocupadas_viernes = 0
+            for worktime in worktimes:
+                if worktime.dia == 'LUN':
+                    horas_ocupadas_lunes += worktime.horas
+                elif worktime.dia == 'MAR':
+                    horas_ocupadas_martes += worktime.horas
+                elif worktime.dia == 'MIE':
+                    horas_ocupadas_miercoles += worktime.horas
+                elif worktime.dia == 'JUE':
+                    horas_ocupadas_jueves += worktime.horas
+                elif worktime.dia == 'VIE':
+                    horas_ocupadas_viernes += worktime.horas
+            if horas_ocupadas_lunes + lunes > 8:
+                messages.error(request,
+                               'Este usuario tiene ' + str(horas_ocupadas_lunes) +
+                               ' hs ocupadas los lunes, puede tener hasta ' + str(8.0 - horas_ocupadas_lunes) +
+                               ' hs agregadas.')
+                return redirect('proyecto_agregar_sm', slug=slug)
+            if horas_ocupadas_martes + martes > 8:
+                messages.error(request,
+                               'Este usuario tiene ' + str(horas_ocupadas_martes) +
+                               ' hs ocupadas los martes, puede tener hasta ' + str(8.0 - horas_ocupadas_martes) +
+                               ' hs agregadas.')
+                return redirect('proyecto_agregar_sm', slug=slug)
+            if horas_ocupadas_miercoles + miercoles > 8:
+                messages.error(request,
+                               'Este usuario tiene ' + str(horas_ocupadas_miercoles) +
+                               ' hs ocupadas los miercoles, puede tener hasta ' + str(8.0 - horas_ocupadas_miercoles) +
+                               ' hs agregadas.')
+                return redirect('proyecto_agregar_sm', slug=slug)
+            if horas_ocupadas_jueves + jueves > 8:
+                messages.error(request,
+                               'Este usuario tiene ' + str(horas_ocupadas_jueves) +
+                               ' hs ocupadas los jueves, puede tener hasta ' + str(8.0 - horas_ocupadas_jueves) +
+                               ' hs agregadas.')
+                return redirect('proyecto_agregar_sm', slug=slug)
+            if horas_ocupadas_viernes + viernes > 8:
+                messages.error(request,
+                               'Este usuario tiene ' + str(horas_ocupadas_viernes) +
+                               ' hs ocupadas los viernes, puede tener hasta ' + str(8.0 - horas_ocupadas_viernes) +
+                               ' hs agregadas.')
+                return redirect('proyecto_agregar_sm', slug=slug)
+            horas_totales = lunes + martes + miercoles + jueves + viernes
+
+            UserWorkTime.objects.create(proyecto=proyecto, desarrollador=scrum_member, dia='LUN', horas=lunes,
+                                        totalEnProyecto=horas_totales)
+            UserWorkTime.objects.create(proyecto=proyecto, desarrollador=scrum_member, dia='MAR', horas=martes,
+                                        totalEnProyecto=horas_totales)
+            UserWorkTime.objects.create(proyecto=proyecto, desarrollador=scrum_member, dia='MIE', horas=miercoles,
+                                        totalEnProyecto=horas_totales)
+            UserWorkTime.objects.create(proyecto=proyecto, desarrollador=scrum_member, dia='JUE', horas=jueves,
+                                        totalEnProyecto=horas_totales)
+            UserWorkTime.objects.create(proyecto=proyecto, desarrollador=scrum_member, dia='VIE', horas=viernes,
+                                        totalEnProyecto=horas_totales)
+            proyecto.scrum_member.add(scrum_member)
+            proyecto.save()
+
+        messages.success(request, 'Scrum Member agregado')
+        return redirect('proyecto_gestion', slug=slug)
+
+
+class QuitarSMember(View):
+    def get(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.gestionar_scrum_members',),
+                                      proyecto) and not request.user.groups.filter(
+            name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('/')
+        form = QuitarScrumMemberForm(slug=slug)
+        context = {
+            'proyecto': proyecto,
+            'form': form
+        }
+        return render(request, 'proyecto/agregar_scrum_member.html', context)
+
+    def post(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.gestionar_scrum_members',),
+                                      proyecto) and not request.user.groups.filter(
+            name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('/')
+        form = QuitarScrumMemberForm(request.POST, slug=slug)
+        if form.is_valid():
+            scrum_member = form.cleaned_data['scrum_member']
+            for user_story in scrum_member.desarrollador_asignado.all():
+                if user_story.proyecto == proyecto:
+                    messages.error(request, "Este usuario tiene user stories asignados")
+                    return redirect('proyecto_quitar_sm', slug=slug)
+            for work in scrum_member.tiempos_de_trabajo.all():
+                if work.proyecto == proyecto:
+                    work.delete()
+            proyecto.scrum_member.remove(scrum_member)
+            scrum_member.save()
+            proyecto.save()
+        messages.success(request, 'Scrum Member removido')
+        return redirect('proyecto_gestion', slug=slug)
 
 
 # TO-DO: Quitar editar cuando se inicie el proyecto y habilitar sprint
@@ -529,9 +646,9 @@ class UserStoryCreate(View):
 
         if form.is_valid():
             descripcion = form.cleaned_data['descripción_de_user_story']
-            prioridad=form.cleaned_data['prioridad_1_al_10']
-            if prioridad>0 and prioridad <11:
-                US=UserStory.objects.create(descripcion=descripcion,proyecto=proyecto,prioridad=prioridad)
+            prioridad = form.cleaned_data['prioridad_1_al_10']
+            if prioridad > 0 and prioridad < 11:
+                US = UserStory.objects.create(descripcion=descripcion, proyecto=proyecto, prioridad=prioridad)
                 US.save()
                 messages.success(request, "User Story Creado Correctamente!")
             else:
@@ -550,6 +667,7 @@ class UserStoryUpdate(View):
         con los nuevos datos de entrada
 
         '''
+
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
@@ -558,9 +676,9 @@ class UserStoryUpdate(View):
             return redirect('proyecto_gestion', slug=slug)
         US2 = UserStory.objects.get(pk=pk)
         form = ProyectoUs(initial={
-                                   'descripción_de_user_story': US2.descripcion,
-                                    'prioridad_1_al_10':US2.prioridad
-                                   })
+            'descripción_de_user_story': US2.descripcion,
+            'prioridad_1_al_10': US2.prioridad
+        })
         context = {
             'form': form,
             'proyecto': proyecto,
@@ -579,10 +697,13 @@ class UserStoryUpdate(View):
 
         if form.is_valid():
             descripcion = form.cleaned_data['descripción_de_user_story']
-            prioridad=form.cleaned_data['prioridad_1_al_10']
+            prioridad = form.cleaned_data['prioridad_1_al_10']
             if prioridad > 0 and prioridad < 11:
+                nuevoHistorial = HistorialUs(us=US2,descripcion=US2.descripcion)
+                nuevoHistorial.save()
                 US2.descripcion = descripcion
                 US2.prioridad=prioridad
+
                 US2.save()
                 messages.success(request, "User Story se actualizó Correctamente!")
             else:
@@ -600,6 +721,7 @@ class EliminarUs(View):
         Se obtiene el objeto por su pk y se hace un delete
 
     '''
+
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
@@ -791,6 +913,10 @@ class ImportarRolProyecto(UserAccessMixin, View):
 class CrearSprint(View):
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.gestionar_sprint_proyecto',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_rol', slug=slug)
         sprint = Sprint.objects.all()
         form = SprintFormCreate(slug=slug)
         context = {
@@ -802,22 +928,26 @@ class CrearSprint(View):
 
     def post(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.gestionar_sprint_proyecto',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_rol', slug=slug)
         form = SprintFormCreate(request.POST, slug=slug)
 
         if form.is_valid():
             nombre = form.cleaned_data['nombre']
             US = form.cleaned_data['UserStorys']
-            #duracion_estimada = form.cleaned_data['duracion_estimanda']
-            validar=Sprint.objects.filter(nombre=nombre).exists()
-            if(validar):
+            # duracion_estimada = form.cleaned_data['duracion_estimanda']
+            validar = Sprint.objects.filter(nombre=nombre).exists()
+            if (validar):
                 messages.error(request, "Ya existe Sprint con ese nombre")
             else:
 
-                sprint=Sprint.objects.create(nombre=nombre,proyecto=proyecto)
+                sprint = Sprint.objects.create(nombre=nombre, proyecto=proyecto)
                 sprint.save()
                 for us in US:
-                    userStory=UserStory.objects.get(nombre=us)
-                    userStory.sprint=sprint
+                    userStory = UserStory.objects.get(nombre=us)
+                    userStory.sprint = sprint
                     userStory.save()
                 messages.success(request, "Sprint Creado Correctamente!")
         else:
@@ -829,6 +959,10 @@ class ActualizarSprint(View):
 
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.gestionar_sprint_proyecto',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_rol', slug=slug)
         sprint = Sprint.objects.get(pk=pk)
         form = SprintFormCreate(initial={'nombre': sprint.nombre,
                                          'UserStorys': sprint.Sprint.all(),
@@ -842,6 +976,11 @@ class ActualizarSprint(View):
 
     def post(self, request, slug, pk, *args, **kwargs):
         sprint = Sprint.objects.get(pk=pk)
+        if not request.user.has_perms(('projectmanager.gestionar_sprint_proyecto',),
+                                      sprint.proyecto) and not request.user.groups.filter(
+            name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_rol', slug=slug)
 
         form = SprintFormCreate(request.POST, slug=slug)
 
@@ -870,6 +1009,10 @@ class ActualizarSprint(View):
 class listaUsSprintBacklog(View):
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.gestionar_sprint_proyecto',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_rol', slug=slug)
         sprint = Sprint.objects.get(pk=pk).Sprint.all()
         # form=SprintFormCreate(slug=slug)
         context = {
@@ -882,6 +1025,10 @@ class listaUsSprintBacklog(View):
 class UserStoryUpdateSprint(View):
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.gestionar_sprint_proyecto',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_rol', slug=slug)
         US = UserStory.objects.all()
         US2 = UserStory.objects.get(pk=pk)
         form = AsignarDesarrolladorUs(slug=slug)
@@ -895,7 +1042,6 @@ class UserStoryUpdateSprint(View):
     def post(self, request, slug, pk, *args, **kwargs):
         US2 = UserStory.objects.get(pk=pk)
         form = AsignarDesarrolladorUs(request.POST, slug=slug)
-        print("asdsadsadsada", form)
         if form.is_valid():
             desarrollador = form.cleaned_data['desarrolladorAsignado']
             US2.desarrolladorAsignado = desarrollador
@@ -903,12 +1049,20 @@ class UserStoryUpdateSprint(View):
             messages.success(request, "User Story se actualizó Correctamente!")
         else:
             messages.error(request, "Un Error a ocurrido")
-        return redirect('sprint_backlog',slug=slug,pk=US2.sprint.pk)
+        return redirect('sprint_backlog', slug=slug, pk=US2.sprint.pk)
 
 
 class CargarSprintBacklog(View):
     def get(self, request, usPk, sprintPk, *args, **kwargs):
         sprint = Sprint.objects.get(pk=sprintPk)
+        if not request.user.has_perms(('projectmanager.cargar_sprint_backlog_proyecto',),
+                                      sprint.proyecto) and not request.user.groups.filter(
+            name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=sprint.proyecto.slug)
+        if sprint.estado != 'conf1':
+            messages.error(request, "Ya no puedes agregar user stories al sprint backlog")
+            return redirect('proyecto_gestion', slug=sprint.proyecto.slug)
         ustory = UserStory.objects.get(pk=usPk)
         ustory.sprint = sprint
         ustory.save()
@@ -919,8 +1073,166 @@ class CargarSprintBacklog(View):
 class QuitarUSFromSprintBacklog(View):
     def get(self, request, usPk, *args, **kwargs):
         ustory = UserStory.objects.get(pk=usPk)
+        if not request.user.has_perms(('projectmanager.cargar_sprint_backlog_proyecto',),
+                                      ustory.proyecto) and not request.user.groups.filter(
+            name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
         ustory.sprint = None
+        ustory.desarrolladorAsignado = None
+        ustory.tiempoEstimado = 0
         ustory.save()
         messages.success(request, 'User Story removido del SprintBacklog')
         return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
+
+
+class listarHistorial(View):
+    def get(self,request,slug,pk):
+        proyecto = Proyecto.objects.get(slug=slug)
+        ustory=UserStory.objects.get(pk=pk).UsHistorial.all()
+        print(ustory)
+        context={
+            'history':ustory,
+            'proyecto':proyecto
+        }
+        return render(request,'UserStory/historial.html',context)
+
+
+class AsignarYEstimarUserStoryView(View):
+    def get(self, request, usPk, *args, **kwargs):
+        ustory = UserStory.objects.get(pk=usPk)
+        if not request.user.has_perms(('projectmanager.estimar_userstory_proyecto',),
+                                      ustory.proyecto) and not request.user.groups.filter(
+            name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
+        form = AsignarYEstimarUserStoryForm(usPk=usPk, initial={
+            'horas_estimadas': ustory.tiempoEstimado,
+            'scrum_member_asignado': ustory.desarrolladorAsignado
+        })
+        context = {
+            'ustory': ustory,
+            'form': form
+        }
+        return render(request, 'sprint/estimar_us_sm.html', context)
+
+    def post(self, request, usPk, *args, **kwargs):
+        ustory = UserStory.objects.get(pk=usPk)
+        if not request.user.has_perms(('projectmanager.estimar_userstory_proyecto',),
+                                      ustory.proyecto) and not request.user.groups.filter(
+            name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
+        form = AsignarYEstimarUserStoryForm(request.POST, usPk=usPk)
+        if form.is_valid():
+            horasEstimadas = form.cleaned_data['horas_estimadas']
+            sm_asignado = form.cleaned_data['scrum_member_asignado']
+            ustory.desarrolladorAsignado = sm_asignado
+            ustory.tiempoEstimadoSMaster = horasEstimadas
+            ustory.save()
+        else:
+            messages.error(request, "Un error a ocurrido")
+            return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
+        messages.success(request, "Se ha asignado y estimado el User Story")
+        return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
+
+
+class PlanningPokerView(View):
+    def get(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.iniciar_ppoker_proyecto',),
+                                      proyecto) and not request.user.groups.filter(
+            name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=proyecto.slug)
+        if not proyecto.sprint_actual.sprint_backlog.exists():
+            messages.error(request, 'No tienes user stories!')
+            return redirect('proyecto_gestion', slug=proyecto.slug)
+        if proyecto.sprint_actual.estado != 'conf1':
+            messages.error(request, 'No se puede realizar planning poker')
+            return redirect('proyecto_gestion', slug=proyecto.slug)
+        for us in proyecto.sprint_actual.sprint_backlog.all():
+            if not us.desarrolladorAsignado != None:
+                messages.error(request, "Debes asignar todos los User Stories")
+                return redirect('proyecto_gestion', slug=slug)
+        proyecto.sprint_actual.estado = 'conf2'
+        proyecto.sprint_actual.save()
+        for us in proyecto.sprint_actual.sprint_backlog.all():
+            current_site = get_current_site(request)
+            email_body = {
+                'user': us.desarrolladorAsignado,
+                'domain': current_site.domain,
+                'uid': urlsafe_base64_encode(force_bytes(us.desarrolladorAsignado.pk)),
+                'token': account_activation_token.make_token(us.desarrolladorAsignado),
+                'usPk': us.pk
+            }
+
+            link = reverse('planning_poker_smember', kwargs={
+                'uidb64': email_body['uid'], 'token': email_body['token'], 'usPk': email_body['usPk']})
+
+            email_subject = 'Planning Poker User Storie: ' + us.descripcion
+
+            activate_url = 'http://' + current_site.domain + link
+
+            email = EmailMessage(
+                email_subject,
+                'Realize su estimacions del user story: ' + activate_url,
+                EMAIL_HOST_USER,
+                [us.desarrolladorAsignado.email],
+            )
+            email.send(fail_silently=False)
+        return redirect('proyecto_gestion', slug=proyecto.slug)
+
+
+class PlanningPokerSMemberView(View):
+    def get(self, request, uidb64, token, usPk, *args, **kwargs):
+        try:
+            id = force_text(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=id)
+
+            if not account_activation_token.check_token(user, token):
+                messages.error(request, "Token incorrecto")
+                return redirect('home')
+
+            ustory = UserStory.objects.get(pk=usPk)
+            if ustory.tiempoEstimado != 0:
+                messages.error(request, 'Este User Story ya a sido estimado')
+                return redirect('home')
+            form = PlanningPokerSMemberForm()
+            context = {
+                'user_story': ustory,
+                'form': form
+            }
+            return render(request, 'sprint/planning_poker_scrummember.html', context)
+        except Exception as ex:
+            messages.error(request, "Error de Token")
+            return redirect('home')
+
+    def post(self, request, uidb64, token, usPk, *args, **kwargs):
+
+        try:
+            id = force_text(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=id)
+
+            if not account_activation_token.check_token(user, token):
+                messages.error(request, "Token incorrecto")
+                return redirect('home')
+
+            user_story = UserStory.objects.get(pk=usPk)
+
+            if user_story.tiempoEstimado != 0:
+                messages.error(request, 'Este User Story ya a sido estimado')
+                return redirect('home')
+
+            form = PlanningPokerSMemberForm(request.POST)
+            if form.is_valid():
+                horas_estimadas_smember = float(form.cleaned_data['horas_estimadas'])
+                horas_estimadas_smaster = float(user_story.tiempoEstimadoSMaster)
+                user_story.tiempoEstimado = float((horas_estimadas_smaster + horas_estimadas_smember) / 2)
+                user_story.save()
+            return redirect('proyecto_gestion', slug=user_story.proyecto.slug)
+        except Exception as ex:
+            messages.error(request, "Error de Token")
+            return redirect('home')
+
 
