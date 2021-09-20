@@ -229,13 +229,18 @@ class GestionProyectoView(UserAccessMixin, View):
                 name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('/')
+        tiempos_totales = {}
+        for scrum_member in proyecto.scrum_member.all():
+            for work in scrum_member.tiempos_de_trabajo.all():
+                if work.proyecto == proyecto:
+                    tiempos_totales[scrum_member.username] = work.totalEnProyecto
         context = {
             'proyecto': proyecto
         }
         return render(request, 'proyecto/gestion_proyecto.html', context)
 
 
-class AgregarSMember(UserAccessMixin, UpdateView):
+class AgregarSMember(UserAccessMixin, View):
     """
     Vista basada en clase el sirve para editar un proyecto nuevo por parte del SM
 
@@ -243,44 +248,148 @@ class AgregarSMember(UserAccessMixin, UpdateView):
 
         Parameters
         ----------
-        model
-            Modelo a utilizar seria el de Proyecto
 
         formclass
             El formulario a utilizar es el FormProyecto
     """
     raise_exception = False
     permission_required = ()
-    permission_required_obj = ('projectmanager.editar_proyecto',)
     permission_denied_message = "You don't have permissions"
     redirect_field_name = 'next'
 
-    model = Proyecto  # Indicar el modelo a utilizar
-    form_class = ProyectoEditarSMForm  # Indicar el formulario
-    template_name = 'proyecto/detail.html'  # Indicar el template
-    success_url = reverse_lazy('proyecto_listar')  # Redireccionar
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        self.success_url = reverse_lazy('proyecto_gestion', slug=self.object.slug)
+    def get(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.gestionar_scrum_members',),
-                                      self.object) and not request.user.groups.filter(
+                                      proyecto) and not request.user.groups.filter(
             name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('/')
-        return super().get(request, *args, **kwargs)
+        form = AgregarScrumMemberForm(slug=slug)
+        context = {
+            'proyecto': proyecto,
+            'form': form
+        }
+        return render(request, 'proyecto/agregar_scrum_member.html', context)
 
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
+    def post(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.gestionar_scrum_members',),
-                                      self.object) and not request.user.groups.filter(
+                                      proyecto) and not request.user.groups.filter(
             name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('/')
-        return super().post(request, *args, **kwargs)
+        form = AgregarScrumMemberForm(request.POST, slug=slug)
+        confirmation = False
+        if form.is_valid():
+            scrum_member = form.cleaned_data['scrum_member']
+            lunes = form.cleaned_data['lunes']
+            martes = form.cleaned_data['martes']
+            miercoles = form.cleaned_data['miercoles']
+            jueves = form.cleaned_data['jueves']
+            viernes = form.cleaned_data['viernes']
+            worktimes = scrum_member.tiempos_de_trabajo.all()
+            horas_ocupadas_lunes = 0
+            horas_ocupadas_martes = 0
+            horas_ocupadas_miercoles = 0
+            horas_ocupadas_jueves = 0
+            horas_ocupadas_viernes = 0
+            for worktime in worktimes:
+                if worktime.dia == 'LUN':
+                    horas_ocupadas_lunes += worktime.horas
+                elif worktime.dia == 'MAR':
+                    horas_ocupadas_martes += worktime.horas
+                elif worktime.dia == 'MIE':
+                    horas_ocupadas_miercoles += worktime.horas
+                elif worktime.dia == 'JUE':
+                    horas_ocupadas_jueves += worktime.horas
+                elif worktime.dia == 'VIE':
+                    horas_ocupadas_viernes += worktime.horas
+            if horas_ocupadas_lunes + lunes > 8:
+                messages.error(request,
+                               'Este usuario tiene ' + str(horas_ocupadas_lunes) +
+                               ' hs ocupadas los lunes, puede tener hasta ' + str(8.0 - horas_ocupadas_lunes) +
+                               ' hs agregadas.')
+                return redirect('proyecto_agregar_sm', slug=slug)
+            if horas_ocupadas_martes + martes > 8:
+                messages.error(request,
+                               'Este usuario tiene ' + str(horas_ocupadas_martes) +
+                               ' hs ocupadas los martes, puede tener hasta ' + str(8.0 - horas_ocupadas_martes) +
+                               ' hs agregadas.')
+                return redirect('proyecto_agregar_sm', slug=slug)
+            if horas_ocupadas_miercoles + miercoles > 8:
+                messages.error(request,
+                               'Este usuario tiene ' + str(horas_ocupadas_miercoles) +
+                               ' hs ocupadas los miercoles, puede tener hasta ' + str(8.0 - horas_ocupadas_miercoles) +
+                               ' hs agregadas.')
+                return redirect('proyecto_agregar_sm', slug=slug)
+            if horas_ocupadas_jueves + jueves > 8:
+                messages.error(request,
+                               'Este usuario tiene ' + str(horas_ocupadas_jueves) +
+                               ' hs ocupadas los jueves, puede tener hasta ' + str(8.0 - horas_ocupadas_jueves) +
+                               ' hs agregadas.')
+                return redirect('proyecto_agregar_sm', slug=slug)
+            if horas_ocupadas_viernes + viernes > 8:
+                messages.error(request,
+                               'Este usuario tiene ' + str(horas_ocupadas_viernes) +
+                               ' hs ocupadas los viernes, puede tener hasta ' + str(8.0 - horas_ocupadas_viernes) +
+                               ' hs agregadas.')
+                return redirect('proyecto_agregar_sm', slug=slug)
+            horas_totales = lunes + martes + miercoles + jueves + viernes
 
-    def get_success_url(self, *args, **kwargs):
-        return reverse_lazy('proyecto_gestion', args=[self.kwargs['slug']])
+            UserWorkTime.objects.create(proyecto=proyecto, desarrollador=scrum_member, dia='LUN', horas=lunes,
+                                        totalEnProyecto=horas_totales)
+            UserWorkTime.objects.create(proyecto=proyecto, desarrollador=scrum_member, dia='MAR', horas=martes,
+                                        totalEnProyecto=horas_totales)
+            UserWorkTime.objects.create(proyecto=proyecto, desarrollador=scrum_member, dia='MIE', horas=miercoles,
+                                        totalEnProyecto=horas_totales)
+            UserWorkTime.objects.create(proyecto=proyecto, desarrollador=scrum_member, dia='JUE', horas=jueves,
+                                        totalEnProyecto=horas_totales)
+            UserWorkTime.objects.create(proyecto=proyecto, desarrollador=scrum_member, dia='VIE', horas=viernes,
+                                        totalEnProyecto=horas_totales)
+            proyecto.scrum_member.add(scrum_member)
+            proyecto.save()
+
+        messages.success(request, 'Scrum Member agregado')
+        return redirect('proyecto_gestion', slug=slug)
+
+
+class QuitarSMember(View):
+    def get(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.gestionar_scrum_members',),
+                                      proyecto) and not request.user.groups.filter(
+            name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('/')
+        form = QuitarScrumMemberForm(slug=slug)
+        context = {
+            'proyecto': proyecto,
+            'form': form
+        }
+        return render(request, 'proyecto/agregar_scrum_member.html', context)
+
+    def post(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.gestionar_scrum_members',),
+                                      proyecto) and not request.user.groups.filter(
+            name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('/')
+        form = QuitarScrumMemberForm(request.POST, slug=slug)
+        if form.is_valid():
+            scrum_member = form.cleaned_data['scrum_member']
+            for user_story in scrum_member.desarrollador_asignado.all():
+                if user_story.proyecto == proyecto:
+                    messages.error(request, "Este usuario tiene user stories asignados")
+                    return redirect('proyecto_quitar_sm', slug=slug)
+            for work in scrum_member.tiempos_de_trabajo.all():
+                if work.proyecto == proyecto:
+                    work.delete()
+            proyecto.scrum_member.remove(scrum_member)
+            scrum_member.save()
+            proyecto.save()
+        messages.success(request, 'Scrum Member removido')
+        return redirect('proyecto_gestion', slug=slug)
 
 
 # TO-DO: Quitar editar cuando se inicie el proyecto y habilitar sprint

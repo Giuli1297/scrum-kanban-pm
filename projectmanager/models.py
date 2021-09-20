@@ -203,3 +203,22 @@ class UserInfo(models.Model):
     """
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='info', primary_key=True)
     horasDisponibles = models.FloatField(default=40.0)
+
+
+class UserWorkTime(models.Model):
+    """
+    Modelo que sirve para administrar las horas de trabajo de un usuario
+    """
+    DIAS_LABORALES = (
+        ('LUN', 'LUNES'),
+        ('MAR', 'MARTES'),
+        ('MIE', 'MIERCOLES'),
+        ('JUE', 'JUEVES'),
+        ('VIE', 'VIERNES'),
+    )
+
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='tiempos_de_usuarios')
+    desarrollador = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tiempos_de_trabajo')
+    dia = models.CharField(max_length=20, choices=DIAS_LABORALES)
+    horas = models.FloatField(default=0.0)
+    totalEnProyecto = models.FloatField(blank=True, null=True)

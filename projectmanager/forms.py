@@ -36,27 +36,43 @@ class ProyectoForm(forms.ModelForm):
         }
 
 
-class ProyectoEditarSMForm(forms.ModelForm):
+class AgregarScrumMemberForm(forms.Form):
     """
            Clase de formulario para editar datos de un proyecto
     """
-    scrum_member = forms.ModelMultipleChoiceField(
-        queryset=User.objects.filter(
-            ~Q(username='AnonymousUser') & ~Q(username='admin') & Q(desarrollador_asignado=None)),
-        widget=forms.CheckboxSelectMultiple(attrs={'class': 'check-label'}))
 
-    class Meta:
-        model = Proyecto
+    def __init__(self, *args, **kwargs):
+        self.slug = kwargs.pop('slug')
+        super(AgregarScrumMemberForm, self).__init__(*args, **kwargs)
+        self.proyecto = Proyecto.objects.get(slug=self.slug)
+        self.fields['scrum_member'].queryset = User.objects.filter(
+            ~Q(proyecto_asignado=self.proyecto) & ~Q(username='AnonymousUser') & ~Q(username='admin'))
 
-        fields = [
-            'scrum_member',
+    scrum_member = forms.ModelChoiceField(
+        queryset=None,
+        widget=forms.Select(attrs={'class': 'check-label'}))
+    lunes = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}), initial=0)
+    martes = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}), initial=0)
+    miercoles = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}), initial=0)
+    jueves = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}), initial=0)
+    viernes = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}), initial=0)
 
-        ]
 
-        labels = {
-            'scrum_member': 'Scrum Members',
+class QuitarScrumMemberForm(forms.Form):
+    """
+           Clase de formulario para editar datos de un proyecto
+    """
 
-        }
+    def __init__(self, *args, **kwargs):
+        self.slug = kwargs.pop('slug')
+        super(QuitarScrumMemberForm, self).__init__(*args, **kwargs)
+        self.proyecto = Proyecto.objects.get(slug=self.slug)
+        self.fields['scrum_member'].queryset = User.objects.filter(
+            Q(proyecto_asignado=self.proyecto) & ~Q(username='AnonymousUser') & ~Q(username='admin'))
+
+    scrum_member = forms.ModelChoiceField(
+        queryset=None,
+        widget=forms.Select(attrs={'class': 'check-label'}))
 
 
 class ActualizarUsuarioForm(forms.ModelForm):
