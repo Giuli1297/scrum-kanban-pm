@@ -1,4 +1,4 @@
-#import pytest as pytest
+# import pytest as pytest
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.test import TestCase, Client
@@ -14,7 +14,7 @@ from projectmanager import views
 from django.urls.base import reverse, resolve
 # Create your tests here.
 from allauth.account.forms import BaseSignupForm, ResetPasswordForm, SignupForm
-from projectmanager.models import Proyecto, rol
+from projectmanager.models import Proyecto, Rol
 from projectmanager.views import *
 
 
@@ -22,6 +22,7 @@ class TestModeloProyecto(TestCase):
     """
     Clase de Testing para formularios
     """
+
     def setUp(self):
         """
         Deja listas las variables para que se utilicen en los tests.
@@ -54,7 +55,7 @@ class TestModeloProyecto(TestCase):
         Test product model slug and URL reverse
         """
         loin = self.client.login(username='testuser', password='secret')
-        url = reverse('proyecto_editar_sm', args=[self.data1.slug])
+        url = reverse('proyecto_agregar_sm', args=[self.data1.slug])
         self.assertEqual(url, '/proyectos/test/editarsm/')
 
 
@@ -132,7 +133,6 @@ class TestModels(TestCase):
         Testea que una vez creado el proyeto el slug sea correcto
         """
         self.assertEquals(self.proyecto.slug, 'slug-1')
-
 
 
 class TestModelss(TestCase):
