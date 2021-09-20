@@ -14,7 +14,11 @@ from projectmanager import views
 from django.urls.base import reverse, resolve
 # Create your tests here.
 from allauth.account.forms import BaseSignupForm, ResetPasswordForm, SignupForm
+
+from projectmanager.models import Proyecto
+
 from projectmanager.models import Proyecto, Rol
+
 from projectmanager.views import *
 
 
@@ -176,3 +180,61 @@ class TestModelss(TestCase):
         """
         self.roles = self.roles.delete()
         self.assertFalse(self.user.groups.filter(name="grupo1"))
+
+
+class TestModelUs(TestCase):
+    '''
+    clase para verificar las asignaciones de proyectos, usuarios, sprint a un user story
+
+    '''
+    def setUp(self):
+        descripcion_us="us"
+        self.userStorys=UserStory.objects.create(descripcion=descripcion_us)
+        self.userStorys.save()
+        self.user = User.objects.create(username='prueba')
+        self.user.set_password('12345')
+        self.user.save()
+        self.proyecto=Proyecto.objects.create(nombre='proyecto1',scrum_master=self.user)
+        self.proyecto.save()
+        self.sprint=Sprint.objects.create(proyecto=self.proyecto,proyecto_actual=self.proyecto)
+        self.sprint.save()
+
+    def test_create_us(self):
+        '''
+            verifica s se creó correctamente un user story
+        '''
+        self.assertEqual(self.userStorys.descripcion, "us")
+
+    def test_asignar_us(self):
+        '''
+            se crea y se asigna un usuario a un user story
+        :return:
+        '''
+        self.userStorys.desarrolladorAsignado=self.user
+        self.assertEqual(self.userStorys.desarrolladorAsignado.username,'prueba',"verifica si se asignó correctamente un usuario a un user story")
+    def test_asignar_proyecto_a_us(self):
+        '''
+        se crea y se asigna un proyecto a un user story
+        :return:
+        '''
+        self.userStorys.proyecto=self.proyecto
+        self.assertEqual(self.userStorys.proyecto.nombre,"proyecto1","verifica si se asignó correctamente un proyecto a un user story")
+    def test_asignar_sprint_a_us(self):
+        '''
+        se crea y se asigna un sprint a un user story
+        :return:
+        '''
+        self.userStorys.sprint=self.sprint
+        self.assertEqual(self.userStorys.sprint.proyecto.nombre,"proyecto1","verifica si se asignó correctamente un sprint a un user story")
+
+    def test_historial_us(self):
+        '''
+        se crea un historial y se le asigna un user story
+        :return:
+        '''
+        self.historial=HistorialUs.objects.create(us=self.userStorys)
+        self.assertEquals(self.historial.us,self.userStorys,"verifica si se asigna bien un user story a un objeto historial de user story  ")
+
+
+
+

@@ -1108,10 +1108,11 @@ class listarHistorial(View):
     def get(self, request, slug, pk):
         proyecto = Proyecto.objects.get(slug=slug)
         ustory = UserStory.objects.get(pk=pk).UsHistorial.all()
-        print(ustory)
+        us=UserStory.objects.get(pk=pk)
         context = {
             'history': ustory,
-            'proyecto': proyecto
+            'proyecto': proyecto,
+            'us':us
         }
         return render(request, 'UserStory/historial.html', context)
 
@@ -1282,6 +1283,7 @@ class EstimarSprint(View):
             sprint.estado = 'conf3'
             sprint.save()
             messages.success(request, "Se ha asignado la estimación al Sprint")
+
         else:
             messages.error(request, "Un error a ocurrido")
 

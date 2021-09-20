@@ -41,17 +41,22 @@ right: 20px;
             <div class="card card-default" >
               <div class="card-header">
                 <h3 class="card-title">
-                    SPRINT BACKLOG
+                    Historial de User Story {{ us.descripcion }}
                 </h3>
               </div>
               <!-- /.card-header -->
               <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <td><h4>Descripcion</h4></td>
+                    </tr>
+                </table>
                 <table class="table" id="data">
                     {% for list in history %}
+
                         <tr>
 
                             <td>{{ list.descripcion }}</td>
-                          <td> <a class="btn btn-primary btn-warning " href="{% url 'configurar_us' slug=proyecto.slug pk=list.pk %}" >Asignar desarrollador</a></td>
 
 
                         </tr>
