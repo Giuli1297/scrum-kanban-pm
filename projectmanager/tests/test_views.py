@@ -63,13 +63,13 @@ class TestViews(TestCase):
         self.assertEquals(response.status_code, 200)
         self.assertTemplateUsed(response, 'proyecto/proyecto_form.html')
 
-    def test_proyecto_editarsm_GET(self):
+    def test_proyecto_agregarsm_GET(self):
         """
         Prueba que devuelva el template correcto
         """
-        response = self.client.get(reverse('proyecto_editar_sm', args=[self.proyecto.slug]))
+        response = self.client.get(reverse('proyecto_agregar_sm', args=[self.proyecto.slug]))
         self.assertEquals(response.status_code, 200)
-        self.assertTemplateUsed(response, 'proyecto/detail.html')
+        self.assertTemplateUsed(response, 'proyecto/agregar_scrum_member.html')
 
     # def test_proyecto_crear_POST(self):
     #     form = ProyectoForm(data={

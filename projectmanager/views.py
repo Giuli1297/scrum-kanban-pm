@@ -675,6 +675,9 @@ class UserStoryUpdate(View):
             messages.error(request, "No tienes permisos para eso")
             return redirect('proyecto_gestion', slug=slug)
         US2 = UserStory.objects.get(pk=pk)
+        if US2.desarrolladorAsignado:
+            messages.error(request, 'User Story en sprint')
+            return redirect('create_us', slug=slug)
         form = ProyectoUs(initial={
             'descripción_de_user_story': US2.descripcion,
             'prioridad_1_al_10': US2.prioridad
@@ -693,16 +696,19 @@ class UserStoryUpdate(View):
             messages.error(request, "No tienes permisos para eso")
             return redirect('proyecto_gestion', slug=slug)
         US2 = UserStory.objects.get(pk=pk)
+        if US2.desarrolladorAsignado:
+            messages.error(request, 'User Story en sprint')
+            return redirect('create_us', slug=slug)
         form = ProyectoUs(request.POST)
 
         if form.is_valid():
             descripcion = form.cleaned_data['descripción_de_user_story']
             prioridad = form.cleaned_data['prioridad_1_al_10']
             if prioridad > 0 and prioridad < 11:
-                nuevoHistorial = HistorialUs(us=US2,descripcion=US2.descripcion)
+                nuevoHistorial = HistorialUs(us=US2, descripcion=US2.descripcion)
                 nuevoHistorial.save()
                 US2.descripcion = descripcion
-                US2.prioridad=prioridad
+                US2.prioridad = prioridad
 
                 US2.save()
                 messages.success(request, "User Story se actualizó Correctamente!")
@@ -729,6 +735,9 @@ class EliminarUs(View):
             messages.error(request, "No tienes permisos para eso")
             return redirect('proyecto_gestion', slug=slug)
         US = UserStory.objects.get(pk=pk)
+        if US.desarrolladorAsignado:
+            messages.error(request, 'User Story en sprint')
+            return redirect('create_us', slug=slug)
         US.delete()
         messages.success(request, "User Story Eliminado")
         return redirect('create_us', slug=slug)
@@ -1031,6 +1040,9 @@ class UserStoryUpdateSprint(View):
             return redirect('proyecto_rol', slug=slug)
         US = UserStory.objects.all()
         US2 = UserStory.objects.get(pk=pk)
+        if US2.desarrolladorAsignado:
+            messages.error(request, 'User Story en sprint')
+            return redirect('create_us', slug=slug)
         form = AsignarDesarrolladorUs(slug=slug)
         context = {
             'form': form,
@@ -1087,15 +1099,16 @@ class QuitarUSFromSprintBacklog(View):
 
 
 class listarHistorial(View):
-    def get(self,request,slug,pk):
+    def get(self, request, slug, pk):
         proyecto = Proyecto.objects.get(slug=slug)
-        ustory=UserStory.objects.get(pk=pk).UsHistorial.all()
-        print(ustory)
-        context={
-            'history':ustory,
-            'proyecto':proyecto
+        ustory = UserStory.objects.get(pk=pk).UsHistorial.all()
+        us=UserStory.objects.get(pk=pk)
+        context = {
+            'history': ustory,
+            'proyecto': proyecto,
+            'us':us
         }
-        return render(request,'UserStory/historial.html',context)
+        return render(request, 'UserStory/historial.html', context)
 
 
 class AsignarYEstimarUserStoryView(View):
@@ -1248,24 +1261,23 @@ class EstimarSprint(View):
         # proyecto.sprint_actual.duracion_estimada
         context = {
             'horas': horas,
-            'form': form
+            'form': form,
+            'proyecto': proyecto
         }
         return render(request, 'sprint/estimarSprint.html', context)
+
     def post(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         sprint = proyecto.sprint_actual
-        form=EstimacionSprint(request.POST)
+        form = EstimacionSprint(request.POST)
 
         if form.is_valid():
             horasEstimadas = form.cleaned_data['horas_estimadas']
-            print(sprint.duracion_estimada)
-            if ( not sprint.duracion_estimada):
-                sprint.duracion_estimada = horasEstimadas
-                sprint.estado = 'conf3'
-                sprint.save()
-                messages.success(request, "Se ha asignado la estimación al Sprint")
-            else:
-                messages.error(request, "Ya se estimó tiempo")
+            sprint.duracion_estimada = horasEstimadas
+            sprint.estado = 'conf3'
+            sprint.save()
+            messages.success(request, "Se ha asignado la estimación al Sprint")
+
         else:
             messages.error(request, "Un error a ocurrido")
 

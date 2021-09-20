@@ -36,12 +36,12 @@ class TestUrls(SimpleTestCase):
         url = reverse('proyecto_editar', args=['slug'])
         self.assertEquals(resolve(url).func.view_class, views.ProyectoUpdate)
 
-    def test_editarsm_proyecto_url_is_resolved(self):
+    def test_agregarsm_proyecto_url_is_resolved(self):
         """
         Test para verificar que se carga correctamente la vista correspondiente
         """
-        url = reverse('proyecto_editar_sm', args=['slug'])
-        self.assertEquals(resolve(url).func.view_class, views.ProyectoSMUpdate)
+        url = reverse('proyecto_agregar_sm', args=['slug'])
+        self.assertEquals(resolve(url).func.view_class, views.AgregarSMember)
 
     def test_iniciar_proyecto_url_is_resolved(self):
         """
