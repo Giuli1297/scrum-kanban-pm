@@ -31,12 +31,9 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
-<<<<<<< HEAD
-=======
     'guardian',
     # 'allauth.socialaccount.providers.facebook',
     # 'allauth.socialaccount.providers.github',
->>>>>>> nelson
 
     'crispy_forms',
     # Local Apps
