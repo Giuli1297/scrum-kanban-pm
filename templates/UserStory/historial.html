@@ -35,44 +35,24 @@ right: 20px;
 
 {% block body %}
 <div >
-<div class="col-md-12  "  >
-            <div class="card card-default" >
-              <div class="card-header">
-                <h3 class="card-title">
-                    CREAR USER STORY PARA PROYECTO {{ proyecto.nombre }}
-                </h3>
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body">
-                <table class="table" id="data">
-                   <form action="{% url 'create_us' proyecto.slug  %}" method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit">Guardar</button>
-                </form>
 
-                </table>
-              </div>
-
-            </div>
-          </div>
 
  <div class="col-md-12  "  >
             <div class="card card-default" >
               <div class="card-header">
                 <h3 class="card-title">
-                    PRODUCT BACKLOG
+                    SPRINT BACKLOG
                 </h3>
               </div>
               <!-- /.card-header -->
               <div class="card-body">
                 <table class="table" id="data">
-                    {% for list in US.all %}
+                    {% for list in history %}
                         <tr>
+
                             <td>{{ list.descripcion }}</td>
-                          <td> <a class="btn btn-primary btn-warning " href="{% url 'update_us'  slug=proyecto.slug pk=list.pk %}" >Editar</a></td>
-                            <td> <a class="btn btn-danger btn-flat" href="{% url 'elimnar_us' slug=proyecto.slug pk=list.pk %}" >Eliminar</a></td>
-                            <td> <a class="btn btn-danger btn-flat" href="{% url 'historial_us' slug=proyecto.slug pk=list.pk %}" >Historial</a></td>
+                          <td> <a class="btn btn-primary btn-warning " href="{% url 'configurar_us' slug=proyecto.slug pk=list.pk %}" >Asignar desarrollador</a></td>
+
 
                         </tr>
 
@@ -83,7 +63,6 @@ right: 20px;
 
             </div>
           </div>
-
 <a href="{% url 'create_us' proyecto.slug %}" class="btn-flotante">Nuevo User Story</a>
 </div>
 {% endblock %}

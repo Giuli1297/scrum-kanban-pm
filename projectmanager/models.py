@@ -3,7 +3,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.template.defaultfilters import slugify
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from guardian.shortcuts import assign_perm
 from django.contrib.auth.models import Permission
 
@@ -73,7 +73,10 @@ class Proyecto(models.Model):
                        ('iniciar_proyecto', 'Puede iniciar proyecto'),
                        ('gestionar_roles_proyecto', 'Puede Agregar/Asignar/Modificar/Eliminar Roles de un Proyecto'),
                        ('importar_roles_proyecto', 'Puede Importar roles de proyecto'),
-                       ('gestionar_user_stories', 'Puede Agregar/Modificar/Eliminar User Stories de un proyecto'),)
+                       ('gestionar_user_stories', 'Puede Agregar/Modificar/Eliminar User Stories de un proyecto'),
+                       ('iniciar_ppoker_proyecto', 'Puede iniciar planning poker de un sprint'),
+                       ('estimar_userstory_proyecto', 'Puede estimar User Stories en el Sprint Backlog'),
+                       ('cargar_sprint_backlog_proyecto', 'Puede cargar User Stories en el Sprint Backlog'))
         default_permissions = ()
         ordering = ('-fecha_inicio',)
 
@@ -176,7 +179,7 @@ class Sprint(models.Model):
         ('en_desarrollo', 'Sprint en desarrollo'),
     )
     fecha_inicio = models.DateTimeField(null=True, blank=True)
-    duracion_estimada = models.IntegerField(null=True, blank=True)
+    duracion_estimada = models.FloatField(null=True, blank=True)
     fecha_finalizacion = models.DateTimeField(null=True, blank=True)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='conf1')
     proyecto = models.ForeignKey(Proyecto, related_name="registro_sprints", on_delete=models.CASCADE, null=True)
@@ -186,6 +189,7 @@ class Sprint(models.Model):
     class Meta:
         verbose_name = 'Sprint'
         verbose_name_plural = 'Sprints'
+
 
 
 class UserStory(models.Model):
@@ -226,23 +230,70 @@ class UserStory(models.Model):
         ('QA', 'QA'),
         ('Release', 'Release')
     )
-    nombre = models.CharField(blank=True, max_length=100, unique=True)
     descripcion = models.TextField(blank=True, max_length=255)
-    tiempoEstimado = models.IntegerField(validators=[MinValueValidator(0)], default=0)
+    tiempoEstimadoSMaster = models.FloatField(default=0.0)
+    tiempoEstimado = models.FloatField(validators=[MinValueValidator(0)], default=0)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Nuevo')
-    tiempoEnDesarrollo = models.IntegerField(validators=[MinValueValidator(0)], default=0)
-    desarrolladorAsignado = models.ForeignKey(User, related_name='desarrollador_asignado', null=True, blank=True,
-                                              on_delete=models.CASCADE)
-    proyecto = models.ForeignKey(Proyecto, related_name='product_backlog', null=True, on_delete=models.CASCADE)
-    sprint = models.ForeignKey(Sprint, related_name='sprint_backlog', null=True, blank=True, on_delete=models.SET_NULL)
+
+    tiempoEnDesarrollo=models.IntegerField(validators=[MinValueValidator(0)],default=0)
+    desarrolladorAsignado=models.ForeignKey(User,related_name='desarrollador_asignado',null=True, on_delete=models.CASCADE)
+    proyecto=models.ForeignKey(Proyecto,related_name='product_backlog',null=True,on_delete=models.CASCADE)
+    sprint=models.ForeignKey(Sprint,related_name='sprint_backlog',null=True,blank=True,on_delete=models.SET_NULL)
+    prioridad=models.IntegerField(default=1)
+    def historial(self):
+        return HistorialUs.objects.filter(descripcion=self).order_by('version')
 
     class Meta:
+        verbose_name = 'User Story'
         verbose_name_plural = 'Users Storys'
+        ordering = ['-prioridad']
+
+    def __str__(self):
+        return self.descripcion
+
+class HistorialUs(models.Model):
+    version=models.IntegerField(editable=False)
+    ESTADOS = (
+        ('Nuevo', 'Nuevo'),
+        ('Cancelado', 'Cancelado'),
+        ('To-Do', 'To-Do'),
+        ('Doing', 'Doing'),
+        ('Done', 'Done'),
+        ('QA', 'QA'),
+        ('Release', 'Release')
+    )
+    us=models.ForeignKey(UserStory,related_name='UsHistorial',null=True,on_delete=models.CASCADE)
+    descripcion=models.TextField(blank=True,max_length=255)
 
 
+    class Meta:
+        unique_together=('version','us')
+    def save(self, *args, **kwargs):
+        cont_version=HistorialUs.objects.filter(us=self.us).order_by('-version')[:1]
+        self.version=cont_version[0].version + 1 if cont_version else 1
+        super(HistorialUs, self).save(*args,**kwargs)
 class UserInfo(models.Model):
     """
     Modelo que guarda informacion util sobre cada usuario del sistema
     """
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='info', primary_key=True)
-    horasDisponibles = models.PositiveIntegerField(default=40)
+    horasDisponibles = models.FloatField(default=40.0)
+
+
+class UserWorkTime(models.Model):
+    """
+    Modelo que sirve para administrar las horas de trabajo de un usuario
+    """
+    DIAS_LABORALES = (
+        ('LUN', 'LUNES'),
+        ('MAR', 'MARTES'),
+        ('MIE', 'MIERCOLES'),
+        ('JUE', 'JUEVES'),
+        ('VIE', 'VIERNES'),
+    )
+
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='tiempos_de_usuarios')
+    desarrollador = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tiempos_de_trabajo')
+    dia = models.CharField(max_length=20, choices=DIAS_LABORALES)
+    horas = models.FloatField(default=0.0)
+    totalEnProyecto = models.FloatField(blank=True, null=True)

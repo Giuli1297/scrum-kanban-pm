@@ -28,7 +28,12 @@
             <div class="col-md-4">
             {% if proyecto.estado != 'CAN' and proyecto.estado != 'FIN' %}
                 {% if "gestionar_scrum_members" in proyecto_perms or request.user|has_group:'Administrador' %}
-                    <a class="btn btn-dark" href="{% url 'proyecto_agregar_sm' proyecto.slug %}">Agregar/Quitar</a>
+                    <a class="btn btn-dark" href="{% url 'proyecto_agregar_sm' proyecto.slug %}">Agregar</a>
+                {% endif %}
+            {% endif %}
+            {% if proyecto.estado != 'CAN' and proyecto.estado != 'FIN' %}
+                {% if "gestionar_scrum_members" in proyecto_perms or request.user|has_group:'Administrador' %}
+                    <a class="btn btn-dark" href="{% url 'proyecto_quitar_sm' proyecto.slug %}">Quitar</a>
                 {% endif %}
             {% endif %}
             </div>
@@ -39,7 +44,7 @@
                 <tr>
                   <th scope="col">Usuario</th>
                   <th scope="col">Email</th>
-                    <th scope="col">Horas Disponibles (5 prox dias)</th>
+                    <th scope="col">Horas Disponibles (Lunes a Viernes)</th>
                 </tr>
               </thead>
               <tbody>
@@ -47,7 +52,13 @@
                     <tr>
                       <th scope="row">{{ scrum_member.username }}</th>
                       <td>{{ scrum_member.email }}</td>
-                     <td>{{ scrum_member.info.horasDisponibles }} hs</td>
+                     <td>
+                        {% for work in scrum_member.tiempos_de_trabajo.all %}
+                         {% if work.proyecto == proyecto %}
+                            {{ work.horas }}/
+                         {% endif %}
+                     {% endfor %}
+                    </td>
                     </tr>
                 {% empty %}
                     <div class="mb-2">
@@ -87,7 +98,7 @@
                 <tr>
                   <th scope="col">Descripcion</th>
                   <th scope="col">Estado</th>
-                    {% if proyecto.estado == 'ACT' %}
+                    {% if proyecto.estado == 'ACT' and proyecto.sprint_actual.estado == 'conf1' %}
                         <th scope="col">Agregar a Sprint Backlog</th>
                     {% endif %}
                 </tr>
@@ -98,13 +109,13 @@
                         <tr>
                           <td>{{ ustory.descripcion }}</td>
                           <td>{{ ustory.estado }}</td>
-                        {% if proyecto.estado == 'ACT' %}
-                            <th scope="col">
+                        {% if proyecto.estado == 'ACT' and proyecto.sprint_actual.estado == 'conf1' %}
+                            <td>
                                 <a class="btn btn-success"
                                    href="{% url 'cargar_sprint_backlog' usPk=ustory.pk sprintPk=proyecto.sprint_actual.pk %}">
                                     <h4>+</h4>
                                 </a>
-                            </th>
+                            </td>
                         {% endif %}
                         </tr>
                     {% endif %}
