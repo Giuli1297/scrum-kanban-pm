@@ -10,7 +10,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_encode
 from .utils import account_activation_token
 from django.urls import reverse
-from .models import Proyecto
+from .models import Proyecto, UserInfo
 from .utils import add_obj_perm_to_group, add_user_to_obj_group, add_perm_to_group, remove_all_users_from_obj_group, \
     add_users_to_obj_group
 
@@ -20,6 +20,7 @@ def send_email_to_admin(request, user, **kwargs):
     admin = User.objects.get(groups__name='Administrador')
     user.is_active = False
     user.save()
+    UserInfo.objects.create(usuario=user)
     current_site = get_current_site(request)
     email_body = {
         'user': user,
@@ -47,9 +48,18 @@ def send_email_to_admin(request, user, **kwargs):
 @receiver(post_save, sender=Proyecto)
 def add_scrum_master_signal(sender, instance, created, **kwargs):
     if created:
+        # Scrum Master Handler
         add_obj_perm_to_group('scrum_master_' + instance.slug, 'editar_proyecto', instance)
         add_obj_perm_to_group('scrum_master_' + instance.slug, 'ver_proyecto', instance)
         add_obj_perm_to_group('scrum_master_' + instance.slug, 'iniciar_proyecto', instance)
+        add_obj_perm_to_group('scrum_master_' + instance.slug, 'gestionar_roles_proyecto', instance)
+        add_obj_perm_to_group('scrum_master_' + instance.slug, 'importar_roles_proyecto', instance)
+        add_obj_perm_to_group('scrum_master_' + instance.slug, 'gestionar_scrum_members', instance)
+        add_obj_perm_to_group('scrum_master_' + instance.slug, 'gestionar_user_stories', instance)
+        add_obj_perm_to_group('scrum_master_' + instance.slug, 'iniciar_ppoker_proyecto', instance)
+        add_obj_perm_to_group('scrum_master_' + instance.slug, 'estimar_userstory_proyecto', instance)
+        add_obj_perm_to_group('scrum_master_' + instance.slug, 'cargar_sprint_backlog_proyecto', instance)
+        add_obj_perm_to_group('scrum_master_' + instance.slug, 'estimar_sprint', instance)
         add_perm_to_group('scrum_master_' + instance.slug, 'ver_proyectos')
         add_user_to_obj_group(instance.scrum_master, 'scrum_master_' + instance.slug)
         add_obj_perm_to_group('scrum_member_' + instance.slug, 'ver_proyecto', instance)
@@ -62,5 +72,4 @@ def add_scrum_master_signal(sender, instance, created, **kwargs):
 @receiver(m2m_changed, sender=Proyecto.scrum_member.through)
 def add_scrum_members_signal(sender, instance, **kwargs):
     remove_all_users_from_obj_group('scrum_member_' + instance.slug)
-    print(instance.scrum_member.all())
     add_users_to_obj_group(instance.scrum_member.all(), 'scrum_member_' + instance.slug)

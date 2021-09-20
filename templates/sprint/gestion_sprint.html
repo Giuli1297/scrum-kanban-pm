@@ -1,0 +1,133 @@
+{% load projectmanager_extras %}
+<div class="row mt-2">
+    {% if proyecto.sprint_actual.estado != 'conf3' %}
+         <h4>Configura el proximo Sprint</h4>
+    {% else %}
+         <h4>Sprint - Duracion {{ proyecto.sprint_actual.duracion_estimada }} hs</h4>
+    {% endif %}
+
+</div>
+{% if proyecto.sprint_actual.estado != 'conf3' %}
+<div class="row mt-2">
+    <div class="col-md-6 border border-2">
+        <div class="row m-1">
+            <div class="col-md-4">
+                <h4>Sprint Backlog</h4>
+            </div>
+            <div class="col-md-6"></div>
+            <div class="col-md-2">
+                {% if proyecto.sprint_actual.estado == 'conf2' %}
+                    <a class="btn btn-dark" href="{% url 'proyecto_gestion' proyecto.slug %}">Actualizar</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row m-1">
+            <table class="table mb-2">
+              <thead>
+                <tr>
+                    <th scope="col">User Story</th>
+                    {% if proyecto.sprint_actual.estado == 'conf1' %}
+                        <th scope="col">Asignar</th>
+                        <th scope="col">Remover</th>
+                    {% elif proyecto.sprint_actual.estado == 'conf2' %}
+                        <th scope="col">Encargado</th>
+                        <th scope="col">Horas (Planning Poker)</th>
+                    {% endif %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for user_story in proyecto.sprint_actual.sprint_backlog.all %}
+                    <tr>
+                        <th scope="row">{{ user_story.descripcion }}</th>
+                        {% if proyecto.sprint_actual.estado == 'conf1' %}
+                            <td>
+                                {% if user_story.desarrolladorAsignado == null %}
+                                    <a class="btn btn-dark"
+                                       href="{% url 'asignar_estimar_user_story' usPk=user_story.pk %}">
+                                        Asignar/Estimar
+                                    </a>
+                                {% else %}
+                                    Ya esta Asignado y Estimado
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a class="btn btn-danger"
+                                   href="{% url 'quitar_us_de_sbacklog' usPk=user_story.pk %}">
+                                    <h4>-</h4>
+                                </a>
+                            </td>
+                        {% elif proyecto.sprint_actual.estado == 'conf2' %}
+                            <td>{{ user_story.desarrolladorAsignado.username }}</td>
+                            <td>
+                                {% if user_story.tiempoEstimado == 0 %}
+                                    Esperando estimacion de encargado
+                                {% else %}
+                                    {{ user_story.tiempoEstimado }}
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% empty %}
+                    <div class="mb-2">
+                        <p>No tienes US en tu SB, agregalos!</p>
+                    </div>
+                {% endfor %}
+              </tbody>
+            </table>
+            <div style="margin-block: 10px;">
+                {% if 'iniciar_ppoker_proyecto' in proyecto_perms or request.user|has_group:'Administrador' %}
+                    {% if proyecto.sprint_actual.estado == 'conf1' %}
+                        <a class="btn btn-dark btn-flotante align-center" href="{% url 'planning_poker_smaster' slug=proyecto.slug %}" >
+                            Realizar Planning Poker
+                        </a>
+                    {% elif proyecto.sprint_actual.estado == 'conf2' %}
+                        {% if 'estimar_sprint' in proyecto_perms or request.user|has_group:'Administrador' %}
+                            <a class="btn btn-dark btn-flotante align-center" href="{% url 'estimar_sprint' slug=proyecto.slug %}" >
+                                Estimar Sprint
+                            </a>
+                        {% endif %}
+
+                    {% endif %}
+
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+    <div class="row mt-2">
+
+        <div class="col-md-4 border border-2">
+            <h4>TO-DO</h4>
+            <table class="table mb-2">
+              <thead>
+                <tr>
+                    <th scope="col">User Story</th>
+                    <th scope="col">Encargado</th>
+                    <th scope="col">Horas (Planning Poker)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user_story in proyecto.sprint_actual.sprint_backlog.all %}
+                    <tr>
+                        <th scope="row">{{ user_story.descripcion }}</th>
+                            <td>{{ user_story.desarrolladorAsignado.username }}</td>
+                            <td>
+                                    {{ user_story.tiempoEstimado }}
+                            </td>
+
+                    </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-4 border border-2">
+            <h4>DOING</h4>
+            </div>
+        <div class="col-md-4 border border-2">
+            <h4>DONE</h4>
+
+        </div>
+    </div>
+{% endif %}

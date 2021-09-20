@@ -1,3 +1,4 @@
+{% load projectmanager_extras %}
 <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="/">ProjectManager</a>
@@ -11,8 +12,10 @@
                 {% if user.is_authenticated %}
                     <div><a class="nav-link" href="{% url 'proyecto_listar' %}">Proyectos</a></div>
                     <div><a class="nav-link" href="{% url 'perfil' %}">Perfil</a></div>
-                    <div><a class="nav-link" href="{% url 'list_rol' %}">Roles</a></div>
-                    <div><a class="nav-link" href="{% url 'list_user' %}">Ver Usuarios</a></div>
+                    {% if request.user|has_group:"Administrador" %}
+                        <div><a class="nav-link" href="{% url 'list_rol' %}">Roles</a></div>
+                        <div><a class="nav-link" href="{% url 'list_user' %}">Ver Usuarios</a></div>
+                    {% endif %}
                 {% endif %}
             </div>
             <div class="navbar-nav ms-auto">
