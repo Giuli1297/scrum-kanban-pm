@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
-from django.db import models
-from django.urls import reverse
-from django.utils import timezone
-from django.conf import settings 
-=======
 from django.contrib.auth.models import User, AbstractUser, Group
 from django.db import models
 from django.urls import reverse
@@ -21,7 +14,6 @@ def get_name(self):
 
 Permission.add_to_class("__str__", get_name)
 
->>>>>>> nelson
 
 # Create your models here.
 class Proyecto(models.Model):
@@ -103,59 +95,6 @@ class Proyecto(models.Model):
         return reverse('proyecto_detail', args=[self.slug])
 
     def __str__(self):
-<<<<<<< HEAD
-        return self.nombre 
-
-
-
-class CuentaPersonalizada(BaseUserManager):
-
-    def create_superuser(self, email, nombre, apellido, password, **otros_campos):
-    
-        otros_campos.setdefault('is_staff', True)
-        otros_campos.setdefault('is_superuser', True)
-        otros_campos.setdefault('is_active', True)
-
-        if otros_campos.get('is_staff') is not True:
-            raise ValueError(
-                'Superuser debe asignar el campo is_staff=True.')
-        if otros_campos.get('is_superuser') is not True:
-            raise ValueError(
-                'Superuser debe asignar el campo is_superuser=True.')
-        return self.create_user(email, nombre, apellido, password, **otros_campos)
-
-    def create_user(self, email, nombre, apellido, password, **otros_campos):
-    
-        if not email:
-            raise ValueError('El email es requerido')
-
-        email = self.normalize_email(email)
-        user = self.model(email=email, nombre=nombre,
-                          apellido=apellido, **otros_campos)
-        user.set_password(password)
-        user.save()
-        return user
-
-
-class Usuario(AbstractBaseUser, PermissionsMixin):
-    identificador = models.AutoField(primary_key=True)
-    email = models.EmailField(unique=True)
-    nombre = models.CharField(max_length=100)
-    apellido = models.CharField(max_length=100) 
-    fecha_creacion = models.DateTimeField(default=timezone.now)
-    is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=False)
-
-    objects = CuentaPersonalizada()
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ["nombre", "apellido"] 
-
-    def __str__(self):
-        return self.email 
-
-
-=======
         return self.nombre
 
 
@@ -296,4 +235,3 @@ class UserWorkTime(models.Model):
     dia = models.CharField(max_length=20, choices=DIAS_LABORALES)
     horas = models.FloatField(default=0.0)
     totalEnProyecto = models.FloatField(blank=True, null=True)
->>>>>>> nelson

@@ -99,19 +99,68 @@ class TestUrls(SimpleTestCase):
         url = reverse('delete_rol_user', args=[1])
         self.assertEquals(resolve(url).func.view_class, views.EliminarRolUser) 
     
-     def test_createUS(self):
-            """
+    def test_proyecto_rol_modificar(self):
+        """
+        Test para verificar que se carga correctamente la vista correspondiente para modificar rol de proyecto
+        """
+        url = reverse('proyecto_rol_modificar', args=['slug', 1])
+        self.assertEquals(resolve(url).func.view_class, views.ModificarRolProyecto) 
+    
+    def test_proyecto_rol_eliminar(self):
+        """
+        Test para verificar que se carga correctamente la vista correspondiente para eliminar rol de proyecto
+        """
+        url = reverse('proyecto_rol_eliminar', args=['slug', 1])
+        self.assertEquals(resolve(url).func.view_class, views.EliminarRolProyecto) 
+    
+    def test_createUS(self):
+        """
         Test para verificar que se carga correctamente la vista correspondiente para crear user story
         """
         url = reverse('create_us', args=['slug'])
         self.assertEquals(resolve(url).func.view_class, views.UserStoryCreate) 
     
-    def test_createSprint(self):
+    def test_updateUS(self):
+        """
+        Test para verificar que se carga correctamente la vista correspondiente para acutalizar user story
+        """
+        url = reverse('update_us', args=['slug', 1])
+        self.assertEquals(resolve(url).func.view_class, views.UserStoryUpdate) 
+    
+    def test_eliminarUS(self):
+        """
+        Test para verificar que se carga correctamente la vista correspondiente para eliminar user story
+        """
+        url = reverse('elimnar_us', args=['slug', 1])
+        self.assertEquals(resolve(url).func.view_class, views.EliminarUs) 
+    
+    def test_historialUS(self):
+        """
+        Test para verificar que se carga correctamente la vista correspondiente para historial user story
+        """
+        url = reverse('historial_us', args=['slug', 1])
+        self.assertEquals(resolve(url).func.view_class, views.listarHistorial) 
+    
+    def test_crear_sprint(self):
         """
         Test para verificar que se carga correctamente la vista correspondiente para crear un sprint
         """
         url = reverse('crear_sprint', args=['slug'])
         self.assertEquals(resolve(url).func.view_class, views.CrearSprint) 
+    
+    def test_actualizar_sprint(self):
+        """
+        Test para verificar que se carga correctamente la vista correspondiente para actualizar sprint
+        """
+        url = reverse('actualizar_sprint', args=['slug', 1])
+        self.assertEquals(resolve(url).func.view_class, views.ActualizarSprint) 
+    
+    def test_asignar_estimar_user_story(self):
+        """
+        Test para verificar que se carga correctamente la vista correspondiente para asignar y estimar sprint
+        """
+        url = reverse('asignar_estimar_user_story', args=[1])
+        self.assertEquals(resolve(url).func.view_class, views.AsignarYEstimarUserStoryView) 
     
     def test_listar_sprint_backlog(self):
         """
