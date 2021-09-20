@@ -14,7 +14,7 @@ from projectmanager import views
 from django.urls.base import reverse, resolve
 # Create your tests here.
 from allauth.account.forms import BaseSignupForm, ResetPasswordForm, SignupForm
-from projectmanager.models import Proyecto, rol
+from projectmanager.models import Proyecto
 from projectmanager.views import *
 
 
@@ -176,3 +176,14 @@ class TestModelss(TestCase):
         """
         self.roles = self.roles.delete()
         self.assertFalse(self.user.groups.filter(name="grupo1"))
+
+
+class TestModelUs(TestCase):
+    def setUp(self):
+        descripcion_us="us"
+        self.userStorys=UserStory.objects.create(descripcion=descripcion_us)
+        self.userStorys.save()
+        self.c = Client()
+        self.user = User.objects.create_user(username="test", email="test@test.com", password="test")
+    def test_create_us(self):
+        self.assertEqual(self.userStorys.descripcion, self.descripcion_us)

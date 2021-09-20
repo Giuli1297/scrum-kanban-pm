@@ -1258,10 +1258,14 @@ class EstimarSprint(View):
 
         if form.is_valid():
             horasEstimadas = form.cleaned_data['horas_estimadas']
-            sprint.duracion_estimada=horasEstimadas
-            sprint.estado='conf3'
-            sprint.save()
-            messages.success(request, "Se ha asignado la estimación al Sprint")
+            print(sprint.duracion_estimada)
+            if ( not sprint.duracion_estimada):
+                sprint.duracion_estimada = horasEstimadas
+                sprint.estado = 'conf3'
+                sprint.save()
+                messages.success(request, "Se ha asignado la estimación al Sprint")
+            else:
+                messages.error(request, "Ya se estimó tiempo")
         else:
             messages.error(request, "Un error a ocurrido")
 
