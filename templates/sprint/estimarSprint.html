@@ -1,9 +1,12 @@
 {% extends "layout/base.html" %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-4"></div>
-    <div class="col-md-4">
+<div class="row mb-3">
+    <h3>Estimacion de Sprint recomendada</h3>
+    <p>{{ horas }}</p>
+</div>
+<div class="row mb-3">
+    <div class="form-group col-md-4">
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
@@ -11,7 +14,5 @@
         </form>
         <a class="mb-3 btn btn-danger" href="{% url 'proyecto_gestion' slug=proyecto.slug %}">Volver</a>
     </div>
-    <div class="col-md-4"></div>
-    <div class="col-md-4"></div>
 </div>
 {% endblock %}

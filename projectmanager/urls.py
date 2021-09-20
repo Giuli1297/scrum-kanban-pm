@@ -59,9 +59,6 @@ urlpatterns = [
     path('proyectos/<slug:slug>/historial/<int:pk>/', views.listarHistorial.as_view(), name='historial_us'),
 
     # URLS DE SPRINTS
-    path('proyectos/<slug:slug>/crearSprint/', views.CrearSprint.as_view(), name='crear_sprint'),
-    path('proyectos/<slug:slug>/actualizarSprint/<int:pk>/', views.ActualizarSprint.as_view(),
-         name='actualizar_sprint'),
     path('proyectos/<slug:slug>/listarSprintBacklog/<int:pk>/', views.listaUsSprintBacklog.as_view(),
          name='sprint_backlog'),
     path('proyectos/<slug:slug>/configurarUS/<int:pk>/', views.UserStoryUpdateSprint.as_view(), name='configurar_us'),
@@ -74,5 +71,6 @@ urlpatterns = [
     path('planningPoker/<slug:slug>/', views.PlanningPokerView.as_view(), name='planning_poker_smaster'),
     path('planningPoker/<uidb64>/<token>/<int:usPk>/', views.PlanningPokerSMemberView.as_view(),
          name='planning_poker_smember'),
+    path('planningPoker/<slug:slug>/estimarSprint/', views.EstimarSprint.as_view(), name='estimar_sprint')
 
 ]
