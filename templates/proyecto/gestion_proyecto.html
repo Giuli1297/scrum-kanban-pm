@@ -1,0 +1,152 @@
+{% extends "layout/base.html" %}
+{% load guardian_tags %}
+{% load projectmanager_extras %}
+{% block content %}
+    {% get_obj_perms request.user for proyecto as "proyecto_perms" %}
+<div class="row">
+    <div class="col-md-4"></div>
+    <div class="col-md-4">
+        <h2 class="mb-2">{{ proyecto.nombre|title }}</h2>
+    </div>
+    <div class="col-md-4"><h5>Estado: <strong>{{ proyecto.estado }}</strong></h5></div>
+</div>
+<div class="row">
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+        <p class="mb-2">{{ proyecto.descripcion }}</p>
+        <hr/>
+    </div>
+    <div class="col-md-2"></div>
+</div>
+<div class="row">
+    <div class="col-md-6 border border-2">
+        <div class="row m-1">
+            <div class="col-md-4">
+                <h4>Scrum Members</h4>
+            </div>
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+            {% if proyecto.estado != 'CAN' and proyecto.estado != 'FIN' %}
+                {% if "gestionar_scrum_members" in proyecto_perms or request.user|has_group:'Administrador' %}
+                    <a class="btn btn-dark" href="{% url 'proyecto_agregar_sm' proyecto.slug %}">Agregar</a>
+                {% endif %}
+            {% endif %}
+            {% if proyecto.estado != 'CAN' and proyecto.estado != 'FIN' %}
+                {% if "gestionar_scrum_members" in proyecto_perms or request.user|has_group:'Administrador' %}
+                    <a class="btn btn-dark" href="{% url 'proyecto_quitar_sm' proyecto.slug %}">Quitar</a>
+                {% endif %}
+            {% endif %}
+            </div>
+        </div>
+        <div class="row m-1">
+            <table class="table mb-2">
+              <thead>
+                <tr>
+                  <th scope="col">Usuario</th>
+                  <th scope="col">Email</th>
+                    <th scope="col">Horas Disponibles (Lunes a Viernes)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for scrum_member in proyecto.scrum_member.all %}
+                    <tr>
+                      <th scope="row">{{ scrum_member.username }}</th>
+                      <td>{{ scrum_member.email }}</td>
+                     <td>
+                        {% for work in scrum_member.tiempos_de_trabajo.all %}
+                         {% if work.proyecto == proyecto %}
+                            {{ work.horas }}/
+                         {% endif %}
+                     {% endfor %}
+                    </td>
+                    </tr>
+                {% empty %}
+                    <div class="mb-2">
+                        <p>No tienes Scrum Members, agregalos!</p>
+                    </div>
+                {% endfor %}
+              </tbody>
+            </table>
+            <div style="margin-block: 10px" >
+            {% if proyecto.estado != 'CAN' and proyecto.estado != 'FIN' %}
+                {% if 'gestionar_roles_proyecto' in proyecto_perms or request.user|has_group:'Administrador' %}
+                    <a class="btn btn-dark btn-flotante align-center" href="{% url 'proyecto_rol' proyecto.slug %}" >
+                        Roles
+                    </a>
+                {% endif %}
+            {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 border border-2">
+        <div class="row m-1">
+            <div class="col-md-4">
+                <h4>Product Backlog</h4>
+            </div>
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+            {% if proyecto.estado != 'CAN' and proyecto.estado != 'FIN' %}
+                {% if "gestionar_user_stories" in proyecto_perms or request.user|has_group:'Administrador' %}
+                    <a class="btn btn-dark" href="{% url 'create_us' proyecto.slug %}">Editar</a>
+                {% endif %}
+            {% endif %}
+            </div>
+        </div>
+        <div class="row m-1">
+            <table class="table mb-2">
+              <thead>
+                <tr>
+                  <th scope="col">Descripcion</th>
+                  <th scope="col">Estado</th>
+                    {% if proyecto.estado == 'ACT' and proyecto.sprint_actual.estado == 'conf1' %}
+                        <th scope="col">Agregar a Sprint Backlog</th>
+                    {% endif %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for ustory in proyecto.product_backlog.all %}
+                    {% if not ustory.sprint != null %}
+                        <tr>
+                          <td>{{ ustory.descripcion }}</td>
+                          <td>{{ ustory.estado }}</td>
+                        {% if proyecto.estado == 'ACT' and proyecto.sprint_actual.estado == 'conf1' %}
+                            <td>
+                                <a class="btn btn-success"
+                                   href="{% url 'cargar_sprint_backlog' usPk=ustory.pk sprintPk=proyecto.sprint_actual.pk %}">
+                                    <h4>+</h4>
+                                </a>
+                            </td>
+                        {% endif %}
+                        </tr>
+                    {% endif %}
+                {% empty %}
+                    <div class="mb-2">
+                        <p>No tienes UserStories, agregalos!</p>
+                    </div>
+                {% endfor %}
+              </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% if proyecto.estado == 'PEN' %}
+    <div class="row m-2">
+        <div class="col-md-2">
+            {% if proyecto.estado != 'CAN' and request.user|has_group:"Administrador" %}
+                {% if proyecto.estado != 'FIN' %}
+                    <a class="btn btn-dark m-1" href="{% url 'proyecto_editar' proyecto.slug %}">Editar Proyecto</a>
+                {% endif %}
+            {% endif%}
+            {% if "iniciar_proyecto" in proyecto_perms or request.user|has_group:'Administrador' %}
+                <a class="btn btn-dark m-1" href="{% url 'proyecto_iniciar' proyecto.slug %}">Iniciar</a>
+            {% endif %}
+            {% if "cancelar_proyecto" in proyecto_perms or request.user|has_group:'Administrador' %}
+                <a class="btn btn-danger m-1" href="{% url 'proyecto_cancelar' proyecto.slug %}">Cancelar</a>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+{% if proyecto.estado == 'ACT' %}
+    {% include 'sprint/gestion_sprint.html' %}
+{% endif %}
+{% endblock %}
