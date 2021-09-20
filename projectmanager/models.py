@@ -283,6 +283,17 @@ class UserInfo(models.Model):
 class UserWorkTime(models.Model):
     """
     Modelo que sirve para administrar las horas de trabajo de un usuario
+
+    Atributos:
+
+    Parameters
+    -----------
+
+    dias_laborales
+        dias laborales, lunes a viernes
+
+
+
     """
     DIAS_LABORALES = (
         ('LUN', 'LUNES'),
