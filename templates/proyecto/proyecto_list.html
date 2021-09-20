@@ -23,7 +23,7 @@
 	<tbody>
 		{% if object_list %}
 		{% for proyecto in object_list %}
-            <tr onclick="document.location = '{% url 'proyecto_gestion' proyecto.slug %}';">
+            <tr onclick="document.location = '{% url 'proyecto_gestion' slug=proyecto.slug %}';">
                 <th scope="row">{{ forloop.counter }}</th>
                 <td>{{ proyecto.nombre }}</td>
                 <td>{{ proyecto.estado }}</td>

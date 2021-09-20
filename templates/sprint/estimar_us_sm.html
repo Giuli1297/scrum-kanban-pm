@@ -1,16 +1,17 @@
 {% extends "layout/base.html" %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-4"></div>
-    <div class="col-md-4">
+<div class="row mb-3">
+    <h3>Asigne y Estime en horas el User Story:</h3>
+    <p>{{ ustory.descripcion }}</p>
+</div>
+<div class="row mb-3">
+    <div class="form-group col-md-4">
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
             <button class="btn btn-dark" type="submit">Guardar</button>
         </form>
     </div>
-    <div class="col-md-4"></div>
-    <div class="col-md-4"></div>
 </div>
 {% endblock %}

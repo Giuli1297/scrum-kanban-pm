@@ -3,7 +3,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.template.defaultfilters import slugify
-from django.core.validators import MinValueValidator,MaxValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from guardian.shortcuts import assign_perm
 from django.contrib.auth.models import Permission
 
@@ -71,23 +71,12 @@ class Proyecto(models.Model):
                        ('cancelar_proyecto', 'Puede cancelar un proyecto en estado pendiente'),
                        ('gestionar_scrum_members', 'Puede Agregar/Quitar Scrum Members de un proyecto'),
                        ('iniciar_proyecto', 'Puede iniciar proyecto'),
-
-
-                       ('crear_roles_proyecto', 'Puede Crear Roles de Proyecto'),
-                       ('ver_roles_proyecto', 'Puede ver roles de proyecto'),
-                       ('modificar_roles_proyecto', 'Puede Modificar Roles de Proyecto'),
-                       ('eliminar_roles_proyecto', 'Puede eliminar roles de proyecto'),
-                       ('ver_users_storys', 'Puede ver user storys'),
-                       ('crear_users_storys', 'Puede crear users storys'),
-                       ('actualizar_users_storys', 'Puede actualizar users storys'),
-                       ('eliminar_users_storys', 'Puede ver users storys'),
-                       ('puede_asignar_users_storys', 'Asigna roles a usuarios'),
-                       ('puede_quitar_users_storys', 'Quita users storys de usuarios'),
                        ('gestionar_roles_proyecto', 'Puede Agregar/Asignar/Modificar/Eliminar Roles de un Proyecto'),
                        ('importar_roles_proyecto', 'Puede Importar roles de proyecto'),
-                       ('gestionar_user_stories', 'Puede Agregar/Modificar/Eliminar User Stories de un proyecto'),)
-
-
+                       ('gestionar_user_stories', 'Puede Agregar/Modificar/Eliminar User Stories de un proyecto'),
+                       ('iniciar_ppoker_proyecto', 'Puede iniciar planning poker de un sprint'),
+                       ('estimar_userstory_proyecto', 'Puede estimar User Stories en el Sprint Backlog'),
+                       ('cargar_sprint_backlog_proyecto', 'Puede cargar User Stories en el Sprint Backlog'))
         default_permissions = ()
         ordering = ('-fecha_inicio',)
 
@@ -147,18 +136,24 @@ class Rol(models.Model):
             return self.related_group.name
 
 
-
 class Sprint(models.Model):
+    ESTADOS = (
+        ('conf1', 'Carga de Sprint Backlog'),
+        ('conf2', 'Planning Poker'),
+        ('conf3', 'Ultimas Configuraciones'),
+        ('en_desarrollo', 'Sprint en desarrollo'),
+    )
     fecha_inicio = models.DateTimeField(null=True, blank=True)
-    duracion_estimada = models.IntegerField(null=True, blank=True)
+    duracion_estimada = models.FloatField(null=True, blank=True)
     fecha_finalizacion = models.DateTimeField(null=True, blank=True)
-    proyecto = models.ForeignKey(Proyecto, related_name="registro_sprints", on_delete=models.CASCADE)
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='conf1')
+    proyecto = models.ForeignKey(Proyecto, related_name="registro_sprints", on_delete=models.CASCADE, null=True)
     proyecto_actual = models.OneToOneField(Proyecto, related_name="sprint_actual", blank=True, null=True,
                                            on_delete=models.CASCADE)
+
     class Meta:
         verbose_name = 'Sprint'
         verbose_name_plural = 'Sprints'
-
 
 
 
@@ -172,9 +167,11 @@ class UserStory(models.Model):
         ('QA', 'QA'),
         ('Release', 'Release')
     )
-    descripcion=models.TextField(blank=True,max_length=255)
-    tiempoEstimado=models.IntegerField(validators=[MinValueValidator(0)],default=0)
+    descripcion = models.TextField(blank=True, max_length=255)
+    tiempoEstimadoSMaster = models.FloatField(default=0.0)
+    tiempoEstimado = models.FloatField(validators=[MinValueValidator(0)], default=0)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Nuevo')
+
     tiempoEnDesarrollo=models.IntegerField(validators=[MinValueValidator(0)],default=0)
     desarrolladorAsignado=models.ForeignKey(User,related_name='desarrollador_asignado',null=True, on_delete=models.CASCADE)
     proyecto=models.ForeignKey(Proyecto,related_name='product_backlog',null=True,on_delete=models.CASCADE)
@@ -184,9 +181,10 @@ class UserStory(models.Model):
         return HistorialUs.objects.filter(descripcion=self).order_by('version')
 
     class Meta:
-        verbose_name='User Story'
+        verbose_name = 'User Story'
         verbose_name_plural = 'Users Storys'
-        ordering=['-prioridad']
+        ordering = ['-prioridad']
+
     def __str__(self):
         return self.descripcion
 
@@ -216,6 +214,4 @@ class UserInfo(models.Model):
     Modelo que guarda informacion util sobre cada usuario del sistema
     """
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='info', primary_key=True)
-    horasDisponibles = models.PositiveIntegerField(default=40)
-
-
+    horasDisponibles = models.FloatField(default=40.0)
