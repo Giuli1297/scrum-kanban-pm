@@ -4,6 +4,7 @@ from .rol_model import Rol
 from .sprint_model import Sprint
 from .user_story_model import UserStory, HistorialUs, UserInfo
 from .user_work_model import UserWorkTime
+from .system_activity_model import SystemActivity
 
 
 def get_name(self):
@@ -20,4 +21,5 @@ __all__ = [
     'Sprint',
     'UserStory',
     'HistorialUs',
+    'SystemActivity'
 ]

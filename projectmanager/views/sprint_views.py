@@ -36,7 +36,7 @@ from django.utils.encoding import force_bytes
 from projectmanager.models import *
 
 from django.http import JsonResponse
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.contrib.sites.shortcuts import get_current_site
 from projectmanager.views.general_views import UserAccessMixin
 
@@ -195,6 +195,11 @@ class UserStoryUpdateSprint(View):
             desarrollador = form.cleaned_data['desarrolladorAsignado']
             US2.desarrolladorAsignado = desarrollador
             US2.save()
+
+            # Log activity
+            SystemActivity.objects.create(usuario=request.user,
+                                          descripcion="Ha modificado el user story con id " + US2.pk)
+
             messages.success(request, "User Story se actualizó Correctamente!")
         else:
             messages.error(request, "Un Error a ocurrido")
@@ -219,6 +224,11 @@ class CargarSprintBacklog(View):
         ustory = UserStory.objects.get(pk=usPk)
         ustory.sprint = sprint
         ustory.save()
+
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha agregado el user story con id " + ustory.pk
+                                                  + " al sprint backlog del proyecto " + sprint.proyecto_actual.nombre)
         messages.success(request, 'User Story agregado al SprintBacklog')
         return redirect('proyecto_gestion', slug=sprint.proyecto_actual.slug)
 
@@ -239,6 +249,11 @@ class QuitarUSFromSprintBacklog(View):
         ustory.desarrolladorAsignado = None
         ustory.tiempoEstimado = 0
         ustory.save()
+
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha removido el user story con id " + ustory.pk
+                                                  + " del sprint backlog del proyecto " + ustory.proyecto.nombre)
         messages.success(request, 'User Story removido del SprintBacklog')
         return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
 
@@ -299,6 +314,11 @@ class AsignarYEstimarUserStoryView(View):
         else:
             messages.error(request, "Un error a ocurrido")
             return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
+
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha asginado y estimado el user story con id " + ustory.pk
+                                                  + " del sprint backlog del proyecto " + ustory.proyecto.nombre)
         messages.success(request, "Se ha asignado y estimado el User Story")
         return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
 
@@ -351,6 +371,9 @@ class PlanningPokerView(View):
                 [us.desarrolladorAsignado.email],
             )
             email.send(fail_silently=False)
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha iniciado el planning poker en el proyecto " + proyecto.nombre)
         return redirect('proyecto_gestion', slug=proyecto.slug)
 
 
@@ -404,6 +427,10 @@ class PlanningPokerSMemberView(View):
                 horas_estimadas_smaster = float(user_story.tiempoEstimadoSMaster)
                 user_story.tiempoEstimado = float((horas_estimadas_smaster + horas_estimadas_smember) / 2)
                 user_story.save()
+            # Log activity
+            SystemActivity.objects.create(usuario=request.user,
+                                          descripcion="Ha estimado su User Story con id "
+                                                      + user_story.pk + " en el planning poker")
             return redirect('proyecto_gestion', slug=user_story.proyecto.slug)
         except Exception as ex:
             messages.error(request, "Error de Token")
@@ -437,6 +464,9 @@ class EstimarSprint(View):
             sprint.duracion_estimada = horasEstimadas
             sprint.estado = 'conf3'
             sprint.save()
+            # Log activity
+            SystemActivity.objects.create(usuario=request.user,
+                                          descripcion="Ha estimado el sprint con id " + sprint.pk)
             messages.success(request, "Se ha asignado la estimación al Sprint")
 
         else:

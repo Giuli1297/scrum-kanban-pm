@@ -51,6 +51,9 @@ def perfilUsuario(request):
 
         if form.is_valid():
             form.save()
+            # Log activity
+            SystemActivity.objects.create(usuario=request.user,
+                                          descripcion="Ha modificado su informacion de usuario")
             messages.success(request, "Tu información ha sido actualizada!")
             return redirect("perfil")
     else:

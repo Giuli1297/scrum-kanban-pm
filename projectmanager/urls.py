@@ -8,6 +8,7 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('activate/<uidb64>/<token>', views.VerificationView.as_view(), name='activate'),
     path('miperfil', views.perfilUsuario, name="perfil"),
+    path('systemActivity', views.SystemActivityView.as_view(), name='system_activity'),
 
     # URLS DE ROLES
     path('roles/lista/', views.RolListView.as_view(), name='list_rol'),
