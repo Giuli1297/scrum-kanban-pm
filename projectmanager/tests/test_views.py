@@ -70,14 +70,3 @@ class TestViews(TestCase):
         response = self.client.get(reverse('proyecto_agregar_sm', args=[self.proyecto.slug]))
         self.assertEquals(response.status_code, 200)
         self.assertTemplateUsed(response, 'proyecto/agregar_scrum_member.html')
-
-    # def test_proyecto_crear_POST(self):
-    #     form = ProyectoForm(data={
-    #         'nombre': 'test 1',
-    #         'descripcion': 'testtest test test',
-    #         'scrum_master': self.my_admin
-    #     })
-    #     response = self.client.post(reverse('proyecto_crear'), follow=True)
-    #
-    #     # self.assertEquals(response.status_code, 302)
-    #     self.assertEquals(Proyecto.objects.get(slug='proyecto-test').nombre, 'proyecto test')

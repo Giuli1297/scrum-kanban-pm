@@ -183,3 +183,20 @@ class EliminarUs(View):
                                       descripcion="Ha eliminado un user story en el proyecto " + proyecto.nombre)
         messages.success(request, "User Story Eliminado")
         return redirect('create_us', slug=slug)
+
+
+class listarHistorial(View):
+    """
+    Vista basada en clase utilizada para mostrar el hisotrial de cambio de un User Story
+    """
+
+    def get(self, request, slug, pk):
+        proyecto = Proyecto.objects.get(slug=slug)
+        ustory = UserStory.objects.get(pk=pk).UsHistorial.all()
+        us = UserStory.objects.get(pk=pk)
+        context = {
+            'history': ustory,
+            'proyecto': proyecto,
+            'us': us
+        }
+        return render(request, 'UserStory/historial.html', context)
