@@ -36,6 +36,7 @@ urlpatterns = [
     path('proyectos/<slug:slug>/roles/<int:pk>/', views.ModificarRolProyecto.as_view(), name='proyecto_rol_modificar'),
     path('proyectos/<slug:slug>/roles/<int:pk>/eliminar/', views.EliminarRolProyecto.as_view(),
          name='proyecto_rol_eliminar'),
+    path('proyecto/list-users-by-group', views.get_list_users_group, name='poryecto_rol_usuarios'),
 
     # URLS DE USER STORY
     path('proyectos/<slug:slug>/createUs/', views.UserStoryCreate.as_view(), name='create_us'),

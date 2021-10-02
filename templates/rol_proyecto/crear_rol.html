@@ -33,7 +33,9 @@
                 <li class="list-group-item">{{ rol.related_group.name }}</li>
                 <li class="list-group-item">
                     <a class="btn btn-dark mr-2" href="{% url 'proyecto_rol_modificar' slug=proyecto.slug pk=rol.pk %}" role="button">Asignar/Modificar Rol</a>
-                    <a class="btn btn-danger mr-2" href="{% url 'proyecto_rol_eliminar' slug=proyecto.slug pk=rol.pk %}" role="button">Eliminar Rol</a>
+                    <button id="{{ rol.pk }}" onclick="obtener_usuarios_por_rol('{{ rol.related_group }}', '{{ rol.pk }}')" type="button" class="btn btn-danger mr-2" data-bs-toggle="modal" data-bs-target="#modalEliminarRol">
+                        Eliminar Rol
+                    </button>
                 </li>
             {% endfor %}
         </ul>
@@ -42,4 +44,83 @@
 <div class="row mt-2">
     <div class="col-md-2"><a class="mb-3 btn btn-danger" href="{% url 'proyecto_gestion' slug=proyecto.slug %}">Volver</a></div>
 </div>
+
+<!--Modal para alerta de elimnación de rol-->
+<div class="modal fade" id="modalEliminarRol" tabindex="-1" aria-labelledby="modalEliminarRolLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalEliminarRol">Alerta de eliminación de rol</h5>
+        <button type="button" onclick="eliminarElementos()" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="parent">
+        <p id="titulo_nombre_rol"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" onclick="eliminarElementos()" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <a id="deleteRol" class="btn btn-primary" role="button">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+    async function obtener_usuarios_por_rol(nombre_rol, id_rol) {
+        let btnEliminar = document.getElementById("deleteRol");
+        let url = "/proyectos/" + '{{ proyecto.slug }}'  + "/roles/" + id_rol + "/eliminar/";
+        btnEliminar.setAttribute("href", url);
+        let csrftoken = getCookie('csrftoken');
+        let p = document.getElementById("titulo_nombre_rol");
+        let resp = await fetch("/proyecto/list-users-by-group", {  
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken,
+            },
+            body: JSON.stringify({data: id_rol})
+        });
+        let json = await resp.json();
+        if ( json.usuarios.length > 0 ) {
+            p.innerHTML = "El rol " + nombre_rol + " esta asignado a los siguientes usuarios:";
+            let ul = document.createElement("ul");
+            ul.setAttribute("id", "lista_de_usuarios");
+            for (i = 0; i < json.usuarios.length; i++) {
+                let li = document.createElement("li");
+                li.innerHTML = json.usuarios[i];
+                ul.appendChild(li);
+            }
+            let modal = document.getElementById("parent");
+            let texto = document.createElement("p");
+            texto.setAttribute("id", "texto_eliminar");
+            texto.innerHTML = "Desea eliminar?";
+            modal.appendChild(ul);
+            modal.appendChild(texto);
+        }
+        else{
+            p.innerHTML = "Actualmente el rol " + nombre_rol + " no esta asignando a ningún usuario. Desea eliminar?";
+        }
+    }
+
+    function eliminarElementos() {
+        let ul = document.getElementById("lista_de_usuarios");
+        ul && ul.remove();
+        let p = document.getElementById("texto_eliminar");
+        p && p.remove();
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
 {% endblock %}
