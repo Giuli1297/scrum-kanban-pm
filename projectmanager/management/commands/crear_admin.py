@@ -12,7 +12,6 @@ class Command(BaseCommand):
             raise CommandError("Ya Existe Un Usuario Adminstrador")
         admin_username = input('Ingresa el nombre de usuario: ')
         admin_password = input('Ingresa la contrasena del administrador: ')
-
         admin_email = input('Ingresa el email del administrador: ')
 
         while True:

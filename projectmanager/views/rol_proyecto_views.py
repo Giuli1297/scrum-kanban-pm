@@ -39,6 +39,8 @@ from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.contrib.sites.shortcuts import get_current_site
 from projectmanager.views.general_views import UserAccessMixin
+from django.http import JsonResponse
+import json
 
 
 class CrearRolProyecto(UserAccessMixin, View):
@@ -236,4 +238,15 @@ class ImportarRolProyecto(UserAccessMixin, View):
                                               descripcion="Ha importado el rol" + rol.related_group.name + " en el proyecto"
                                                           + proyecto.nombre)
             messages.success(request, "Roles Importados Correctamente!")
-        return redirect('proyecto_rol', slug=slug)
+        return redirect('proyecto_rol', slug=slug) 
+
+def get_list_users_group(request):
+    if request.method == "POST":
+        body = json.loads(request.body)
+        users = User.objects.filter(groups=body["data"])
+        user_list = []
+        for user in users:
+            user_list.append(user.username);
+        return JsonResponse({"status": 200, "usuarios": user_list}) 
+    return JsonResponse({"status": 400})
+
