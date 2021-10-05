@@ -231,7 +231,7 @@ class UserStory(models.Model):
         ('QA', 'QA'),
         ('Release', 'Release')
     )
-    descripcion = models.TextField(blank=True, max_length=255)
+    descripcion = models.TextField(blank=True, max_length=5000)
     tiempoEstimadoSMaster = models.FloatField(default=0.0)
     tiempoEstimado = models.FloatField(validators=[MinValueValidator(0)], default=0)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Nuevo')
@@ -265,7 +265,8 @@ class HistorialUs(models.Model):
     )
     us=models.ForeignKey(UserStory,related_name='UsHistorial',null=True,on_delete=models.CASCADE)
     descripcion=models.TextField(blank=True,max_length=255)
-
+    hora=models.DateTimeField(default=timezone.now)
+    usuario=models.ForeignKey(User,related_name='usuario_que_modificó_us',null=True,blank=True,on_delete=models.SET_NULL)
 
     class Meta:
         unique_together=('version','us')
@@ -273,6 +274,12 @@ class HistorialUs(models.Model):
         cont_version=HistorialUs.objects.filter(us=self.us).order_by('-version')[:1]
         self.version=cont_version[0].version + 1 if cont_version else 1
         super(HistorialUs, self).save(*args,**kwargs)
+class RegistroActividadDiairia(models.Model):
+    us=models.ForeignKey(UserStory,related_name='RegistroActividad',null=True,on_delete=models.CASCADE)
+    descripcion=models.TextField(blank=True,max_length=5000)
+    hora=models.IntegerField(default=0)
+    #usuario=models.ForeignKey(User,related_name='usuario_que_modificó_us',null=True,blank=True,on_delete=models.SET_NULL)
+
 class UserInfo(models.Model):
     """
     Modelo que guarda informacion util sobre cada usuario del sistema

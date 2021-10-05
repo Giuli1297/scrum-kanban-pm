@@ -30,6 +30,24 @@ bottom: 20px;
 right: 20px;
 }
 }
+
+
+    	div{
+		border-radius: 5px;
+	}
+	.contenedor{
+		background-color:#CCC;
+		width:100%;
+		height:50px;
+    display:flex;
+    justify-content: space-around;
+	}
+	.contenido{
+		height:100px;
+		width:30%;
+		float:left;
+		margin: 15px;
+	}
 </style>
 {% endblock %}
 
@@ -44,23 +62,34 @@ right: 20px;
                     Historial de User Story {{ us.descripcion }}
                 </h3>
               </div>
+
+            <div class="contenedor">
+                <div class="contenido">
+                    <h4 class="card-title">
+                        Descripción
+                    </h4>
+                </div>
+                <div class="contenido">
+                    <h4 class="card-title">
+                        Fecha de modificación
+                    </h4>
+                </div>
+                <div class="contenido">
+                    <h4 class="card-title">
+                        Usuario
+                    </h4>
+                </div>
+            </div>
               <!-- /.card-header -->
               <div class="card-body">
-                <table class="table">
-                    <tr>
-                        <td><h4>Descripcion</h4></td>
-                    </tr>
-                </table>
                 <table class="table" id="data">
                     {% for list in history %}
-
                         <tr>
 
-                            <td>{{ list.descripcion }}</td>
-
-
+                            <td class="contenido">{{ list.descripcion }}</td>
+                            <td class="contenido ">{{ list.hora }}</td>
+                            <td class="contenido">{{ list.usuario }}</td>
                         </tr>
-
                     {% endfor %}
 
                 </table>

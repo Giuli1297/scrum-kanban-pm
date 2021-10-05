@@ -725,7 +725,7 @@ class UserStoryUpdate(View):
             descripcion = form.cleaned_data['descripción_de_user_story']
             prioridad = form.cleaned_data['prioridad_1_al_10']
             if prioridad > 0 and prioridad < 11:
-                nuevoHistorial = HistorialUs(us=US2, descripcion=US2.descripcion)
+                nuevoHistorial = HistorialUs(us=US2, descripcion=US2.descripcion,usuario=request.user)
                 nuevoHistorial.save()
                 US2.descripcion = descripcion
                 US2.prioridad = prioridad
@@ -1330,4 +1330,44 @@ class EstimarSprint(View):
         else:
             messages.error(request, "Un error a ocurrido")
 
+        return redirect('proyecto_gestion', slug=slug)
+
+
+
+class RegistroDiario(View):
+
+    def get(self, request, slug, pk, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        '''if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=slug)'''
+        US = UserStory.objects.get(pk=pk)
+
+        form=RegistroActividadForm()
+        context = {
+            'form': form,
+            'proyecto': proyecto,
+            'US': US
+        }
+        return render(request, 'UserStory/registroActividad.html', context)
+
+    def post(self, request, slug, pk, *args, **kwargs):
+        """
+        Se obtiene el objeto del User Story actual y se actualiza
+        con los nuevos datos de entrada
+        """
+        proyecto = Proyecto.objects.get(slug=slug)
+        US = UserStory.objects.get(pk=pk)
+        form = RegistroActividadForm(request.POST)
+
+        if form.is_valid():
+            descripcion = form.cleaned_data['descripcion']
+            horas = form.cleaned_data['horas']
+            nuevoRegistro = RegistroActividadDiairia(us=US, descripcion=descripcion,hora=horas)
+            nuevoRegistro.save()
+            messages.success(request, "Se registró correctamente la actividad!")
+        else:
+
+            messages.error(request, "Un Error a ocurrido")
         return redirect('proyecto_gestion', slug=slug)

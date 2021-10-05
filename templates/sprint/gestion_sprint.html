@@ -1,4 +1,5 @@
 {% load projectmanager_extras %}
+
 <div class="row mt-2">
     {% if proyecto.sprint_actual.estado != 'conf3' %}
          <h4>Configura el proximo Sprint</h4>
@@ -95,39 +96,71 @@
     </div>
 </div>
 {% else %}
-    <div class="row mt-2">
+    <div id="contenido" class="row mt-2">
 
-        <div class="col-md-4 border border-2">
+        <div class="  col-md-4 border border-2">
             <h4>TO-DO</h4>
-            <table class="table mb-2">
-              <thead>
-                <tr>
-                    <th scope="col">User Story</th>
-                    <th scope="col">Encargado</th>
-                    <th scope="col">Horas (Planning Poker)</th>
+            <table class=" table mb-2">
+              <thead >
+                <tr >
+                    <th scope="colgroup">User Story</th>
+                    <th scope="colgroup">Encargado</th>
+                    <th scope="colgroup">Horas (Planning Poker)</th>
                 </tr>
               </thead>
               <tbody>
                 {% for user_story in proyecto.sprint_actual.sprint_backlog.all %}
-                    <tr>
-                        <th scope="row">{{ user_story.descripcion }}</th>
-                            <td>{{ user_story.desarrolladorAsignado.username }}</td>
-                            <td>
-                                    {{ user_story.tiempoEstimado }}
-                            </td>
-
+                    {% if user_story.estado == 'Nuevo' %}
+                        <tr>
+                            <th >{{ user_story.descripcion }}
+                                <br><a id="realizar" href="{% url 'cambiar_estado_us'  slug=proyecto.slug pk=user_story.pk %}" class=" btn btn-dark btn-flat" href="#" >Realizar</a></br>
+                            </th>
+                            <td  >{{ user_story.desarrolladorAsignado.username }}</td>
+                            <td>{{ user_story.tiempoEstimado }}</td>
                     </tr>
+                    {% endif %} 
+
                 {% endfor %}
+
               </tbody>
             </table>
         </div>
 
         <div class="col-md-4 border border-2">
             <h4>DOING</h4>
-            </div>
+            <table  class=" table mb-2">
+              <thead >
+                <tr >
+                    <th scope="colgroup">User Story</th>
+                    <th scope="colgroup">Encargado</th>
+                    <th scope="colgroup">Horas (Planning Poker)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user_story in proyecto.sprint_actual.sprint_backlog.all %}
+                    {% if user_story.estado == 'Doing' %}
+                    <tr>
+                            <th >{{ user_story.descripcion }}
+                                <br><a id="realizar" class=" btn btn-dark btn-flat" href="#" >Realizar</a></br>
+                                <br><a href="{% url 'registro_actividad'  slug=proyecto.slug pk=user_story.pk %} " type="button" class="btn btn-primary" > Registro</a></br>
+                                <!--br><button  onclick=" return registro_modal('{% url 'registro_actividad'  slug=proyecto.slug pk=user_story.pk %}') " class=" btn btn-dark btn-flat"> Registro Actividad </button></br-->
+                            </th>
+                            <td  >{{ user_story.desarrolladorAsignado.username }}</td>
+                            <td>{{ user_story.tiempoEstimado }}</td>
+                    </tr>
+                    {% endif %}
+
+                {% endfor %}
+
+              </tbody>
+            </table>
+        </div>
         <div class="col-md-4 border border-2">
             <h4>DONE</h4>
 
         </div>
     </div>
+
+<!-- Modal -->
+   </div>
 {% endif %}

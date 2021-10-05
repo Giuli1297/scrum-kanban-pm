@@ -22,6 +22,7 @@ urlpatterns = [
     path('proyectos/listar/', views.ProyectoView.as_view(), name="proyecto_listar"),
     path('proyectos/crear/', views.ProyectoCreate.as_view(), name="proyecto_crear"),
     path('proyectos/<slug:slug>/gestionar/', views.GestionProyectoView.as_view(), name='proyecto_gestion'),
+    path('proyectos/<slug:slug>/RegistroActividad/<int:pk>/', views.RegistroDiario.as_view(), name='registro_actividad'),
     path('proyectos/<slug:slug>/editar/', views.ProyectoUpdate.as_view(), name="proyecto_editar"),
     path('proyectos/<slug:slug>/editarsm/', views.AgregarSMember.as_view(), name="proyecto_agregar_sm"),
     path('proyectos/<slug:slug>/quitarsm/', views.QuitarSMember.as_view(), name="proyecto_quitar_sm"),

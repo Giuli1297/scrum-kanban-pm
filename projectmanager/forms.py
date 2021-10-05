@@ -323,3 +323,13 @@ class PlanningPokerSMemberForm(forms.Form):
 
 class EstimacionSprint(forms.Form):
     horas_estimadas = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
+
+
+
+class RegistroActividadForm(forms.Form):
+    descripcion = forms.CharField(max_length=5000, widget=forms.Textarea(attrs={
+        'class': 'form-control'
+    }))
+    horas = forms.IntegerField(widget=forms.NumberInput(attrs={
+        'class': 'form-control'
+    }))

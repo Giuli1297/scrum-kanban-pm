@@ -16,3 +16,4 @@ admin.site.register(HistorialUs)
 
 
 admin.site.register(UserWorkTime)
+admin.site.register(RegistroActividadDiairia)
