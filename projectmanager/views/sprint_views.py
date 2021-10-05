@@ -62,7 +62,7 @@ class CargarSprintBacklog(View):
 
         # Log activity
         SystemActivity.objects.create(usuario=request.user,
-                                      descripcion="Ha agregado el user story con id " + ustory.pk
+                                      descripcion="Ha agregado el user story con id " + str(ustory.pk)
                                                   + " al sprint backlog del proyecto " + sprint.proyecto_actual.nombre)
         messages.success(request, 'User Story agregado al SprintBacklog')
         return redirect('proyecto_gestion', slug=sprint.proyecto_actual.slug)
@@ -87,7 +87,7 @@ class QuitarUSFromSprintBacklog(View):
 
         # Log activity
         SystemActivity.objects.create(usuario=request.user,
-                                      descripcion="Ha removido el user story con id " + ustory.pk
+                                      descripcion="Ha removido el user story con id " + str(ustory.pk)
                                                   + " del sprint backlog del proyecto " + ustory.proyecto.nombre)
         messages.success(request, 'User Story removido del SprintBacklog')
         return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
@@ -129,13 +129,15 @@ class AsignarYEstimarUserStoryView(View):
             ustory.desarrolladorAsignado = sm_asignado
             ustory.tiempoEstimadoSMaster = horasEstimadas
             ustory.save()
+            add_obj_perm_to_group('desarrollador_de_' + str(ustory.pk), 'desarrollar_user_story', ustory)
+            add_user_to_obj_group(ustory.desarrolladorAsignado, 'desarrollador_de_' + str(ustory.pk))
         else:
             messages.error(request, "Un error a ocurrido")
             return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
 
         # Log activity
         SystemActivity.objects.create(usuario=request.user,
-                                      descripcion="Ha asginado y estimado el user story con id " + ustory.pk
+                                      descripcion="Ha asginado y estimado el user story con id " + str(ustory.pk)
                                                   + " del sprint backlog del proyecto " + ustory.proyecto.nombre)
         messages.success(request, "Se ha asignado y estimado el User Story")
         return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
@@ -248,7 +250,7 @@ class PlanningPokerSMemberView(View):
             # Log activity
             SystemActivity.objects.create(usuario=request.user,
                                           descripcion="Ha estimado su User Story con id "
-                                                      + user_story.pk + " en el planning poker")
+                                                      + str(user_story.pk) + " en el planning poker")
             return redirect('proyecto_gestion', slug=user_story.proyecto.slug)
         except Exception as ex:
             messages.error(request, "Error de Token")
@@ -261,8 +263,11 @@ class EstimarSprint(View):
         proyecto = Proyecto.objects.get(slug=slug)
         sprint = proyecto.sprint_actual
         horas = 0
-        for i in sprint.sprint_backlog.all():
-            horas = horas + i.tiempoEstimado
+        for us in sprint.sprint_backlog.all():
+            if not us.tiempoEstimado > 0:
+                messages.error(request, "Faltan Estimar User Stories")
+                return redirect('proyecto_gestion', slug=slug)
+            horas = horas + us.tiempoEstimado
 
         # proyecto.sprint_actual.duracion_estimada
         context = {
@@ -282,9 +287,12 @@ class EstimarSprint(View):
             sprint.duracion_estimada = horasEstimadas
             sprint.estado = 'conf3'
             sprint.save()
+            for us in sprint.sprint_backlog.all():
+                us.estado = 'To-Do'
+                us.save()
             # Log activity
             SystemActivity.objects.create(usuario=request.user,
-                                          descripcion="Ha estimado el sprint con id " + sprint.pk)
+                                          descripcion="Ha estimado el sprint con id " + str(sprint.pk))
             messages.success(request, "Se ha asignado la estimación al Sprint")
 
         else:

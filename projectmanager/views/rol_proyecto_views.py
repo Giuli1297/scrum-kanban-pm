@@ -174,7 +174,11 @@ class EliminarRolProyecto(UserAccessMixin, View):
                                       proyecto) and not request.user.groups.filter(name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('proyecto_rol', slug=slug)
+
         rol = Rol.objects.get(pk=pk)
+        if rol.tipo == 'defecto':
+            messages.error(request, "Este Rol es defecto")
+            return redirect('proyecto_rol', slug=slug)
         related_group = rol.related_group
         related_group.delete()
 
@@ -238,7 +242,8 @@ class ImportarRolProyecto(UserAccessMixin, View):
                                               descripcion="Ha importado el rol" + rol.related_group.name + " en el proyecto"
                                                           + proyecto.nombre)
             messages.success(request, "Roles Importados Correctamente!")
-        return redirect('proyecto_rol', slug=slug) 
+        return redirect('proyecto_rol', slug=slug)
+
 
 def get_list_users_group(request):
     if request.method == "POST":
@@ -247,6 +252,5 @@ def get_list_users_group(request):
         user_list = []
         for user in users:
             user_list.append(user.username);
-        return JsonResponse({"status": 200, "usuarios": user_list}) 
+        return JsonResponse({"status": 200, "usuarios": user_list})
     return JsonResponse({"status": 400})
-

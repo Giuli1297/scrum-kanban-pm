@@ -105,18 +105,27 @@
                     <th scope="col">User Story</th>
                     <th scope="col">Encargado</th>
                     <th scope="col">Horas (Planning Poker)</th>
+                    <th scope="col">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {% for user_story in proyecto.sprint_actual.sprint_backlog.all %}
-                    <tr>
-                        <th scope="row">{{ user_story.descripcion }}</th>
-                            <td>{{ user_story.desarrolladorAsignado.username }}</td>
-                            <td>
+                    {% if user_story.estado == 'To-Do' %}
+                        <tr>
+                            <th scope="row">{{ user_story.descripcion }}</th>
+                                <td>{{ user_story.desarrolladorAsignado.username }}</td>
+                                <td>
                                     {{ user_story.tiempoEstimado }}
-                            </td>
-
-                    </tr>
+                                </td>
+                                <td>{% if user_story.desarrolladorAsignado == request.user %}
+                                        <a class="btn btn-primary"
+                                           href="{% url 'seleccionar_p_realizar_user_story' usPk=user_story.pk %}">
+                                            Realizar
+                                        </a>
+                                    {% endif %}
+                                </td>
+                        </tr>
+                    {% endif %}
                 {% endfor %}
               </tbody>
             </table>
@@ -124,10 +133,36 @@
 
         <div class="col-md-4 border border-2">
             <h4>DOING</h4>
-            </div>
+            <table class="table mb-2">
+              <thead>
+                <tr>
+                    <th scope="col">User Story</th>
+                    <th scope="col">Encargado</th>
+                    <th scope="col">Horas (Planning Poker)</th>
+                    <th scope="col">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user_story in proyecto.sprint_actual.sprint_backlog.all %}
+                    {% if user_story.estado == 'Doing' %}
+                        <tr>
+                            <th scope="row">{{ user_story.descripcion }}</th>
+                                <td>{{ user_story.desarrolladorAsignado.username }}</td>
+                                <td>
+                                    {{ user_story.tiempoEstimado }}
+                                </td>
+                                <td>
+                                    -
+                                </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+              </tbody>
+            </table>
+        </div>
+
         <div class="col-md-4 border border-2">
             <h4>DONE</h4>
-
         </div>
     </div>
 {% endif %}
