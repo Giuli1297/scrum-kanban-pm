@@ -39,6 +39,8 @@ from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.contrib.sites.shortcuts import get_current_site
 from projectmanager.views.general_views import UserAccessMixin
+from django.http import JsonResponse
+import json
 
 
 class CrearRolProyecto(UserAccessMixin, View):
@@ -83,6 +85,12 @@ class CrearRolProyecto(UserAccessMixin, View):
             rol = Rol.objects.get(related_group=group)
             rol.descripcion = descripcion
             rol.save()
+
+            # Log activity
+            SystemActivity.objects.create(usuario=request.user,
+                                          descripcion="Ha creado un rol nivel proyecto en el proyecto "
+                                                      + proyecto.nombre + " con el nombre " + nombre)
+
             messages.success(request, "Rol Creado Correctamente!")
         else:
             messages.error(request, "Un Error a ocurrido")
@@ -139,6 +147,12 @@ class ModificarRolProyecto(UserAccessMixin, View):
                 add_obj_perm_to_group(nombre, permiso.codename, proyecto)
             for user in usuarios_a_asignar:
                 add_user_to_obj_group(user, nombre)
+
+            # Log activity
+            SystemActivity.objects.create(usuario=request.user,
+                                          descripcion="Ha modificado el rol " + nombre
+                                                      + " del proyecto " + proyecto.nombre)
+
             messages.success(request, "Rol Modificado Correctamente!")
         else:
             messages.error(request, "Un Error a ocurrido")
@@ -160,9 +174,19 @@ class EliminarRolProyecto(UserAccessMixin, View):
                                       proyecto) and not request.user.groups.filter(name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('proyecto_rol', slug=slug)
+
         rol = Rol.objects.get(pk=pk)
+        if rol.tipo == 'defecto':
+            messages.error(request, "Este Rol es defecto")
+            return redirect('proyecto_rol', slug=slug)
         related_group = rol.related_group
         related_group.delete()
+
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha eliminado el rol " + rol.related_group.name
+                                                  + "del proyecto " + proyecto.nombre)
+
         messages.success(request, "Rol Eliminado")
         return redirect('proyecto_rol', slug)
 
@@ -213,5 +237,20 @@ class ImportarRolProyecto(UserAccessMixin, View):
                 created_rol.tipo = 'proyimp'
                 created_rol.copied_from = rol.related_group.name
                 created_rol.save()
+                # Log activity
+                SystemActivity.objects.create(usuario=request.user,
+                                              descripcion="Ha importado el rol" + rol.related_group.name + " en el proyecto"
+                                                          + proyecto.nombre)
             messages.success(request, "Roles Importados Correctamente!")
         return redirect('proyecto_rol', slug=slug)
+
+
+def get_list_users_group(request):
+    if request.method == "POST":
+        body = json.loads(request.body)
+        users = User.objects.filter(groups=body["data"])
+        user_list = []
+        for user in users:
+            user_list.append(user.username);
+        return JsonResponse({"status": 200, "usuarios": user_list})
+    return JsonResponse({"status": 400})

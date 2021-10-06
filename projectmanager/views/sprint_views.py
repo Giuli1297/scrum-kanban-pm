@@ -36,169 +36,9 @@ from django.utils.encoding import force_bytes
 from projectmanager.models import *
 
 from django.http import JsonResponse
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.contrib.sites.shortcuts import get_current_site
 from projectmanager.views.general_views import UserAccessMixin
-
-
-class CrearSprint(View):
-    """
-    Vista basada en clase utilizada para la creacion de Sprint
-    """
-
-    def get(self, request, slug, *args, **kwargs):
-        proyecto = Proyecto.objects.get(slug=slug)
-        if not request.user.has_perms(('projectmanager.gestionar_sprint_proyecto',),
-                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
-            messages.error(request, "No tienes permisos para eso")
-            return redirect('proyecto_rol', slug=slug)
-        sprint = Sprint.objects.all()
-        form = SprintFormCreate(slug=slug)
-        context = {
-            'form': form,
-            'proyecto': proyecto,
-            'sprint': sprint
-        }
-        return render(request, 'sprint/crearSprint.html', context)
-
-    def post(self, request, slug, *args, **kwargs):
-        proyecto = Proyecto.objects.get(slug=slug)
-        if not request.user.has_perms(('projectmanager.gestionar_sprint_proyecto',),
-                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
-            messages.error(request, "No tienes permisos para eso")
-            return redirect('proyecto_rol', slug=slug)
-        form = SprintFormCreate(request.POST, slug=slug)
-
-        if form.is_valid():
-            nombre = form.cleaned_data['nombre']
-            US = form.cleaned_data['UserStorys']
-            # duracion_estimada = form.cleaned_data['duracion_estimanda']
-            validar = Sprint.objects.filter(nombre=nombre).exists()
-            if (validar):
-                messages.error(request, "Ya existe Sprint con ese nombre")
-            else:
-
-                sprint = Sprint.objects.create(nombre=nombre, proyecto=proyecto)
-                sprint.save()
-                for us in US:
-                    userStory = UserStory.objects.get(nombre=us)
-                    userStory.sprint = sprint
-                    userStory.save()
-                messages.success(request, "Sprint Creado Correctamente!")
-        else:
-            messages.error(request, "Un Error a ocurrido")
-        return redirect('crear_sprint', slug=slug)
-
-
-class ActualizarSprint(View):
-    """
-    Vista basada en clases para la actualizacion de Sprint
-    """
-
-    def get(self, request, slug, pk, *args, **kwargs):
-        proyecto = Proyecto.objects.get(slug=slug)
-        if not request.user.has_perms(('projectmanager.gestionar_sprint_proyecto',),
-                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
-            messages.error(request, "No tienes permisos para eso")
-            return redirect('proyecto_rol', slug=slug)
-        sprint = Sprint.objects.get(pk=pk)
-        form = SprintFormCreate(initial={'nombre': sprint.nombre,
-                                         'UserStorys': sprint.Sprint.all(),
-                                         'duracion_estimanda': sprint.duracion_estimada}, slug=slug)
-        context = {
-            'form': form,
-            'proyecto': proyecto,
-            'sprint': sprint
-        }
-        return render(request, 'sprint/actualizarSprint.html', context)
-
-    def post(self, request, slug, pk, *args, **kwargs):
-        sprint = Sprint.objects.get(pk=pk)
-        if not request.user.has_perms(('projectmanager.gestionar_sprint_proyecto',),
-                                      sprint.proyecto) and not request.user.groups.filter(
-            name='Administrador').exists():
-            messages.error(request, "No tienes permisos para eso")
-            return redirect('proyecto_rol', slug=slug)
-
-        form = SprintFormCreate(request.POST, slug=slug)
-
-        if form.is_valid():
-            nombre = form.cleaned_data['nombre']
-            US = form.cleaned_data['UserStorys']
-            duracion_estimada = form.cleaned_data['duracion_estimanda']
-            sprint.nombre = nombre
-            sprint.duracion_estimada = duracion_estimada
-            sprint.save()
-            for us in Sprint.objects.get(pk=pk).Sprint.all():
-                userStory = UserStory.objects.get(nombre=us)
-                userStory.sprint = None
-                userStory.save()
-            for us in US:
-                userStory = UserStory.objects.get(nombre=us)
-                userStory.sprint = sprint
-                userStory.save()
-
-            messages.success(request, "User Story se actualizó Correctamente!")
-        else:
-            messages.error(request, "Un Error a ocurrido")
-        return redirect('crear_sprint', slug=slug)
-
-
-class listaUsSprintBacklog(View):
-    """
-    Lista basada en clases que muestra el Sprint Backlog
-    """
-
-    def get(self, request, slug, pk, *args, **kwargs):
-        proyecto = Proyecto.objects.get(slug=slug)
-        if not request.user.has_perms(('projectmanager.gestionar_sprint_proyecto',),
-                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
-            messages.error(request, "No tienes permisos para eso")
-            return redirect('proyecto_rol', slug=slug)
-        sprint = Sprint.objects.get(pk=pk).Sprint.all()
-        # form=SprintFormCreate(slug=slug)
-        context = {
-            'proyecto': proyecto,
-            'US': sprint
-        }
-        return render(request, 'sprint_backlog/userStorySprint.html', context)
-
-
-class UserStoryUpdateSprint(View):
-    """
-    Vista basada en clases utilizada para la actualizacion de User Stories
-    """
-
-    def get(self, request, slug, pk, *args, **kwargs):
-        proyecto = Proyecto.objects.get(slug=slug)
-        if not request.user.has_perms(('projectmanager.gestionar_sprint_proyecto',),
-                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
-            messages.error(request, "No tienes permisos para eso")
-            return redirect('proyecto_rol', slug=slug)
-        US = UserStory.objects.all()
-        US2 = UserStory.objects.get(pk=pk)
-        if US2.desarrolladorAsignado:
-            messages.error(request, 'User Story en sprint')
-            return redirect('create_us', slug=slug)
-        form = AsignarDesarrolladorUs(slug=slug)
-        context = {
-            'form': form,
-            'proyecto': proyecto,
-            'US2': US2
-        }
-        return render(request, 'sprint_backlog/updateUsSprint.html', context)
-
-    def post(self, request, slug, pk, *args, **kwargs):
-        US2 = UserStory.objects.get(pk=pk)
-        form = AsignarDesarrolladorUs(request.POST, slug=slug)
-        if form.is_valid():
-            desarrollador = form.cleaned_data['desarrolladorAsignado']
-            US2.desarrolladorAsignado = desarrollador
-            US2.save()
-            messages.success(request, "User Story se actualizó Correctamente!")
-        else:
-            messages.error(request, "Un Error a ocurrido")
-        return redirect('sprint_backlog', slug=slug, pk=US2.sprint.pk)
 
 
 class CargarSprintBacklog(View):
@@ -219,6 +59,11 @@ class CargarSprintBacklog(View):
         ustory = UserStory.objects.get(pk=usPk)
         ustory.sprint = sprint
         ustory.save()
+
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha agregado el user story con id " + str(ustory.pk)
+                                                  + " al sprint backlog del proyecto " + sprint.proyecto_actual.nombre)
         messages.success(request, 'User Story agregado al SprintBacklog')
         return redirect('proyecto_gestion', slug=sprint.proyecto_actual.slug)
 
@@ -239,25 +84,13 @@ class QuitarUSFromSprintBacklog(View):
         ustory.desarrolladorAsignado = None
         ustory.tiempoEstimado = 0
         ustory.save()
+
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha removido el user story con id " + str(ustory.pk)
+                                                  + " del sprint backlog del proyecto " + ustory.proyecto.nombre)
         messages.success(request, 'User Story removido del SprintBacklog')
         return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
-
-
-class listarHistorial(View):
-    """
-    Vista basada en clase utilizada para mostrar el hisotrial de cambio de un User Story
-    """
-
-    def get(self, request, slug, pk):
-        proyecto = Proyecto.objects.get(slug=slug)
-        ustory = UserStory.objects.get(pk=pk).UsHistorial.all()
-        us = UserStory.objects.get(pk=pk)
-        context = {
-            'history': ustory,
-            'proyecto': proyecto,
-            'us': us
-        }
-        return render(request, 'UserStory/historial.html', context)
 
 
 class AsignarYEstimarUserStoryView(View):
@@ -296,9 +129,16 @@ class AsignarYEstimarUserStoryView(View):
             ustory.desarrolladorAsignado = sm_asignado
             ustory.tiempoEstimadoSMaster = horasEstimadas
             ustory.save()
+            add_obj_perm_to_group('desarrollador_de_' + str(ustory.pk), 'desarrollar_user_story', ustory)
+            add_user_to_obj_group(ustory.desarrolladorAsignado, 'desarrollador_de_' + str(ustory.pk))
         else:
             messages.error(request, "Un error a ocurrido")
             return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
+
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha asginado y estimado el user story con id " + str(ustory.pk)
+                                                  + " del sprint backlog del proyecto " + ustory.proyecto.nombre)
         messages.success(request, "Se ha asignado y estimado el User Story")
         return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
 
@@ -351,6 +191,9 @@ class PlanningPokerView(View):
                 [us.desarrolladorAsignado.email],
             )
             email.send(fail_silently=False)
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha iniciado el planning poker en el proyecto " + proyecto.nombre)
         return redirect('proyecto_gestion', slug=proyecto.slug)
 
 
@@ -404,6 +247,10 @@ class PlanningPokerSMemberView(View):
                 horas_estimadas_smaster = float(user_story.tiempoEstimadoSMaster)
                 user_story.tiempoEstimado = float((horas_estimadas_smaster + horas_estimadas_smember) / 2)
                 user_story.save()
+            # Log activity
+            SystemActivity.objects.create(usuario=request.user,
+                                          descripcion="Ha estimado su User Story con id "
+                                                      + str(user_story.pk) + " en el planning poker")
             return redirect('proyecto_gestion', slug=user_story.proyecto.slug)
         except Exception as ex:
             messages.error(request, "Error de Token")
@@ -416,8 +263,11 @@ class EstimarSprint(View):
         proyecto = Proyecto.objects.get(slug=slug)
         sprint = proyecto.sprint_actual
         horas = 0
-        for i in sprint.sprint_backlog.all():
-            horas = horas + i.tiempoEstimado
+        for us in sprint.sprint_backlog.all():
+            if not us.tiempoEstimado > 0:
+                messages.error(request, "Faltan Estimar User Stories")
+                return redirect('proyecto_gestion', slug=slug)
+            horas = horas + us.tiempoEstimado
 
         # proyecto.sprint_actual.duracion_estimada
         context = {
@@ -437,6 +287,12 @@ class EstimarSprint(View):
             sprint.duracion_estimada = horasEstimadas
             sprint.estado = 'conf3'
             sprint.save()
+            for us in sprint.sprint_backlog.all():
+                us.estado = 'To-Do'
+                us.save()
+            # Log activity
+            SystemActivity.objects.create(usuario=request.user,
+                                          descripcion="Ha estimado el sprint con id " + str(sprint.pk))
             messages.success(request, "Se ha asignado la estimación al Sprint")
 
         else:

@@ -64,6 +64,12 @@ class ProyectoCreate(UserAccessMixin, CreateView):
     template_name = "proyecto/proyecto_form.html"
     success_url = reverse_lazy('proyecto_listar')
 
+    def post(self, request, *args, **kwargs):
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha creado un proyecto")
+        return super().post(self, request, *args, **kwargs)
+
 
 class ProyectoView(UserAccessMixin, ListView):
     """
@@ -127,6 +133,9 @@ class ProyectoUpdate(UserAccessMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         if not self.object.estado != 'PEN':
+            # Log activity
+            SystemActivity.objects.create(usuario=request.user,
+                                          descripcion="Ha modificado el proyecto " + self.object.nombre)
             return super().get(request, *args, **kwargs)
         messages.error(request, "No se puede editar este proyecto")
         return redirect('proyecto_gestion', slug=self.object.slug)
@@ -273,6 +282,10 @@ class AgregarSMember(UserAccessMixin, View):
             proyecto.scrum_member.add(scrum_member)
             proyecto.save()
 
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha agregado Scrum Members al proyecto " + proyecto.nombre)
+
         messages.success(request, 'Scrum Member agregado')
         return redirect('proyecto_gestion', slug=slug)
 
@@ -316,6 +329,10 @@ class QuitarSMember(View):
             proyecto.scrum_member.remove(scrum_member)
             scrum_member.save()
             proyecto.save()
+
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha quitado scrum members del proyecto " + proyecto.name)
         messages.success(request, 'Scrum Member removido')
         return redirect('proyecto_gestion', slug=slug)
 
@@ -344,6 +361,11 @@ class ProyectoIniciarView(UserAccessMixin, View):
         else:
             messages.error(request, "Proyecto no se puede iniciar")
             return redirect('proyecto_gestion', slug=slug)
+
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha iniciado el proyecto " + proyecto.nombre)
+
         messages.success(request, "Proyecto Iniciado")
         return redirect('proyecto_gestion', slug=proyecto.slug)
 
@@ -369,5 +391,10 @@ class ProyectoCancelarView(UserAccessMixin, View):
         else:
             messages.error(request, "Proyecto no se puede cancelar")
             return redirect('proyecto_gestion', slug=slug)
+
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha cancelado el proyecto " + proyecto.nombre)
+
         messages.success(request, "Proyecto Cancelado")
         return redirect('proyecto_listar')

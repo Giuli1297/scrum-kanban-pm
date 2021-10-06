@@ -75,6 +75,10 @@ class VerificationView(View):
             user.is_active = True
             user.save()
 
+            # Log activity
+            SystemActivity.objects.create(usuario=request.user,
+                                          descripcion="Se ha verificado al usuario " + user.username)
+
             messages.success(request, "Usuario " + user.username + " habilitado")
             return redirect('home')
         except Exception as ex:
@@ -97,3 +101,13 @@ class HomePage(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
+
+
+class SystemActivityView(View):
+    def get(self, request, *args, **kwargs):
+        if not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('home')
+        return render(request, 'dashboard/system_activity.html', context={
+            'registro': SystemActivity.objects.all().order_by('-fecha')
+        })

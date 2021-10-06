@@ -84,6 +84,12 @@ class RolCreateView(UserAccessMixin, CreateView):
     template_name = 'rol/create.html'
     success_url = reverse_lazy('list_rol')
 
+    def post(self, request, *args, **kwargs):
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha creado un rol de sistema")
+        return super().post(self, request, *args, **kwargs)
+
     def form_valid(self, form):
         """If the form is valid, save the associated model."""
         returnValue = super().form_valid(form)
@@ -113,6 +119,13 @@ class RolUpdateView(UserAccessMixin, UpdateView):
     template_name = 'rol/update.html'
     success_url = reverse_lazy('list_rol')
 
+    def post(self, request, *args, **kwargs):
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha modificado un rol de sistema")
+
+        return super().post(self, request, *args, **kwargs)
+
 
 class RolDeleteView(UserAccessMixin, DeleteView):
     """
@@ -131,6 +144,12 @@ class RolDeleteView(UserAccessMixin, DeleteView):
     model = Group
     template_name = 'rol/delete.html'
     success_url = reverse_lazy('list_rol')
+
+    def post(self, request, *args, **kwargs):
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha eliminado un rol de sistema")
+        return super().post(self, request, *args, **kwargs)
 
 
 class ListUser(ListView):
@@ -171,6 +190,12 @@ class AsignarRol(UserAccessMixin, UpdateView):
     template_name = 'rol/asignarRol.html'
     success_url = reverse_lazy('list_user')
 
+    def post(self, request, *args, **kwargs):
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha asignado un rol de sistema")
+        return super().post(self, request, *args, **kwargs)
+
 
 class EliminarRolUser(UserAccessMixin, UpdateView):
     """
@@ -192,3 +217,9 @@ class EliminarRolUser(UserAccessMixin, UpdateView):
     form_class = UserFormDelete
     template_name = 'rol/eliminarRolUser.html'
     success_url = reverse_lazy('list_user')
+
+    def post(self, request, *args, **kwargs):
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha desasignado un rol de sistema a un usuario")
+        return super().post(self, request, *args, **kwargs)

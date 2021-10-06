@@ -82,6 +82,9 @@ class UserStoryCreate(View):
             if prioridad > 0 and prioridad < 11:
                 US = UserStory.objects.create(descripcion=descripcion, proyecto=proyecto, prioridad=prioridad)
                 US.save()
+                # Log activity
+                SystemActivity.objects.create(usuario=request.user,
+                                              descripcion="Ha creado un user story en el proyecto " + proyecto.nombre)
                 messages.success(request, "User Story Creado Correctamente!")
             else:
                 messages.error(request, "Prioridad invalida, fuera del rango 1 al 10")
@@ -146,6 +149,9 @@ class UserStoryUpdate(View):
                 US2.prioridad = prioridad
 
                 US2.save()
+                # Log activity
+                SystemActivity.objects.create(usuario=request.user,
+                                              descripcion="Ha modificado un user story en el proyecto " + proyecto.nombre)
                 messages.success(request, "User Story se actualizó Correctamente!")
             else:
                 messages.error(request, "Prioridad invalida, fuera del rango 1 al 10")
@@ -172,5 +178,25 @@ class EliminarUs(View):
             messages.error(request, 'User Story en sprint')
             return redirect('create_us', slug=slug)
         US.delete()
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha eliminado un user story en el proyecto " + proyecto.nombre)
         messages.success(request, "User Story Eliminado")
         return redirect('create_us', slug=slug)
+
+
+class listarHistorial(View):
+    """
+    Vista basada en clase utilizada para mostrar el hisotrial de cambio de un User Story
+    """
+
+    def get(self, request, slug, pk):
+        proyecto = Proyecto.objects.get(slug=slug)
+        ustory = UserStory.objects.get(pk=pk).UsHistorial.all()
+        us = UserStory.objects.get(pk=pk)
+        context = {
+            'history': ustory,
+            'proyecto': proyecto,
+            'us': us
+        }
+        return render(request, 'UserStory/historial.html', context)

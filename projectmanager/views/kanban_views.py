@@ -38,24 +38,26 @@ from projectmanager.models import *
 from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.contrib.sites.shortcuts import get_current_site
-from projectmanager.views.general_views import UserAccessMixin
 
 
-@login_required
-def perfilUsuario(request):
+class SeleccionarParaRealizarUserStory(View):
     """
-        Funcion para administrar el perfil de usuario
+    Vista basada en clase que sirve para cargar el sprint backlog
     """
-    if request.method == "POST":
-        form = ActualizarUsuarioForm(request.POST, instance=request.user)
 
-        if form.is_valid():
-            form.save()
-            # Log activity
-            SystemActivity.objects.create(usuario=request.user,
-                                          descripcion="Ha modificado su informacion de usuario")
-            messages.success(request, "Tu información ha sido actualizada!")
-            return redirect("perfil")
-    else:
-        form = ActualizarUsuarioForm(instance=request.user)
-    return render(request, "perfil/usuario.html", {'form': form})
+    def get(self, request, usPk, *args, **kwargs):
+        user_story = UserStory.objects.get(pk=usPk)
+        if not request.user.has_perms(('projectmanager.desarrollar_user_story',),
+                                      user_story) and not request.user.groups.filter(
+            name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=user_story.proyecto.slug)
+        user_story.estado = 'Doing'
+        user_story.save()
+
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha seleccionado el user story " + str(user_story.pk)
+                                                  + " para desarrollarlo")
+        messages.success(request, 'User Story agregado a doing')
+        return redirect('proyecto_gestion', slug=user_story.proyecto.slug)

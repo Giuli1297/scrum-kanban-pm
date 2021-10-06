@@ -64,6 +64,8 @@ class UserStory(models.Model):
         return HistorialUs.objects.filter(descripcion=self).order_by('version')
 
     class Meta:
+        permissions = (
+            ('desarrollar_user_story', 'Puede desarrollar un user story'),)
         verbose_name = 'User Story'
         verbose_name_plural = 'Users Storys'
         ordering = ['-prioridad']
