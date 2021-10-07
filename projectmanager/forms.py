@@ -183,6 +183,7 @@ class CrearRolProyectoForm(forms.Form):
     """
         Clase formulario para la creacion de rol a nivel de proyecto
     """
+
     def __init__(self, *args, **kwargs):
         self.slug = kwargs.pop('slug')
         super(CrearRolProyectoForm, self).__init__(*args, **kwargs)
@@ -208,6 +209,9 @@ class CrearRolProyectoForm(forms.Form):
 
 
 class ProyectoUs(forms.Form):
+    """
+        Clase formulario para la creacion de User Stories de proyecto
+    """
     descripción_de_user_story = forms.CharField(max_length=100, widget=forms.Textarea(attrs={
         'class': 'form-control'
     }))
@@ -220,6 +224,7 @@ class ImportarRolProyectoForm(forms.Form):
     """
         Clase formulario para la importacion de un rol de prouecto de un proyecto a otro
     """
+
     def __init__(self, *args, **kwargs):
         self.slug = kwargs.pop('slug')
         super(ImportarRolProyectoForm, self).__init__(*args, **kwargs)
@@ -238,6 +243,7 @@ class SprintFormCreate(forms.Form):
     """
         Clase formulario para la creacion de spriat
     """
+
     def __init__(self, *args, **kwargs):
         self.slug = kwargs.pop('slug')
         super(SprintFormCreate, self).__init__(*args, **kwargs)
@@ -253,15 +259,12 @@ class SprintFormCreate(forms.Form):
             'class': 'check-label'
         }))
 
-    '''duracion_estimanda = forms.IntegerField( widget=forms.TextInput(attrs={
-           'class': 'form-control'
-       }))'''
-
 
 class SprintFormUpdate(forms.Form):
     """
         Clase formulario para la actualizacion de un sprint
     """
+
     def __init__(self, *args, **kwargs):
         self.slug = kwargs.pop('slug')
         super(SprintFormUpdate, self).__init__(*args, **kwargs)
@@ -282,6 +285,7 @@ class AsignarDesarrolladorUs(forms.Form):
     """
         Clase formulario para la asignacion de un usuario a un User Story
     """
+
     def __init__(self, *args, **kwargs):
         self.slug = kwargs.pop('slug')
         super(AsignarDesarrolladorUs, self).__init__(*args, **kwargs)
@@ -299,6 +303,7 @@ class AsignarYEstimarUserStoryForm(forms.Form):
     """
         Clase formulario para la esstimacion y asignacion de de User Story a un desarrollador
     """
+
     def __init__(self, *args, **kwargs):
         self.usPk = kwargs.pop('usPk')
         super(AsignarYEstimarUserStoryForm, self).__init__(*args, **kwargs)
@@ -322,8 +327,11 @@ class PlanningPokerSMemberForm(forms.Form):
 
 
 class EstimacionSprint(forms.Form):
-    horas_estimadas = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
 
+    """
+        Clase formulario para la estimacion de un sprint de proyecto
+    """
+    horas_estimadas = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
 
 
 class RegistroActividadForm(forms.Form):

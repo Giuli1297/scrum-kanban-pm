@@ -15,6 +15,7 @@
                     {% if request.user|has_group:"Administrador" %}
                         <div><a class="nav-link" href="{% url 'list_rol' %}">Roles</a></div>
                         <div><a class="nav-link" href="{% url 'list_user' %}">Ver Usuarios</a></div>
+                        <div><a class="nav-link" href="{% url 'system_activity' %}">Registro de Actividad</a></div>
                     {% endif %}
                 {% endif %}
             </div>
