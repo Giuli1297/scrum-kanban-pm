@@ -59,5 +59,7 @@ urlpatterns = [
     # URLS DE KANBAN
     path('kanban/<int:usPk>/seleccionarpararealizar/', views.SeleccionarParaRealizarUserStory.as_view(),
          name='seleccionar_p_realizar_user_story'),
-
+    path('proyectos/<slug:slug>/burndownchart/', views.VerBurndownChartView.as_view(), name='ver_burndownchart_actual'),
+    path('proyectos/<slug:slug>/dataBurndownChart/', views.getDataForBurndownChart.as_view(),
+         name='data_burndownchart'),
 ]

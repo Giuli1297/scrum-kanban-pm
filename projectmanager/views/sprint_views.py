@@ -263,15 +263,19 @@ class EstimarSprint(View):
         proyecto = Proyecto.objects.get(slug=slug)
         sprint = proyecto.sprint_actual
         horas = 0
+        horas_desarrolladores = 0
         for us in sprint.sprint_backlog.all():
             if not us.tiempoEstimado > 0:
                 messages.error(request, "Faltan Estimar User Stories")
                 return redirect('proyecto_gestion', slug=slug)
             horas = horas + us.tiempoEstimado
+        for tiempo in proyecto.tiempos_de_usuarios.all():
+            horas_desarrolladores += tiempo.horas
 
         # proyecto.sprint_actual.duracion_estimada
         context = {
             'horas': horas,
+            'horas_desarrolladores': horas_desarrolladores,
             'form': form,
             'proyecto': proyecto
         }
@@ -299,3 +303,23 @@ class EstimarSprint(View):
             messages.error(request, "Un error a ocurrido")
 
         return redirect('proyecto_gestion', slug=slug)
+
+
+class VerBurndownChartView(View):
+    def get(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        context = {
+            'proyecto': proyecto
+        }
+        return render(request, 'sprint/burndown_chart.html', context)
+
+
+class getDataForBurndownChart(View):
+    def get(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        duracionSprint = proyecto.sprint_actual.duracion_estimada
+        data = {
+            'horas_estimadas': duracionSprint,
+            'horas_desarrolladas': 0
+        }
+        return JsonResponse(data)
