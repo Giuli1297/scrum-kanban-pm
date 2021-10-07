@@ -4,7 +4,12 @@
     {% if proyecto.sprint_actual.estado != 'conf3' %}
          <h4>Configura el proximo Sprint</h4>
     {% else %}
-         <h4>Sprint - Duracion {{ proyecto.sprint_actual.duracion_estimada }} hs</h4>
+        <div class="col-md-9">
+            <h4>Sprint - Duracion {{ proyecto.sprint_actual.duracion_estimada }} hs</h4>
+        </div>
+        <div class="col-md-3">
+            <a class="btn btn-dark m-3" href="{% url 'ver_burndownchart_actual' proyecto.slug %}">Ver Burndown Chart</a>
+        </div>
     {% endif %}
 
 </div>

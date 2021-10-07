@@ -3,14 +3,15 @@
 {% block content %}
 <div class="row mb-3">
     <h3>Estimacion de Sprint recomendada</h3>
-    <p>{{ horas }}</p>
+    <p>Horas totales de los user-stories: {{ horas }}</p>
+    <p>Horas totales disponibles por semana de los desarrolladores: {{ horas_desarrolladores }}</p>
 </div>
 <div class="row mb-3">
     <div class="form-group col-md-4">
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <button class="btn btn-dark" type="submit">Guardar</button>
+            <button class="btn btn-dark" type="submit">Iniciar Desarrollo del Proyecto</button>
         </form>
         <a class="mb-3 btn btn-danger" href="{% url 'proyecto_gestion' slug=proyecto.slug %}">Volver</a>
     </div>

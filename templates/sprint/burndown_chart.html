@@ -1,0 +1,81 @@
+{% extends "layout/base.html" %}
+
+{% block content %}
+    <div>
+        <input id='slug' type="hidden" value="{{ proyecto.slug }}">
+        <canvas id="myChart"></canvas>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script>
+        //SetUp
+        const slug = $('#slug').val()
+        var defaultData = null;
+        console.log(slug);
+        $.ajax({
+            method: 'GET',
+            url: '/proyectos/'+slug+'/dataBurndownChart/',
+            success: function(data){
+                console.log(data);
+                defaultData = data;
+                setChart();
+            },
+            error: function (error_data){
+                console.log('pero que a pasao');
+            }
+        });
+        function setChart(){
+            const DATA_COUNT = 7;
+            const NUMBER_CFG = {count: DATA_COUNT, min: 0, max: 100};
+            const lab = [];
+            var dataset1 = [];
+            var dataset2 = [];
+            console.log(defaultData.horas_estimadas);
+            for(let i=0;i<parseInt(defaultData.horas_estimadas);i++){
+                lab.push(i+1);
+                dataset1.push(parseInt(defaultData.horas_estimadas)-(i));
+                dataset2.push(parseInt(defaultData.horas_estimadas)-(i))
+            }
+            const labels = lab;
+            const data = {
+              labels: labels,
+              datasets: [
+                {
+                  label: 'Dataset 1',
+                  data: dataset1,
+                  borderColor: 'rgb(255, 100, 50)',
+                  backgroundColor: 'rgb(255, 100, 50)',
+                },
+                {
+                  label: 'Dataset 2',
+                  data: dataset2,
+                  borderColor: 'rgb(100, 100, 255)',
+                  backgroundColor: 'rgb(100, 100, 255)',
+                }
+              ]
+            };
+            //Config
+            const config = {
+              type: 'line',
+              data: data,
+              options: {
+                responsive: true,
+                plugins: {
+                  legend: {
+                    position: 'top',
+                  },
+                  title: {
+                    display: true,
+                    text: 'Chart.js Line Chart'
+                  }
+                }
+              },
+            };
+            var myChart = new Chart(
+                document.getElementById('myChart'),
+                config
+            );
+        }
+
+    </script>
+{% endblock %}
