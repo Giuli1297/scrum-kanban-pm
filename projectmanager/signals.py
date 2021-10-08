@@ -60,6 +60,7 @@ def add_scrum_master_signal(sender, instance, created, **kwargs):
         add_obj_perm_to_group('scrum_master_' + instance.slug, 'estimar_userstory_proyecto', instance)
         add_obj_perm_to_group('scrum_master_' + instance.slug, 'cargar_sprint_backlog_proyecto', instance)
         add_obj_perm_to_group('scrum_master_' + instance.slug, 'estimar_sprint', instance)
+        add_obj_perm_to_group('scrum_master_' + instance.slug, 'realizar_qa', instance)
         add_perm_to_group('scrum_master_' + instance.slug, 'ver_proyectos')
         add_user_to_obj_group(instance.scrum_master, 'scrum_master_' + instance.slug)
         add_obj_perm_to_group('scrum_member_' + instance.slug, 'ver_proyecto', instance)

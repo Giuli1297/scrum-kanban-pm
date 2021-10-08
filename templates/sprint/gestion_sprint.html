@@ -164,7 +164,7 @@
                                 {% if user_story.desarrolladorAsignado == request.user %}
                                     <a class="mb-3 btn btn-dark"
                                        href="{% url 'registro_actividad' slug=proyecto.slug pk=user_story.pk %}">
-                                        Actividad
+                                        Gestionar
                                     </a>
                                 {% endif %}
                             </td>
@@ -181,10 +181,46 @@
 
         <div class="col-md-4 border border-4">
             <h4>DONE</h4>
+            <table bgcolor="#228b22" class="table mb-2" border="1">
+              <thead>
+                <tr>
+                    <th scope="col">User Story</th>
+                    <th scope="col">Encargado</th>
+                    <th scope="col">Estado</th>
+                    {% if "realizar_qa" in proyecto_perms or request.user|has_group:'Administrador'%}
+                        <th scope="col">Acciones</th>
+                    {% endif %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for user_story in proyecto.sprint_actual.sprint_backlog.all %}
+                    {% if user_story.estado == 'QA' or user_story.estado == 'Release' %}
+                        <tr>
+                            <th scope="row">{{ user_story.descripcion }}</th>
+                            <td>{{ user_story.desarrolladorAsignado.username }}</td>
+                            <td>{% if user_story.estado == 'QA' %}
+                                    Pendiente de QA
+                                {% elif user_story.estado == 'Release' %}
+                                    Release
+                                {% endif %}</td>
+                                {% if "realizar_qa" in proyecto_perms or request.user|has_group:'Administrador' %}
+                                    {% if user_story.estado == 'QA' %}
+                                    <td>
+                                        <a class="mb-3 btn btn-dark"
+                                            href="{% url 'realizar_qa' slug=proyecto.slug usPk=user_story.pk %}">
+                                            Realizar QA
+                                        </a>
+                                    </td>
+                                    {% endif %}
+                                {% endif %}
+                        </tr>
+                    {% endif %}
 
+                {% endfor %}
+
+              </tbody>
+            </table>
 
         </div>
     </div>
-
-   </div>
 {% endif %}

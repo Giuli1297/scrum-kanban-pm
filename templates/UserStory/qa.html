@@ -1,0 +1,53 @@
+{% extends 'layout/base.html' %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-4"></div>
+    <div class="col-md-6">
+        <h2>QA de User Story</h2>
+        <p>Descripcion: {{ user_story.descripcion }}</p>
+    </div>
+    <div class="col-md-2"></div>
+</div>
+<div class="row">
+    <h5>Informarcion relevante: </h5>
+    <ul>
+        <li>Esfuerzo en horas estimado de User Story: {{ user_story.tiempoEstimado }} hs.</li>
+        <li>Total de horas invertidas en el User Story: {{ user_story.tiempoEnDesarrollo }} hs.</li>
+    </ul>
+</div>
+<div class="row">
+
+</div>
+<div class="row">
+    <div class="col-md-6 border border-2">
+        <h3>Actividades</h3>
+        <table bgcolor="#f0ffff" class="table mb-2" border="5"  >
+          <thead>
+            <tr align="justify">
+                <th scope="col">Descipcion</th>
+                <th scope="col">Horas Invertidas</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for list in user_story.RegistroActividad.all %}
+                <tr>
+                    <td>{{ list.descripcion }}</td>
+                    <td>{{ list.hora }}</td>
+                </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>
+    <div class="col-md-6 border border-2">
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="btn btn-dark" type="submit">Guardar</button>
+        </form>
+    </div>
+</div>
+<div class="row m-3">
+
+</div>
+{% endblock %}

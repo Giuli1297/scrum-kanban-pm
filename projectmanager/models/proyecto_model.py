@@ -70,7 +70,8 @@ class Proyecto(models.Model):
                        ('iniciar_ppoker_proyecto', 'Puede iniciar planning poker de un sprint'),
                        ('estimar_userstory_proyecto', 'Puede estimar User Stories en el Sprint Backlog'),
                        ('cargar_sprint_backlog_proyecto', 'Puede cargar User Stories en el Sprint Backlog'),
-                       ('estimar_sprint', 'Puede estimar sprint'),)
+                       ('estimar_sprint', 'Puede estimar sprint'),
+                       ('realizar_qa', 'Puede realizar QA a user stories'))
         default_permissions = ()
         ordering = ('-fecha_inicio',)
 
