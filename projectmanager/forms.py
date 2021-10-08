@@ -330,4 +330,4 @@ class EstimacionSprint(forms.Form):
     """
         Clase formulario para la estimacion de un sprint de proyecto
     """
-    horas_estimadas = forms.FloatField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    dias_estimados = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control'}))

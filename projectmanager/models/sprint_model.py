@@ -40,7 +40,9 @@ class Sprint(models.Model):
         ('en_desarrollo', 'Sprint en desarrollo'),
     )
     fecha_inicio = models.DateTimeField(null=True, blank=True)
-    duracion_estimada = models.FloatField(null=True, blank=True)
+    fecha_inicio_desarrollo = models.DateTimeField(null=True, blank=True)
+    duracion_estimada_dias = models.IntegerField(null=True, blank=True)
+    horas_realizadas = models.FloatField(null=True, blank=True, default=0)
     fecha_finalizacion = models.DateTimeField(null=True, blank=True)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='conf1')
     proyecto = models.ForeignKey(Proyecto, related_name="registro_sprints", on_delete=models.CASCADE, null=True)
