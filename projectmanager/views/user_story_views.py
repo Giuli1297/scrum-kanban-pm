@@ -15,6 +15,8 @@ from django.views.generic import (
     TemplateView,
     DetailView
 )
+
+from projectmanager.models.user_story_model import RegistroActividadDiairia
 from scrum_kanban_pm.settings.development import EMAIL_HOST_USER
 from projectmanager.forms import *
 from django.core.mail import EmailMessage
@@ -143,7 +145,7 @@ class UserStoryUpdate(View):
             descripcion = form.cleaned_data['descripción_de_user_story']
             prioridad = form.cleaned_data['prioridad_1_al_10']
             if prioridad > 0 and prioridad < 11:
-                nuevoHistorial = HistorialUs(us=US2, descripcion=US2.descripcion)
+                nuevoHistorial = HistorialUs(us=US2, descripcion=US2.descripcion,usuario=request.user)
                 nuevoHistorial.save()
                 US2.descripcion = descripcion
                 US2.prioridad = prioridad
@@ -200,3 +202,134 @@ class listarHistorial(View):
             'us': us
         }
         return render(request, 'UserStory/historial.html', context)
+
+
+class RegistroDiario(View):
+
+    def get(self, request, slug, pk, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=slug)
+        US = UserStory.objects.get(pk=pk)
+
+        form=RegistroActividadForm()
+        context = {
+            'form': form,
+            'proyecto': proyecto,
+            'US': US
+        }
+        return render(request, 'UserStory/registroActividad.html', context)
+
+    def post(self, request, slug, pk, *args, **kwargs):
+        """
+        Se obtiene el objeto del User Story actual y se actualiza
+        con los nuevos datos de entrada
+        """
+        proyecto = Proyecto.objects.get(slug=slug)
+        US = UserStory.objects.get(pk=pk)
+        form = RegistroActividadForm(request.POST)
+
+        if form.is_valid():
+            descripcion = form.cleaned_data['descripcion']
+            horas = form.cleaned_data['horas']
+            nuevoRegistro = RegistroActividadDiairia(us=US, descripcion=descripcion,hora=horas)
+            nuevoRegistro.save()
+            US.tiempoEnDesarrollo=US.tiempoEnDesarrollo+horas
+            US.save()
+            # Log activity
+
+            SystemActivity.objects.create(usuario=request.user,
+                                            descripcion="Ha realizado un registro de actividad en el user story " + US.descripcion + " del proyecto " + proyecto.nombre)
+            messages.success(request, "Se registró correctamente la actividad!")
+        else:
+
+            messages.error(request, "Un Error a ocurrido")
+        return redirect('registro_actividad', slug=slug,pk=pk)
+
+class RegistroDiarioUpdate(View):
+    """
+        Vista para actualizar los datos de descripcion y prioridad de un User Story
+
+        US
+            obtiene el user story con metodo get y su pk
+
+    """
+
+    def get(self, request, slug, pk,uspk, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+
+        if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=slug)
+        registro= RegistroActividadDiairia.objects.get(pk=pk)
+        form = RegistroActividadForm(initial={
+            'descripcion': registro.descripcion,
+            'horas': registro.hora
+        })
+
+        context = {
+            'form': form,
+            'proyecto': proyecto,
+            'registro': registro,
+        }
+        return render(request, 'UserStory/registroActividadUpdate.html', context)
+
+    def post(self, request, slug, pk,uspk, *args, **kwargs):
+        """
+        Se obtiene el objeto del User Story actual y se actualiza
+        con los nuevos datos de entrada
+        """
+        proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=slug)
+        registro = RegistroActividadDiairia.objects.get(pk=pk)
+        US = UserStory.objects.get(pk=uspk)
+        US.tiempoEnDesarrollo = US.tiempoEnDesarrollo - registro.hora
+        form = RegistroActividadForm(request.POST)
+
+        if form.is_valid():
+            descripcion = form.cleaned_data['descripcion']
+            horas = form.cleaned_data['horas']
+            registro.descripcion = descripcion
+            registro.hora = horas
+
+            registro.save()
+            US.tiempoEnDesarrollo = US.tiempoEnDesarrollo + horas
+            US.save()
+            # Log activity
+
+            SystemActivity.objects.create(usuario=request.user,
+                                          descripcion="Ha realizado una actualización en el registro de actividad en el user story " + US.descripcion + " del proyecto " + proyecto.nombre)
+            messages.success(request, "Registro se actualizó Correctamente!")
+
+
+        else:
+            messages.error(request, "Un Error a ocurrido")
+        return redirect('registro_actividad', slug=slug, pk=uspk)
+
+class RegistroDiarioDelete(View):
+    """
+    Clase para eliminar un registro de actividad de un user story
+    Se obtiene el objeto por su pk y se hace un delete
+    """
+
+    def get(self, request, slug, pk,uspk, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=slug)
+        registro = RegistroActividadDiairia.objects.get(pk=pk)
+        US = UserStory.objects.get(pk=uspk)
+        US.tiempoEnDesarrollo = US.tiempoEnDesarrollo - registro.hora
+        US.save()
+        registro.delete()
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha eliminado un registro de actividad en el user story " + US.descripcion + " del proyecto " + proyecto.nombre)
+        messages.success(request, "Registro de actividad eliminado")
+        return redirect('registro_actividad', slug=slug,pk=uspk)

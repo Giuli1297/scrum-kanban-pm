@@ -330,4 +330,14 @@ class EstimacionSprint(forms.Form):
     """
         Clase formulario para la estimacion de un sprint de proyecto
     """
-    dias_estimados = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    dias_estimados = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control'}),
+                                        label='Dias Laborales Estimados')
+
+
+class RegistroActividadForm(forms.Form):
+    descripcion = forms.CharField(max_length=5000, widget=forms.Textarea(attrs={
+        'class': 'form-control'
+    }))
+    horas = forms.IntegerField(widget=forms.NumberInput(attrs={
+        'class': 'form-control'
+    }))

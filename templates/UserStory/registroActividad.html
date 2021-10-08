@@ -1,0 +1,56 @@
+{% extends 'layout/base.html' %}
+
+{% block body %}
+<div >
+<div class="col-md-12  "  >
+            <div class="card card-default" >
+              <div class="card-header">
+                <h3 class="card-title">
+                   REGISTRO DE ACTIVIDAD {{ proyecto.nombre }}
+                </h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <table class="table" id="data">
+                    <form action="" method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button class="btn btn-dark" type="submit">Guardar</button>
+                    </form>
+                </table>
+                  <a class="mb-3 btn btn-danger" href="{% url 'proyecto_gestion' slug=proyecto.slug %}">Volver</a>
+              </div>
+
+            </div>
+          </div>
+        <div class="  col-md-12 border border-2">
+            <table bgcolor="#f0ffff" class="table mb-2" border="5"  >
+              <thead>
+                <tr align="justify">
+                    <th scope="col">Actividades Realizadas</th>
+                    <th scope="col">Horas</th>
+                    <th scope="col">Acciones</th>
+
+
+                </tr>
+              </thead>
+              <tbody>
+                        {% for list in US.RegistroActividad.all %}
+                        <tr>
+                            <td>{{ list.descripcion }}</td>
+                            <td>{{ list.hora }}</td>
+                            <td> <a class=" mb-3 btn btn-primary btn-warning " href="{% url 'registro_actividad_update'  slug=proyecto.slug pk=list.pk uspk=US.pk %}" >Editar</a>
+                                <a class="mb-3 btn btn-primary btn-danger " href="{% url 'registro_actividad_delete'  slug=proyecto.slug pk=list.pk uspk=US.pk %}" >Eliminar</a></td>
+
+                        </tr>
+
+                    {% endfor %}
+              </tbody>
+            </table>
+        </div>
+
+
+</div>
+{% endblock %}
+
+

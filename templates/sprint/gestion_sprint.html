@@ -1,10 +1,13 @@
 {% load projectmanager_extras %}
+
 <div class="row mt-2">
     {% if proyecto.sprint_actual.estado != 'conf3' %}
          <h4>Configura el proximo Sprint</h4>
     {% else %}
         <div class="col-md-9">
             <h4>Sprint - Duracion {{ proyecto.sprint_actual.duracion_estimada }} hs</h4>
+            <h4>Fecha inicio {{ proyecto.sprint_actual.fecha_inicio }} hs</h4>
+            <h4>Fecha finalizacion {{ proyecto.sprint_actual.fecha_finalizacion }} hs</h4>
         </div>
         <div class="col-md-3">
             <a class="btn btn-dark m-3" href="{% url 'ver_burndownchart_actual' proyecto.slug %}">Ver Burndown Chart</a>
@@ -88,7 +91,7 @@
                     {% elif proyecto.sprint_actual.estado == 'conf2' %}
                         {% if 'estimar_sprint' in proyecto_perms or request.user|has_group:'Administrador' %}
                             <a class="btn btn-dark btn-flotante align-center" href="{% url 'estimar_sprint' slug=proyecto.slug %}" >
-                                Estimar Sprint
+                                Estimar Sprint e Iniciar Desarrollo
                             </a>
                         {% endif %}
 
@@ -100,17 +103,18 @@
     </div>
 </div>
 {% else %}
-    <div class="row mt-2">
+    <div id="contenido" class="row mt-2">
 
-        <div class="col-md-4 border border-2">
+        <div class=" c  col-md-4 border border-4" >
             <h4>TO-DO</h4>
-            <table class="table mb-2">
+            <table bgcolor="#b8860b" class="table mb-2" border="1">
               <thead>
                 <tr>
                     <th scope="col">User Story</th>
                     <th scope="col">Encargado</th>
                     <th scope="col">Horas (Planning Poker)</th>
                     <th scope="col">Acciones</th>
+
                 </tr>
               </thead>
               <tbody>
@@ -118,33 +122,35 @@
                     {% if user_story.estado == 'To-Do' %}
                         <tr>
                             <th scope="row">{{ user_story.descripcion }}</th>
-                                <td>{{ user_story.desarrolladorAsignado.username }}</td>
-                                <td>
-                                    {{ user_story.tiempoEstimado }}
-                                </td>
-                                <td>{% if user_story.desarrolladorAsignado == request.user %}
-                                        <a class="btn btn-primary"
-                                           href="{% url 'seleccionar_p_realizar_user_story' usPk=user_story.pk %}">
+                            <td>{{ user_story.desarrolladorAsignado.username }}</td>
+                            <td>{{ user_story.tiempoEstimado }}</td>
+                            <td>
+                                {% if user_story.desarrolladorAsignado == request.user %}
+                                    <a class="btn btn-primary"
+                                       href="{% url 'seleccionar_p_realizar_user_story' usPk=user_story.pk %}">
                                             Realizar
-                                        </a>
-                                    {% endif %}
-                                </td>
+                                    </a>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endif %}
+
                 {% endfor %}
+
               </tbody>
             </table>
         </div>
 
-        <div class="col-md-4 border border-2">
+        <div class="col-md-4 border border-4">
             <h4>DOING</h4>
-            <table class="table mb-2">
+            <table bgcolor="#adff2f" class="table mb-2" border="1">
               <thead>
                 <tr>
                     <th scope="col">User Story</th>
                     <th scope="col">Encargado</th>
-                    <th scope="col">Horas (Planning Poker)</th>
+                    <th scope="col">Desarrollo (Hs.)</th>
                     <th scope="col">Acciones</th>
+
                 </tr>
               </thead>
               <tbody>
@@ -152,22 +158,33 @@
                     {% if user_story.estado == 'Doing' %}
                         <tr>
                             <th scope="row">{{ user_story.descripcion }}</th>
-                                <td>{{ user_story.desarrolladorAsignado.username }}</td>
-                                <td>
-                                    {{ user_story.tiempoEstimado }}
-                                </td>
-                                <td>
-                                    -
-                                </td>
+                            <td>{{ user_story.desarrolladorAsignado.username }}</td>
+                            <td>{{ user_story.tiempoEnDesarrollo }}/{{ user_story.tiempoEstimado }}
+                            <td>
+                                {% if user_story.desarrolladorAsignado == request.user %}
+                                    <a class="mb-3 btn btn-dark"
+                                       href="{% url 'registro_actividad' slug=proyecto.slug pk=user_story.pk %}">
+                                        Actividad
+                                    </a>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endif %}
+
                 {% endfor %}
+
               </tbody>
             </table>
+
         </div>
 
-        <div class="col-md-4 border border-2">
+
+        <div class="col-md-4 border border-4">
             <h4>DONE</h4>
+
+
         </div>
     </div>
+
+   </div>
 {% endif %}
