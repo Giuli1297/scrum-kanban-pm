@@ -41,6 +41,7 @@ from django.http import JsonResponse
 from django.urls import reverse_lazy, reverse
 from django.contrib.sites.shortcuts import get_current_site
 from projectmanager.views.general_views import UserAccessMixin
+from django.utils import timezone
 
 
 class CargarSprintBacklog(View):
@@ -264,20 +265,36 @@ class EstimarSprint(View):
         form = EstimacionSprint()
         proyecto = Proyecto.objects.get(slug=slug)
         sprint = proyecto.sprint_actual
-        horas = 0
+        horas_us_total = 0
         horas_desarrolladores = 0
+        horas_por_dia = {'lun': 0,
+                         'mar': 0,
+                         'mie': 0,
+                         'jue': 0,
+                         'vie': 0}
         for us in sprint.sprint_backlog.all():
             if not us.tiempoEstimado > 0:
                 messages.error(request, "Faltan Estimar User Stories")
                 return redirect('proyecto_gestion', slug=slug)
-            horas = horas + us.tiempoEstimado
+            horas_us_total = horas_us_total + us.tiempoEstimado
         for tiempo in proyecto.tiempos_de_usuarios.all():
             horas_desarrolladores += tiempo.horas
+            if tiempo.dia == 'LUN':
+                horas_por_dia['lun'] += tiempo.horas
+            if tiempo.dia == 'MAR':
+                horas_por_dia['mar'] += tiempo.horas
+            if tiempo.dia == 'MIE':
+                horas_por_dia['mie'] += tiempo.horas
+            if tiempo.dia == 'JUE':
+                horas_por_dia['jue'] += tiempo.horas
+            if tiempo.dia == 'VIE':
+                horas_por_dia['vie'] += tiempo.horas
 
-        # proyecto.sprint_actual.duracion_estimada
+                # proyecto.sprint_actual.duracion_estimada
         context = {
-            'horas': horas,
+            'horas': horas_us_total,
             'horas_desarrolladores': horas_desarrolladores,
+            'horas_por_dia': horas_por_dia,
             'form': form,
             'proyecto': proyecto
         }
@@ -289,8 +306,9 @@ class EstimarSprint(View):
         form = EstimacionSprint(request.POST)
 
         if form.is_valid():
-            horasEstimadas = form.cleaned_data['horas_estimadas']
-            sprint.duracion_estimada = horasEstimadas
+            diasEstimados = form.cleaned_data['dias_estimados']
+            sprint.duracion_estimada_dias = diasEstimados
+            sprint.fecha_inicio_desarrollo = timezone.now().date()
             sprint.estado = 'conf3'
             sprint.fecha_inicio=sprint.fecha_inicio+timedelta(hours=horasEstimadas)
             sprint.fecha_finalizacion=sprint.fecha_finalizacion + timedelta(hours=horasEstimadas)
@@ -321,9 +339,16 @@ class VerBurndownChartView(View):
 class getDataForBurndownChart(View):
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
-        duracionSprint = proyecto.sprint_actual.duracion_estimada
+        horas_us_total = 0
+        for us in proyecto.sprint_actual.sprint_backlog.all():
+            if not us.tiempoEstimado > 0:
+                messages.error(request, "Faltan Estimar User Stories")
+                return redirect('proyecto_gestion', slug=slug)
+            horas_us_total = horas_us_total + us.tiempoEstimado
+        duracionSprint = proyecto.sprint_actual.duracion_estimada_dias
         data = {
-            'horas_estimadas': duracionSprint,
+            'dias_estimados': duracionSprint,
+            'horas_us_totales': horas_us_total,
             'horas_desarrolladas': 0
         }
         return JsonResponse(data)
