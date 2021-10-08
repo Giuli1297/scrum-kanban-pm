@@ -238,6 +238,10 @@ class RegistroDiario(View):
             nuevoRegistro.save()
             US.tiempoEnDesarrollo=US.tiempoEnDesarrollo+horas
             US.save()
+            # Log activity
+
+            SystemActivity.objects.create(usuario=request.user,
+                                            descripcion="Ha realizado un registro de actividad en el user story " + US.descripcion + " del proyecto " + proyecto.nombre)
             messages.success(request, "Se registró correctamente la actividad!")
         else:
 
@@ -299,8 +303,8 @@ class RegistroDiarioUpdate(View):
             US.save()
             # Log activity
 
-            #SystemActivity.objects.create(usuario=request.user,
-              #                                descripcion="Ha modificado registro de actividad en el proyecto " + proyecto.nombre)
+            SystemActivity.objects.create(usuario=request.user,
+                                          descripcion="Ha realizado una actualización en el registro de actividad en el user story " + US.descripcion + " del proyecto " + proyecto.nombre)
             messages.success(request, "Registro se actualizó Correctamente!")
 
 
@@ -325,8 +329,7 @@ class RegistroDiarioDelete(View):
         US.tiempoEnDesarrollo = US.tiempoEnDesarrollo - registro.hora
         US.save()
         registro.delete()
-        # Log activity
-        #SystemActivity.objects.create(usuario=request.user,
-                                     # descripcion="Ha eliminado un registro de actividad en un user story en el proyecto " + proyecto.nombre)
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha eliminado un registro de actividad en el user story " + US.descripcion + " del proyecto " + proyecto.nombre)
         messages.success(request, "Registro de actividad eliminado")
         return redirect('registro_actividad', slug=slug,pk=uspk)

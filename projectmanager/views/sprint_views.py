@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -290,6 +292,8 @@ class EstimarSprint(View):
             horasEstimadas = form.cleaned_data['horas_estimadas']
             sprint.duracion_estimada = horasEstimadas
             sprint.estado = 'conf3'
+            sprint.fecha_inicio=sprint.fecha_inicio+timedelta(hours=horasEstimadas)
+            sprint.fecha_finalizacion=sprint.fecha_finalizacion + timedelta(hours=horasEstimadas)
             sprint.save()
             for us in sprint.sprint_backlog.all():
                 us.estado = 'To-Do'
