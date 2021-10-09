@@ -33,6 +33,9 @@
                 lab.push(defaultData.dias_estimados-i);
                 dataset1.push(defaultData.horas_us_totales-(defaultData.horas_us_totales/defaultData.dias_estimados)*i);
             }
+            for(let i=0;i<=defaultData.passed_days;i++){
+                dataset2.push(defaultData.progreso[i]);
+            }
             const data = {
               labels: lab,
               datasets: [

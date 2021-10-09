@@ -43,6 +43,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from projectmanager.views.general_views import UserAccessMixin
 from django.utils import timezone
 import datetime
+import numpy
 
 
 class CargarSprintBacklog(View):
@@ -349,9 +350,25 @@ class getDataForBurndownChart(View):
                 return redirect('proyecto_gestion', slug=slug)
             horas_us_total = horas_us_total + us.tiempoEstimado
         duracionSprint = proyecto.sprint_actual.duracion_estimada_dias
+        progreso = []
+        for x in range(0, duracionSprint):
+            progreso.append(horas_us_total)
+        for us in proyecto.sprint_actual.sprint_backlog.all():
+            if hasattr(us, 'QA') and us.QA.aceptar:
+                diferencia_dia = int(numpy.busday_count(proyecto.sprint_actual.fecha_inicio_desarrollo.date(),
+                                                        us.QA.fecha.date()))
+                for i in range(0, duracionSprint - diferencia_dia):
+                    if (duracionSprint - 1) - i != 0:
+                        progreso[(duracionSprint - 1) - i] -= us.tiempoEstimado
+        print(progreso)
+        passed_days = int(numpy.busday_count(proyecto.sprint_actual.fecha_inicio_desarrollo.date(),
+                                             datetime.datetime.now(timezone.utc).date()))
+        print(passed_days)
         data = {
             'dias_estimados': duracionSprint,
             'horas_us_totales': horas_us_total,
+            'progreso': progreso,
+            'passed_days': passed_days,
             'horas_desarrolladas': 0
         }
         return JsonResponse(data)
