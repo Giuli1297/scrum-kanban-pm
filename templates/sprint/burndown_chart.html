@@ -1,9 +1,21 @@
 {% extends "layout/base.html" %}
 
 {% block content %}
-    <div>
+    <div class="row">
+        <h3>Burndown Chart del Sprint Actual del proyecto {{ proyecto.nombre }}</h3>
+        <p>Este grafico muestra el progreso actual del Sprint en curso.</p>
+        <ul>
+            <li>El eje de las abscisas representa los dias restantes de acuerdo a la planificacion del Sprint</li>
+            <li>El eke de las ordenadas representa las horas a desarrollar del Sprint.</li>
+        </ul>
+    </div>
+    <div class="row">
         <input id='slug' type="hidden" value="{{ proyecto.slug }}">
         <canvas id="myChart"></canvas>
+    </div>
+    <div class="row">
+        <div class="col-md-3">    <a class="m-3 btn btn-danger" href="{% url 'proyecto_gestion' slug=proyecto.slug %}">Volver</a>
+    </div>
     </div>
 {% endblock %}
 {% block scripts %}
