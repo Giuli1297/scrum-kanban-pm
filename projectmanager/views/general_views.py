@@ -74,7 +74,6 @@ class VerificationView(View):
                 return redirect('home')
             user.is_active = True
             user.save()
-
             # Log activity
             SystemActivity.objects.create(usuario=request.user,
                                           descripcion="Se ha verificado al usuario " + user.username)

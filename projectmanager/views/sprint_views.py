@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -39,6 +41,9 @@ from django.http import JsonResponse
 from django.urls import reverse_lazy, reverse
 from django.contrib.sites.shortcuts import get_current_site
 from projectmanager.views.general_views import UserAccessMixin
+from django.utils import timezone
+import datetime
+import numpy
 
 
 class CargarSprintBacklog(View):
@@ -262,16 +267,40 @@ class EstimarSprint(View):
         form = EstimacionSprint()
         proyecto = Proyecto.objects.get(slug=slug)
         sprint = proyecto.sprint_actual
-        horas = 0
+        horas_us_total = 0
+        horas_desarrolladores = 0
+        horas_por_dia = {'lun': 0,
+                         'mar': 0,
+                         'mie': 0,
+                         'jue': 0,
+                         'vie': 0}
         for us in sprint.sprint_backlog.all():
             if not us.tiempoEstimado > 0:
                 messages.error(request, "Faltan Estimar User Stories")
                 return redirect('proyecto_gestion', slug=slug)
-            horas = horas + us.tiempoEstimado
-
+            horas_us_total = horas_us_total + us.tiempoEstimado
+        for tiempo in proyecto.tiempos_de_usuarios.all():
+            horas_desarrolladores += tiempo.horas
+            if tiempo.dia == 'LUN':
+                horas_por_dia['lun'] += tiempo.horas
+            if tiempo.dia == 'MAR':
+                horas_por_dia['mar'] += tiempo.horas
+            if tiempo.dia == 'MIE':
+                horas_por_dia['mie'] += tiempo.horas
+            if tiempo.dia == 'JUE':
+                horas_por_dia['jue'] += tiempo.horas
+            if tiempo.dia == 'VIE':
+                horas_por_dia['vie'] += tiempo.horas
+        today = datetime.datetime.today().weekday()
+        print(today)
+        if today == 5 or today == 6:
+            today = 0
         # proyecto.sprint_actual.duracion_estimada
         context = {
-            'horas': horas,
+            'horas': horas_us_total,
+            'horas_desarrolladores': horas_desarrolladores,
+            'horas_por_dia': horas_por_dia,
+            'hoy': today,
             'form': form,
             'proyecto': proyecto
         }
@@ -283,8 +312,9 @@ class EstimarSprint(View):
         form = EstimacionSprint(request.POST)
 
         if form.is_valid():
-            horasEstimadas = form.cleaned_data['horas_estimadas']
-            sprint.duracion_estimada = horasEstimadas
+            diasEstimados = form.cleaned_data['dias_estimados']
+            sprint.duracion_estimada_dias = diasEstimados
+            sprint.fecha_inicio_desarrollo = timezone.now().date()
             sprint.estado = 'conf3'
             sprint.save()
             for us in sprint.sprint_backlog.all():
@@ -299,3 +329,46 @@ class EstimarSprint(View):
             messages.error(request, "Un error a ocurrido")
 
         return redirect('proyecto_gestion', slug=slug)
+
+
+class VerBurndownChartView(View):
+    def get(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        context = {
+            'proyecto': proyecto
+        }
+        return render(request, 'sprint/burndown_chart.html', context)
+
+
+class getDataForBurndownChart(View):
+    def get(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        horas_us_total = 0
+        for us in proyecto.sprint_actual.sprint_backlog.all():
+            if not us.tiempoEstimado > 0:
+                messages.error(request, "Faltan Estimar User Stories")
+                return redirect('proyecto_gestion', slug=slug)
+            horas_us_total = horas_us_total + us.tiempoEstimado
+        duracionSprint = proyecto.sprint_actual.duracion_estimada_dias
+        progreso = []
+        for x in range(0, duracionSprint):
+            progreso.append(horas_us_total)
+        for us in proyecto.sprint_actual.sprint_backlog.all():
+            if hasattr(us, 'QA') and us.QA.aceptar:
+                diferencia_dia = int(numpy.busday_count(proyecto.sprint_actual.fecha_inicio_desarrollo.date(),
+                                                        us.QA.fecha.date()))
+                for i in range(0, duracionSprint - diferencia_dia):
+                    if (duracionSprint - 1) - i != 0:
+                        progreso[(duracionSprint - 1) - i] -= us.tiempoEstimado
+        print(progreso)
+        passed_days = int(numpy.busday_count(proyecto.sprint_actual.fecha_inicio_desarrollo.date(),
+                                             datetime.datetime.now(timezone.utc).date()))
+        print(passed_days)
+        data = {
+            'dias_estimados': duracionSprint,
+            'horas_us_totales': horas_us_total,
+            'progreso': progreso,
+            'passed_days': passed_days,
+            'horas_desarrolladas': 0
+        }
+        return JsonResponse(data)
