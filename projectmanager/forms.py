@@ -215,6 +215,9 @@ class ProyectoUs(forms.Form):
     descripción_de_user_story = forms.CharField(max_length=100, widget=forms.Textarea(attrs={
         'class': 'form-control'
     }))
+    documentación =  forms.CharField(max_length=100, widget=forms.Textarea(attrs={
+        'class': 'form-control'
+    }))
     prioridad_1_al_10 = forms.IntegerField(widget=forms.NumberInput(attrs={
         'class': 'form-control'
     }))
@@ -327,18 +330,29 @@ class PlanningPokerSMemberForm(forms.Form):
 
 
 class EstimacionSprint(forms.Form):
-
     """
         Clase formulario para la estimacion de un sprint de proyecto
     """
 
-    dias_estimados = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    dias_estimados = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control'}),
+                                        label='Dias Laborales Estimados')
 
 
 class RegistroActividadForm(forms.Form):
     descripcion = forms.CharField(max_length=5000, widget=forms.Textarea(attrs={
+        'class': 'form-control', 'rows': '4'
+    }))
+    horas = forms.FloatField(widget=forms.NumberInput(attrs={
         'class': 'form-control'
     }))
-    horas = forms.IntegerField(widget=forms.NumberInput(attrs={
-        'class': 'form-control'
+
+
+class RealizarQAUSForm(forms.Form):
+    comentario = forms.CharField(max_length=255, widget=forms.Textarea(attrs={
+        'class': 'form-control',
+        'rows': '4'
     }))
+    aceptar = forms.ChoiceField(choices=(('si', 'Aceptar'), ('no', 'Rechazar')), widget=forms.Select(attrs={
+        'class': 'check-label'
+    }))
+

@@ -42,6 +42,7 @@ from django.urls import reverse_lazy, reverse
 from django.contrib.sites.shortcuts import get_current_site
 from projectmanager.views.general_views import UserAccessMixin
 from django.utils import timezone
+import datetime
 
 
 class CargarSprintBacklog(View):
@@ -289,12 +290,16 @@ class EstimarSprint(View):
                 horas_por_dia['jue'] += tiempo.horas
             if tiempo.dia == 'VIE':
                 horas_por_dia['vie'] += tiempo.horas
-
-                # proyecto.sprint_actual.duracion_estimada
+        today = datetime.datetime.today().weekday()
+        print(today)
+        if today == 5 or today == 6:
+            today = 0
+        # proyecto.sprint_actual.duracion_estimada
         context = {
             'horas': horas_us_total,
             'horas_desarrolladores': horas_desarrolladores,
             'horas_por_dia': horas_por_dia,
+            'hoy': today,
             'form': form,
             'proyecto': proyecto
         }
@@ -309,9 +314,9 @@ class EstimarSprint(View):
             diasEstimados = form.cleaned_data['dias_estimados']
             sprint.duracion_estimada_dias = diasEstimados
             sprint.fecha_inicio_desarrollo = timezone.now().date()
+            sprint.fecha_finalizacion = timezone.now().date()+ timedelta(days=diasEstimados)
+
             sprint.estado = 'conf3'
-            sprint.fecha_inicio=sprint.fecha_inicio+timedelta(hours=horasEstimadas)
-            sprint.fecha_finalizacion=sprint.fecha_finalizacion + timedelta(hours=horasEstimadas)
             sprint.save()
             for us in sprint.sprint_backlog.all():
                 us.estado = 'To-Do'

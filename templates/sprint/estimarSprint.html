@@ -9,17 +9,17 @@
         <li>Horas por semana de los desarrolladores: {{ horas_desarrolladores }} hs.</li>
         <li>Cada dia consta de 8 horas de trabajo.</li>
         <li>Los dias se contaran a partir de hoy.</li>
-        <li>Horas de desarrollo disponible en la semana:</li>
+        <li>Horas de desarrollo disponible en la semana: (El "*" marca el dia actual)</li>
     </ul>
     <div class="col-md-8">
         <table class="table">
           <thead>
             <tr>
-              <th scope="col">Lunes</th>
-              <th scope="col">Martes</th>
-              <th scope="col">Miercoles</th>
-              <th scope="col">Jueves</th>
-              <th scope="col">Viernes</th>
+              <th scope="col">Lunes{% if hoy == 0 %}<strong>*</strong>{% endif %}</th>
+              <th scope="col">Martes{% if hoy == 1 %}<strong>*</strong>{% endif %}</th>
+              <th scope="col">Miercoles{% if hoy == 2 %}<strong>*</strong>{% endif %}</th>
+              <th scope="col">Jueves{% if hoy == 3 %}<strong>*</strong>{% endif %}</th>
+                <th scope="col">Viernes{% if hoy == 4 %}<strong>*</strong>{% endif %}</th>
             </tr>
           </thead>
           <tbody>

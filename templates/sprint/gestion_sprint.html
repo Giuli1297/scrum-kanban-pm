@@ -5,9 +5,11 @@
          <h4>Configura el proximo Sprint</h4>
     {% else %}
         <div class="col-md-9">
-            <h4>Sprint - Duracion {{ proyecto.sprint_actual.duracion_estimada }} hs</h4>
-            <h4>Fecha inicio {{ proyecto.sprint_actual.fecha_inicio }} hs</h4>
-            <h4>Fecha finalizacion {{ proyecto.sprint_actual.fecha_finalizacion }} hs</h4>
+            <h4>Duración del Sprint {{ proyecto.sprint_actual.duracion_estimada_dias }} dias</h4>
+            <h4>Fecha inicio {{ proyecto.sprint_actual.fecha_inicio_desarrollo.day }}/{{ proyecto.sprint_actual.fecha_inicio_desarrollo.month }}
+            /{{ proyecto.sprint_actual.fecha_inicio_desarrollo.year }}</h4>
+            <h4>Fecha finalizacion {{ proyecto.sprint_actual.fecha_finalizacion.day }}/{{ proyecto.sprint_actual.fecha_finalizacion.month }}
+            /{{ proyecto.sprint_actual.fecha_finalizacion.year }}</h4>
         </div>
         <div class="col-md-3">
             <a class="btn btn-dark m-3" href="{% url 'ver_burndownchart_actual' proyecto.slug %}">Ver Burndown Chart</a>
@@ -91,7 +93,7 @@
                     {% elif proyecto.sprint_actual.estado == 'conf2' %}
                         {% if 'estimar_sprint' in proyecto_perms or request.user|has_group:'Administrador' %}
                             <a class="btn btn-dark btn-flotante align-center" href="{% url 'estimar_sprint' slug=proyecto.slug %}" >
-                                Estimar Sprint
+                                Estimar Sprint e Iniciar Desarrollo
                             </a>
                         {% endif %}
 
@@ -121,17 +123,18 @@
                 {% for user_story in proyecto.sprint_actual.sprint_backlog.all %}
                     {% if user_story.estado == 'To-Do' %}
                         <tr>
-
-                            <th  >{{ user_story.descripcion }}
-                            </th>
-                            <td  >{{ user_story.desarrolladorAsignado.username }}</td>
-                            <td>{{ user_story.tiempoEstimado }}
-
+                            <th scope="row">{{ user_story.descripcion }}</th>
+                            <td>{{ user_story.desarrolladorAsignado.username }}</td>
+                            <td>{{ user_story.tiempoEstimado }}</td>
+                            <td>
+                                {% if user_story.desarrolladorAsignado == request.user %}
+                                    <a class="btn btn-primary"
+                                       href="{% url 'seleccionar_p_realizar_user_story' usPk=user_story.pk %}">
+                                            Realizar
+                                    </a>
+                                {% endif %}
                             </td>
-                            <td><a class="mb-3 btn btn-danger" href="{% url 'seleccionar_p_realizar_user_story' user_story.pk %}" >Realizar</a>
-
-                            </td>
-                    </tr>
+                        </tr>
                     {% endif %}
 
                 {% endfor %}
@@ -147,7 +150,7 @@
                 <tr>
                     <th scope="col">User Story</th>
                     <th scope="col">Encargado</th>
-                    <th scope="col">Horas (Planning Poker)</th>
+                    <th scope="col">Desarrollo (Hs.)</th>
                     <th scope="col">Acciones</th>
 
                 </tr>
@@ -156,17 +159,18 @@
                 {% for user_story in proyecto.sprint_actual.sprint_backlog.all %}
                     {% if user_story.estado == 'Doing' %}
                         <tr>
-
-                            <th  >{{ user_story.descripcion }}
-                            </th>
-                            <td  >{{ user_story.desarrolladorAsignado.username }}</td>
+                            <th scope="row">{{ user_story.descripcion }}</th>
+                            <td>{{ user_story.desarrolladorAsignado.username }}</td>
                             <td>{{ user_story.tiempoEnDesarrollo }}/{{ user_story.tiempoEstimado }}
-
+                            <td>
+                                {% if user_story.desarrolladorAsignado == request.user %}
+                                    <a class="mb-3 btn btn-dark"
+                                       href="{% url 'registro_actividad' slug=proyecto.slug pk=user_story.pk %}">
+                                        Gestionar
+                                    </a>
+                                {% endif %}
                             </td>
-                            <td><a class="mb-3 btn btn-danger" href="{% url 'seleccionar_p_realizar_user_story' user_story.pk %}" >Realizar</a>
-                                <a class="mb-3 btn btn-dark" href="{% url 'registro_actividad' slug=proyecto.slug pk=user_story.pk %}">Actividad</a>
-                            </td>
-                    </tr>
+                        </tr>
                     {% endif %}
 
                 {% endfor %}
@@ -176,12 +180,49 @@
 
         </div>
 
+
         <div class="col-md-4 border border-4">
             <h4>DONE</h4>
+            <table bgcolor="#228b22" class="table mb-2" border="1">
+              <thead>
+                <tr>
+                    <th scope="col">User Story</th>
+                    <th scope="col">Encargado</th>
+                    <th scope="col">Estado</th>
+                    {% if "realizar_qa" in proyecto_perms or request.user|has_group:'Administrador'%}
+                        <th scope="col">Acciones</th>
+                    {% endif %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for user_story in proyecto.sprint_actual.sprint_backlog.all %}
+                    {% if user_story.estado == 'QA' or user_story.estado == 'Release' %}
+                        <tr>
+                            <th scope="row">{{ user_story.descripcion }}</th>
+                            <td>{{ user_story.desarrolladorAsignado.username }}</td>
+                            <td>{% if user_story.estado == 'QA' %}
+                                    Pendiente de QA
+                                {% elif user_story.estado == 'Release' %}
+                                    Release
+                                {% endif %}</td>
+                                {% if "realizar_qa" in proyecto_perms or request.user|has_group:'Administrador' %}
+                                    {% if user_story.estado == 'QA' %}
+                                    <td>
+                                        <a class="mb-3 btn btn-dark"
+                                            href="{% url 'realizar_qa' slug=proyecto.slug usPk=user_story.pk %}">
+                                            Realizar QA
+                                        </a>
+                                    </td>
+                                    {% endif %}
+                                {% endif %}
+                        </tr>
+                    {% endif %}
 
+                {% endfor %}
+
+              </tbody>
+            </table>
 
         </div>
     </div>
-
-   </div>
 {% endif %}
