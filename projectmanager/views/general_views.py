@@ -75,13 +75,13 @@ class VerificationView(View):
             user.is_active = True
             user.save()
             # Log activity
-            SystemActivity.objects.create(usuario=request.user,
-                                          descripcion="Se ha verificado al usuario " + user.username)
+            #SystemActivity.objects.create(usuario=request.user,
+             #                             descripcion="Se ha verificado al usuario " + user.username)
 
             messages.success(request, "Usuario " + user.username + " habilitado")
             return redirect('home')
         except Exception as ex:
-            messages.error(request, "El usuario no pudo ser habilitado")
+            messages.error(request, "El usuario no pudo ser habilitado_exception")
             return redirect('home')
 
 
