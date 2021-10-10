@@ -16,7 +16,7 @@ dj-database-url==0.5.0
 Django==3.2.6
 django-allauth==0.45.0
 django-celery==3.3.1
--e git+git://github.com/maraujop/django-crispy-forms.git@7ce02ff6a4a720fd0969341d4787528dba80a589#egg=django_crispy_forms
+-e git://github.com/maraujop/django-crispy-forms.git@7ce02ff6a4a720fd0969341d4787528dba80a589#egg=django_crispy_forms
 django-environ==0.4.5
 django-guardian==2.4.0
 django-heroku==0.3.1
@@ -30,6 +30,7 @@ Jinja2==3.0.1
 kombu==3.0.37
 Markdown==3.3.4
 MarkupSafe==2.0.1
+numpy==1.21.2
 oauthlib==3.1.1
 packaging==21.0
 pluggy==1.0.0

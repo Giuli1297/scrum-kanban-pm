@@ -7,8 +7,16 @@ Proyecto
    :members:
    :show-inheritance:
 
+
+QA
+----
+.. automodule:: projectmanager.models.QA_models
+   :members:
+   :show-inheritance:
+
+
 Rol
----------------
+----
 .. automodule:: projectmanager.models.rol_model
    :members:
    :show-inheritance:
@@ -18,6 +26,13 @@ Sprint
 .. automodule:: projectmanager.models.sprint_model
    :members:
    :show-inheritance:
+
+System Activity
+--------------------
+.. automodule:: projectmanager.models.system_activity__model
+   :members:
+   :show-inheritance:
+
 
 UserStory
 --------------------
