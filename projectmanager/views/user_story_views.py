@@ -205,6 +205,9 @@ class listarHistorial(View):
 
 
 class RegistroDiario(View):
+    """
+    Vista basada en clase utilizada para el registro de las actividades diarias
+    """
 
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
@@ -344,6 +347,9 @@ class RegistroDiarioDelete(View):
 
 
 class MarcarUSComoDoneView(View):
+    """
+    Vista basada en clase para la marcacion de un userstory como Done
+    """
     def get(self, request, slug, usPk, *args, **kwargs):
         user_story = UserStory.objects.get(pk=usPk)
         if not request.user.has_perms(('projectmanager.desarrollar_user_story',),
@@ -361,6 +367,9 @@ class MarcarUSComoDoneView(View):
 
 
 class RealizarQAUSView(View):
+    """
+    Vista basada en clase para la realizacion del control de calidad de un user story
+    """
     def get(self, request, slug, usPk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         user_story = UserStory.objects.get(pk=usPk)
