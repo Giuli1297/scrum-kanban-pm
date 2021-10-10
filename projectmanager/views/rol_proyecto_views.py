@@ -246,6 +246,11 @@ class ImportarRolProyecto(UserAccessMixin, View):
 
 
 def get_list_users_group(request):
+
+    """
+    Obtiene la lista de los usuarios
+    """
+
     if request.method == "POST":
         body = json.loads(request.body)
         users = User.objects.filter(groups=body["data"])

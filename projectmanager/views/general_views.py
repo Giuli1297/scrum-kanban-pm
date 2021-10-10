@@ -103,6 +103,9 @@ class HomePage(LoginRequiredMixin, TemplateView):
 
 
 class SystemActivityView(View):
+    """
+    Vista basada en clase para administras el registro de las actividades del sistema
+    """
     def get(self, request, *args, **kwargs):
         if not request.user.groups.filter(name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")

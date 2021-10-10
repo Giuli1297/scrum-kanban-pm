@@ -263,6 +263,9 @@ class PlanningPokerSMemberView(View):
 
 
 class EstimarSprint(View):
+    """
+    Vista basada en clase utilizada para la estimacion de sprint
+    """
     def get(self, request, slug, *args, **kwargs):
         form = EstimacionSprint()
         proyecto = Proyecto.objects.get(slug=slug)
@@ -332,6 +335,9 @@ class EstimarSprint(View):
 
 
 class VerBurndownChartView(View):
+    """
+    Vista basada en clase para la visusalizacion del burndownchart
+    """
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         context = {
@@ -341,6 +347,9 @@ class VerBurndownChartView(View):
 
 
 class getDataForBurndownChart(View):
+    """
+    Vista basada en clase para la obtención de los datos para el burndownchart
+    """
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         horas_us_total = 0
