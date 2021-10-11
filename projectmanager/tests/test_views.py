@@ -251,7 +251,24 @@ class TestViews(TestCase):
             aceptar=False
         )
 
-        self.assertFalse(qa.aceptar)
+        self.assertFalse(qa.aceptar) 
+    
+
+    def test_proyecto_gestionar_horas_user_story(self):
+        """
+        Prueba para gestionar horas user story scrum master
+        """
+
+        user = User.objects.create(username='dev', email="user1@gmail.com")
+        userStory = userStory = UserStory.objects.create(
+            descripcion="Probar server", 
+            prioridad=5, proyecto=self.proyecto,
+            estado="Nuevo",
+            desarrolladorAsignado=user,
+            tiempoEstimadoSMaster=4
+        )
+
+        self.assertEquals(userStory.tiempoEstimadoSMaster, 4)
 
     
 
