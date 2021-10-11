@@ -7,7 +7,8 @@ from django.urls.base import reverse, resolve
 # Create your tests here.
 from allauth.account.forms import BaseSignupForm, ResetPasswordForm, SignupForm
 from ..models import Proyecto, Rol
-from projectmanager.forms import *
+from projectmanager.forms import * 
+import datetime
 
 
 class TestViews(TestCase):
@@ -182,6 +183,9 @@ class TestViews(TestCase):
     
 
     def test_proyecto_visualizar_tablero_kanban_y_registro_actividades(self):
+        """
+        Prueba de registro de actividades
+        """
         user = User.objects.create(username='juan', email="user1@gmail.com")
         self.proyecto.estado = 'ACT'
         self.proyecto.scrum_member.add(user)
@@ -191,7 +195,69 @@ class TestViews(TestCase):
         userStory = UserStory.objects.create(descripcion="test1", prioridad=4, proyecto=self.proyecto, sprint=sprint, desarrolladorAsignado=user, tiempoEstimado=8)
 
         self.assertEquals(userStory.desarrolladorAsignado.username, 'juan')
-        self.assertEquals(userStory.tiempoEstimado, 8)
+        self.assertEquals(userStory.tiempoEstimado, 8) 
+    
+
+    def test_proyecto_user_story_cambio_estado(self):
+        """
+        Prueba de cambio de estado en un user story
+        """
+        userStory = UserStory.objects.create(
+            descripcion="userStory1", 
+            prioridad=5, proyecto=self.proyecto,
+            estado="Nuevo"
+        )
+
+        userStory.estado = "Doing"
+        self.assertEquals(userStory.estado, "Doing") 
+
+        userStory.estado = "Done"
+        self.assertEquals(userStory.estado, "Done") 
+        
+    
+
+    def test_proyecto_cargar_actividades_user_story(self):
+        """
+        Prueba cargar de actividades en un user story
+        """
+        userStory = userStory = UserStory.objects.create(
+            descripcion="Probar server", 
+            prioridad=5, proyecto=self.proyecto,
+            estado="Doing"
+        )
+
+        historial = HistorialUs.objects.create(
+            descripcion="Testeo primera parte",
+            us=userStory,
+            usuario=self.admin
+        ) 
+
+        self.assertEquals(historial.descripcion, "Testeo primera parte") 
+    
+
+    def test_proyecto_habilitar_qa(self):
+        """
+        Prueba para habilitar qa de un user story
+        """
+        userStory = userStory = UserStory.objects.create(
+            descripcion="Probar server", 
+            prioridad=5, proyecto=self.proyecto,
+            estado="QA"
+        )
+
+        qa = QA.objects.create(
+            user_story=userStory,
+            comentario="el user story terminado para revision",
+            aceptar=False
+        )
+
+        self.assertFalse(qa.aceptar)
+
+    
+
+
+
+
        
         
 
