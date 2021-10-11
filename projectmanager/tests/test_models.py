@@ -70,19 +70,17 @@ class TestModeloAutenticacion(TestCase):
     ...
 
     Methods
-    -------
+    --------
     setUp()
 
     test_login()
 
     test_login_false()
-
     """
 
     def setUp(self):
         """
         Deja listas las variables para que se utilicen en los tests.
-
         """
         user = User.objects.create(username='prueba')
         user.set_password('12345')
@@ -93,7 +91,6 @@ class TestModeloAutenticacion(TestCase):
     def test_login(self):
         """
         Testea el log-in de un usuario existente
-
         """
         logged_in = self.client.login(username='prueba', password='12345')
         self.assertTrue(logged_in)
@@ -101,7 +98,6 @@ class TestModeloAutenticacion(TestCase):
     def test_login_false(self):
         """
         Testea el log-in de un usuario con credenciales incorrectas
-
         """
         logged_in = self.client.login(username='prueb', password='12345')
         self.assertFalse(logged_in)
@@ -183,58 +179,59 @@ class TestModelss(TestCase):
 
 
 class TestModelUs(TestCase):
-    '''
+    """
     clase para verificar las asignaciones de proyectos, usuarios, sprint a un user story
+    """
 
-    '''
     def setUp(self):
-        descripcion_us="us"
-        self.userStorys=UserStory.objects.create(descripcion=descripcion_us)
+        descripcion_us = "us"
+        self.userStorys = UserStory.objects.create(descripcion=descripcion_us)
         self.userStorys.save()
         self.user = User.objects.create(username='prueba')
         self.user.set_password('12345')
         self.user.save()
-        self.proyecto=Proyecto.objects.create(nombre='proyecto1',scrum_master=self.user)
+        self.proyecto = Proyecto.objects.create(nombre='proyecto1', scrum_master=self.user)
         self.proyecto.save()
-        self.sprint=Sprint.objects.create(proyecto=self.proyecto,proyecto_actual=self.proyecto)
+        self.sprint = Sprint.objects.create(proyecto=self.proyecto, proyecto_actual=self.proyecto)
         self.sprint.save()
 
     def test_create_us(self):
-        '''
+        """
             verifica s se creó correctamente un user story
-        '''
+        """
         self.assertEqual(self.userStorys.descripcion, "us")
 
     def test_asignar_us(self):
-        '''
+        """
             se crea y se asigna un usuario a un user story
-        :return:
-        '''
-        self.userStorys.desarrolladorAsignado=self.user
-        self.assertEqual(self.userStorys.desarrolladorAsignado.username,'prueba',"verifica si se asignó correctamente un usuario a un user story")
+        """
+        self.userStorys.desarrolladorAsignado = self.user
+        self.assertEqual(self.userStorys.desarrolladorAsignado.username, 'prueba',
+                         "verifica si se asignó correctamente un usuario a un user story")
+
     def test_asignar_proyecto_a_us(self):
-        '''
+        """
         se crea y se asigna un proyecto a un user story
         :return:
-        '''
-        self.userStorys.proyecto=self.proyecto
-        self.assertEqual(self.userStorys.proyecto.nombre,"proyecto1","verifica si se asignó correctamente un proyecto a un user story")
+        """
+        self.userStorys.proyecto = self.proyecto
+        self.assertEqual(self.userStorys.proyecto.nombre, "proyecto1",
+                         "verifica si se asignó correctamente un proyecto a un user story")
+
     def test_asignar_sprint_a_us(self):
-        '''
+        """
         se crea y se asigna un sprint a un user story
         :return:
-        '''
-        self.userStorys.sprint=self.sprint
-        self.assertEqual(self.userStorys.sprint.proyecto.nombre,"proyecto1","verifica si se asignó correctamente un sprint a un user story")
+        """
+        self.userStorys.sprint = self.sprint
+        self.assertEqual(self.userStorys.sprint.proyecto.nombre, "proyecto1",
+                         "verifica si se asignó correctamente un sprint a un user story")
 
     def test_historial_us(self):
-        '''
+        """
         se crea un historial y se le asigna un user story
         :return:
-        '''
-        self.historial=HistorialUs.objects.create(us=self.userStorys)
-        self.assertEquals(self.historial.us,self.userStorys,"verifica si se asigna bien un user story a un objeto historial de user story  ")
-
-
-
-
+        """
+        self.historial = HistorialUs.objects.create(us=self.userStorys)
+        self.assertEquals(self.historial.us, self.userStorys,
+                          "verifica si se asigna bien un user story a un objeto historial de user story  ")

@@ -14,4 +14,36 @@
     <div class="col-md-4"></div>
     <div class="col-md-4"></div>
 </div>
+{% if users_work %}
+    <div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <h3>Horas Ocupadas por Usuario:</h3>
+        <table class="table mb-2">
+          <thead>
+            <tr>
+              <th scope="col">Usuario</th>
+              <th scope="col">Lunes</th>
+              <th scope="col">Martes</th>
+              <th scope="col">Miercoles</th>
+              <th scope="col">Jueves</th>
+              <th scope="col">Viernes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users_work %}
+                <tr>
+                  <th scope="row">{{ user.usuario }}</th>
+                  <td>{{ user.LUN }}</td>
+                  <td>{{ user.MAR }}</td>
+                  <td>{{ user.MIE }}</td>
+                  <td>{{ user.JUE }}</td>
+                  <td>{{ user.VIE }}</td>
+                </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

@@ -2,7 +2,7 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from six import text_type
 from guardian.shortcuts import assign_perm, remove_perm, get_perms
 from django.contrib.auth.models import Group, User, Permission
-from projectmanager.models import Rol
+from projectmanager.models import Rol, Proyecto
 
 
 class AppTokenGenerator(PasswordResetTokenGenerator):
@@ -27,14 +27,18 @@ def add_perm_to_group(name, permission):
 
 
 def add_obj_perm_to_group(name, permission, instance):
+    if isinstance(instance, Proyecto):
+        proyecto = instance
+    else:
+        proyecto = instance.proyecto
     if Group.objects.filter(name=name).exists():
         group = Group.objects.get(name=name)
     else:
         group = Group.objects.create(name=name)
-        if 'scrum_master' in group.name or 'scrum_member' in group.name:
-            rol = Rol.objects.create(related_group=group, tipo='defecto', proyecto=instance)
+        if 'scrum_master' in group.name or 'scrum_member' or 'desarrollador_' in group.name:
+            rol = Rol.objects.create(related_group=group, tipo='defecto', proyecto=proyecto)
         else:
-            rol = Rol.objects.create(related_group=group, tipo='proyecto', proyecto=instance)
+            rol = Rol.objects.create(related_group=group, tipo='proyecto', proyecto=proyecto)
         rol.save()
     assign_perm(permission, group, instance)
     group.save()

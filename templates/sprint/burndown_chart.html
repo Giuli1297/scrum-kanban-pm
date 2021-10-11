@@ -1,0 +1,92 @@
+{% extends "layout/base.html" %}
+
+{% block content %}
+    <div class="row">
+        <h3>Burndown Chart del Sprint Actual del proyecto {{ proyecto.nombre }}</h3>
+        <p>Este grafico muestra el progreso actual del Sprint en curso.</p>
+        <ul>
+            <li>El eje de las abscisas representa los dias restantes de acuerdo a la planificacion del Sprint</li>
+            <li>El eje de las ordenadas representa las horas a desarrollar del Sprint.</li>
+        </ul>
+    </div>
+    <div class="row">
+        <input id='slug' type="hidden" value="{{ proyecto.slug }}">
+        <canvas id="myChart"></canvas>
+    </div>
+    <div class="row">
+        <div class="col-md-3">    <a class="m-3 btn btn-danger" href="{% url 'proyecto_gestion' slug=proyecto.slug %}">Volver</a>
+    </div>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script>
+        //SetUp
+        const slug = $('#slug').val();
+        var defaultData = null;
+        console.log(slug);
+        $.ajax({
+            method: 'GET',
+            url: '/proyectos/'+slug+'/dataBurndownChart/',
+            success: function(data){
+                console.log(data);
+                defaultData = data;
+                setChart();
+            },
+            error: function (error_data){
+                console.log('pero que a pasao');
+            }
+        });
+        function setChart(){
+            const lab = [];
+            var dataset1 = [];
+            var dataset2 = [];
+            console.log(defaultData.horas_us_totales);
+            for(let i=0;i<=parseInt(defaultData.dias_estimados);i++){
+                lab.push(defaultData.dias_estimados-i);
+                dataset1.push(defaultData.horas_us_totales-(defaultData.horas_us_totales/defaultData.dias_estimados)*i);
+            }
+            for(let i=0;i<=defaultData.passed_days;i++){
+                dataset2.push(defaultData.progreso[i]);
+            }
+            const data = {
+              labels: lab,
+              datasets: [
+                {
+                  label: 'Progreso Estimado',
+                  data: dataset1,
+                  borderColor: 'rgb(255, 100, 50)',
+                  backgroundColor: 'rgb(255, 100, 50)',
+                },
+                {
+                  label: 'Progreso Real',
+                  data: dataset2,
+                  borderColor: 'rgb(100, 100, 255)',
+                  backgroundColor: 'rgb(100, 100, 255)',
+                }
+              ]
+            };
+            //Config
+            const config = {
+              type: 'line',
+              data: data,
+              options: {
+                responsive: true,
+                plugins: {
+                  legend: {
+                    position: 'top',
+                  },
+                  title: {
+                    display: true,
+                    text: 'Chart.js Line Chart'
+                  }
+                }
+              },
+            };
+            var myChart = new Chart(
+                document.getElementById('myChart'),
+                config
+            );
+        }
+
+    </script>
+{% endblock %}

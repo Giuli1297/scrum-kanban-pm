@@ -2,15 +2,44 @@
 
 {% block content %}
 <div class="row mb-3">
-    <h3>Estimacion de Sprint recomendada</h3>
-    <p>{{ horas }}</p>
+    <h3>Estimacion de Sprint</h3>
+    <h5>Informacion a tener en cuenta</h5>
+    <ul>
+        <li>Horas de desarrollo total de los User Stories: {{ horas }} hs.</li>
+        <li>Horas por semana de los desarrolladores: {{ horas_desarrolladores }} hs.</li>
+        <li>Cada dia consta de 8 horas de trabajo.</li>
+        <li>Los dias se contaran a partir de hoy.</li>
+        <li>Horas de desarrollo disponible en la semana: (El "*" marca el dia actual)</li>
+    </ul>
+    <div class="col-md-8">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Lunes{% if hoy == 0 %}<strong>*</strong>{% endif %}</th>
+              <th scope="col">Martes{% if hoy == 1 %}<strong>*</strong>{% endif %}</th>
+              <th scope="col">Miercoles{% if hoy == 2 %}<strong>*</strong>{% endif %}</th>
+              <th scope="col">Jueves{% if hoy == 3 %}<strong>*</strong>{% endif %}</th>
+                <th scope="col">Viernes{% if hoy == 4 %}<strong>*</strong>{% endif %}</th>
+            </tr>
+          </thead>
+          <tbody>
+                <tr>
+                  <td>{{ horas_por_dia.lun }} hs.</td>
+                  <td>{{ horas_por_dia.mar }} hs.</td>
+                  <td>{{ horas_por_dia.mie }} hs.</td>
+                  <td>{{ horas_por_dia.jue }} hs.</td>
+                  <td>{{ horas_por_dia.vie }} hs.</td>
+                </tr>
+          </tbody>
+        </table>
+    </div>
 </div>
 <div class="row mb-3">
     <div class="form-group col-md-4">
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <button class="btn btn-dark" type="submit">Guardar</button>
+            <button class="btn btn-dark" type="submit">Iniciar Desarrollo del Proyecto</button>
         </form>
         <a class="mb-3 btn btn-danger" href="{% url 'proyecto_gestion' slug=proyecto.slug %}">Volver</a>
     </div>

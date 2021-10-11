@@ -1,0 +1,23 @@
+{% extends 'layout/base.html' %}
+{% block head_title %}Project Manger{% endblock %}
+{% block content %}
+    <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Fecha</th>
+      <th scope="col">Usuario</th>
+      <th scope="col">Registro</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for actividad in registro %}
+        <tr>
+          <th scope="row">{{ actividad.fecha }}</th>
+          <td>{{ actividad.usuario.username }}</td>
+          <td>{{ actividad.descripcion }}</td>
+        </tr>
+    {% endfor %}
+
+  </tbody>
+</table>
+{% endblock %}

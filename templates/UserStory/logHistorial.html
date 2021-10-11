@@ -55,8 +55,7 @@ right: 20px;
      <thead>
                      <tr>
                         <th scope="col">Descripcion</th>
-                        <th scope="col">Meta</th>
-                        <th scope="col">Fecha de modificación</th>
+                        <th scope="col">Fecha </th>
                         <th scope="col">Usuario</th>
                         </tr>
                  </thead>
@@ -64,7 +63,6 @@ right: 20px;
       {% for list in history %}
                         <tr>
                             <td >{{ list.descripcion }}</td>
-                            <td >{{ list.descripcionDone }}</td>
                             <td >{{ list.fecha }}</td>
                             <td >{{ list.usuario }}</td>
                         </tr>

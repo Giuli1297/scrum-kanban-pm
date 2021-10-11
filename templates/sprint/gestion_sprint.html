@@ -1,12 +1,42 @@
 {% load projectmanager_extras %}
-<div class="row mt-2">
-    {% if proyecto.sprint_actual.estado != 'conf3' %}
-         <h4>Configura el proximo Sprint</h4>
-    {% else %}
-         <h4>Sprint - Duracion {{ proyecto.sprint_actual.duracion_estimada }} hs</h4>
-    {% endif %}
+{% block extra_head %}
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,200;1,200&display=swap');
+        .countdown{
+            display: flex;
+            transform: scale(1);
+        }
 
-</div>
+        .time{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 15px;
+        }
+        .time h5{
+            font-weight: bold;
+            font-size: 36px;
+            line-height: 1;
+            margin: 0 0 5px;
+        }
+
+        
+        @media (max-width: 500px) {
+            .time{margin: 5px}
+            .time h5{
+                font-size: 12px;
+            }
+            .time small{
+            font-size: 10px;
+        }
+
+            
+        }
+    </style>
+
+{% endblock %}
+
 {% if proyecto.sprint_actual.estado != 'conf3' %}
 <div class="row mt-2">
     <div class="col-md-6 border border-2">
@@ -82,8 +112,9 @@
                         </a>
                     {% elif proyecto.sprint_actual.estado == 'conf2' %}
                         {% if 'estimar_sprint' in proyecto_perms or request.user|has_group:'Administrador' %}
+
                             <a class="btn btn-dark btn-flotante align-center" href="{% url 'estimar_sprint' slug=proyecto.slug %}" >
-                                Estimar Sprint
+                                Estimar Sprint e Iniciar Desarrollo
                             </a>
                         {% endif %}
 
@@ -95,39 +126,232 @@
     </div>
 </div>
 {% else %}
-    <div class="row mt-2">
+    <div class="row mt-5"><h3 class="align-center">Sprint en Curso</h3><hr/></div>
+    <div id="contenido" class="row mt-2">
 
-        <div class="col-md-4 border border-2">
+        <div class=" c  col-md-4 border border-4" >
             <h4>TO-DO</h4>
-            <table class="table mb-2">
+            <table bgcolor="#b8860b" class="table mb-2" border="1">
               <thead>
                 <tr>
                     <th scope="col">User Story</th>
                     <th scope="col">Encargado</th>
                     <th scope="col">Horas (Planning Poker)</th>
+                    <th scope="col">Acciones</th>
+
                 </tr>
               </thead>
               <tbody>
                 {% for user_story in proyecto.sprint_actual.sprint_backlog.all %}
-                    <tr>
-                        <th scope="row">{{ user_story.descripcion }}</th>
+                    {% if user_story.estado == 'To-Do' %}
+                        <tr>
+                            <th scope="row">{{ user_story.descripcion }}</th>
                             <td>{{ user_story.desarrolladorAsignado.username }}</td>
+                            <td>{{ user_story.tiempoEstimado }}</td>
                             <td>
-                                    {{ user_story.tiempoEstimado }}
+                                {% if user_story.desarrolladorAsignado == request.user %}
+                                    <a class="btn btn-primary"
+                                       href="{% url 'seleccionar_p_realizar_user_story' usPk=user_story.pk %}">
+                                            Realizar
+                                    </a>
+                                {% endif %}
                             </td>
+                        </tr>
+                    {% endif %}
 
-                    </tr>
                 {% endfor %}
+
               </tbody>
             </table>
         </div>
 
-        <div class="col-md-4 border border-2">
+        <div class="col-md-4 border border-4">
             <h4>DOING</h4>
-            </div>
-        <div class="col-md-4 border border-2">
+            <table bgcolor="#adff2f" class="table mb-2" border="1">
+              <thead>
+                <tr>
+                    <th scope="col">User Story</th>
+                    <th scope="col">Encargado</th>
+                    <th scope="col">Desarrollo (Hs.)</th>
+                    <th scope="col">Acciones</th>
+
+                </tr>
+              </thead>
+              <tbody>
+                {% for user_story in proyecto.sprint_actual.sprint_backlog.all %}
+                    {% if user_story.estado == 'Doing' %}
+                        <tr>
+                            <th scope="row">{{ user_story.descripcion }}</th>
+                            <td>{{ user_story.desarrolladorAsignado.username }}</td>
+                            <td>{{ user_story.tiempoEnDesarrollo }}/{{ user_story.tiempoEstimado }}
+                            <td>
+                                {% if user_story.desarrolladorAsignado == request.user %}
+                                    <a class="mb-3 btn btn-dark"
+                                       href="{% url 'registro_actividad' slug=proyecto.slug pk=user_story.pk %}">
+                                        Gestionar
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                {% endfor %}
+
+              </tbody>
+            </table>
+
+        </div>
+
+
+        <div class="col-md-4 border border-4">
             <h4>DONE</h4>
+            <table bgcolor="#228b22" class="table mb-2" border="1">
+              <thead>
+                <tr>
+                    <th scope="col">User Story</th>
+                    <th scope="col">Encargado</th>
+                    <th scope="col">Estado</th>
+                    {% if "realizar_qa" in proyecto_perms or request.user|has_group:'Administrador'%}
+                        <th scope="col">Acciones</th>
+                    {% endif %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for user_story in proyecto.sprint_actual.sprint_backlog.all %}
+                    {% if user_story.estado == 'QA' or user_story.estado == 'Release' %}
+                        <tr>
+                            <th scope="row">{{ user_story.descripcion }}</th>
+                            <td>{{ user_story.desarrolladorAsignado.username }}</td>
+                            <td>{% if user_story.estado == 'QA' %}
+                                    Pendiente de QA
+                                {% elif user_story.estado == 'Release' %}
+                                    Release
+                                {% endif %}</td>
+                                {% if "realizar_qa" in proyecto_perms or request.user|has_group:'Administrador' %}
+                                    {% if user_story.estado == 'QA' %}
+                                    <td>
+                                        <a class="mb-3 btn btn-dark"
+                                            href="{% url 'realizar_qa' slug=proyecto.slug usPk=user_story.pk %}">
+                                            Realizar QA
+                                        </a>
+                                    </td>
+                                    {% endif %}
+                                {% endif %}
+                        </tr>
+                    {% endif %}
+
+                {% endfor %}
+
+              </tbody>
+            </table>
 
         </div>
     </div>
+
+    <div class="row m-3"><h2>Información del avance del Sprint</h2>
+        <hr/>
+    </div>
+    <div class="row mt-2">
+
+    {% if proyecto.sprint_actual.estado != 'conf3' %}
+         <h4>Configura el proximo Sprint</h4>
+    {% else %}
+
+
+        <input id='idia' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio_desarrollo.day }}">
+        <input id='imes' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio_desarrollo.month }}">
+        <input id='ianio' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio_desarrollo.year }}">
+        <input id='fdia' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion.day }}">
+        <input id='fmes' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion.month }}">
+        <input id='fanio' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion.year }}">
+        <div class="col-md-9">
+            <h4>Duración del Sprint {{ proyecto.sprint_actual.duracion_estimada_dias }} dias laborales</h4>
+            <h4>Fecha inicio {{ proyecto.sprint_actual.fecha_inicio_desarrollo.day }}/{{ proyecto.sprint_actual.fecha_inicio_desarrollo.month }}
+            /{{ proyecto.sprint_actual.fecha_inicio_desarrollo.year }}</h4>
+            <h4>Fecha estimada de finalizacion {{ proyecto.sprint_actual.fecha_finalizacion.day }}/{{ proyecto.sprint_actual.fecha_finalizacion.month }}
+            /{{ proyecto.sprint_actual.fecha_finalizacion.year }}</h4>
+            <div id="countdown" class="countdown">
+                <div  class="time">
+                    <h5 id="days"></h5>
+                    <small>Dias</small>
+                </div>
+
+                <div  class="time">
+                    <h5 id="hours"></h5>
+                    <small>Horas</small>
+                </div>
+
+                <div  class="time">
+                    <h5 id="minutes"></h5>
+                    <small>Minutos</small>
+                </div>
+
+                <div  class="time">
+                    <h5 id="seconds"></h5>
+                    <small>Segundos</small>
+                </div>
+
+            </div>
+        </div>
+        <div class="col-md-3">
+            <a class="btn btn-dark m-3" href="{% url 'ver_burndownchart_actual' proyecto.slug %}">Ver Burndown Chart</a>
+        </div>
+    {% endif %}
+
+</div>
+
+
 {% endif %}
+
+
+{% block script %}
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+ <script >
+        var iDia;
+        var iMes;
+        var iAnio;
+        var fDia;
+        var fMes;
+        var fAnio;
+
+        var iDia = $('#idia').val();
+        var iMes = $('#imes').val();
+        var iAnio = $('#ianio').val();
+        var fDia = $('#fdia').val();
+        var fMes = $('#fmes').val();
+        var fAnio = $('#fanio').val();
+        var hora=0;
+        var min=0;
+        var seg=0;
+
+        var defaultData = null;
+        console.log(iDia);
+        console.log(fDia);
+        const days=document.getElementById('days');
+        const hours=document.getElementById('hours');
+        const minutes=document.getElementById('minutes');
+        const seconds=document.getElementById('seconds');
+
+        const fecha_final= new Date(fAnio,fMes-1,fDia);
+        console.log(fecha_final)
+
+        function updateCountdown(){
+            const tiempoActual=new Date()
+            const diff=fecha_final-tiempoActual
+            const d=Math.floor(diff/1000/60/60/24);
+            const h=Math.floor(diff/1000/60/60)%24;
+            const m=Math.floor(diff/1000/60)%60;
+            const s=Math.floor(diff/1000)%60;
+
+
+
+            days.innerHTML=d;
+            hours.innerHTML=h;
+            minutes.innerHTML=m;
+            seconds.innerHTML=s ;
+            }
+        setInterval(updateCountdown,1000);
+
+
+    </script>
+{% endblock %}
