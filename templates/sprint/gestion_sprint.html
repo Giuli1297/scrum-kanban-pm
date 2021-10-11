@@ -1,5 +1,41 @@
 {% load projectmanager_extras %}
+{% block extra_head %}
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,200;1,200&display=swap');
+        .countdown{
+            display: flex;
+            transform: scale(1);
+        }
 
+        .time{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 15px;
+        }
+        .time h5{
+            font-weight: bold;
+            font-size: 36px;
+            line-height: 1;
+            margin: 0 0 5px;
+        }
+
+        
+        @media (max-width: 500px) {
+            .time{margin: 5px}
+            .time h5{
+                font-size: 12px;
+            }
+            .time small{
+            font-size: 10px;
+        }
+
+            
+        }
+    </style>
+
+{% endblock %}
 <div class="row mt-2">
     {% if proyecto.sprint_actual.estado != 'conf3' %}
          <h4>Configura el proximo Sprint</h4>
@@ -10,7 +46,37 @@
             /{{ proyecto.sprint_actual.fecha_inicio_desarrollo.year }}</h4>
             <h4>Fecha finalizacion {{ proyecto.sprint_actual.fecha_finalizacion.day }}/{{ proyecto.sprint_actual.fecha_finalizacion.month }}
             /{{ proyecto.sprint_actual.fecha_finalizacion.year }}</h4>
+            <div id="countdown" class="countdown">
+                <div  class="time">
+                    <h5 id="days"></h5>
+                    <small>Dias</small>
+                </div>
+
+                <div  class="time">
+                    <h5 id="hours"></h5>
+                    <small>Horas</small>
+                </div>
+
+                <div  class="time">
+                    <h5 id="minutes"></h5>
+                    <small>Minutos</small>
+                </div>
+
+                <div  class="time">
+                    <h5 id="seconds"></h5>
+                    <small>Segundos</small>
+                </div>
+
+            </div>
         </div>
+
+        <input id='idia' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio_desarrollo.day }}">
+        <input id='imes' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio_desarrollo.month }}">
+        <input id='ianio' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio_desarrollo.year }}">
+        <input id='fdia' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion.day }}">
+        <input id='fmes' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion.month }}">
+        <input id='fanio' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion.year }}">
+
         <div class="col-md-3">
             <a class="btn btn-dark m-3" href="{% url 'ver_burndownchart_actual' proyecto.slug %}">Ver Burndown Chart</a>
         </div>
@@ -92,6 +158,7 @@
                         </a>
                     {% elif proyecto.sprint_actual.estado == 'conf2' %}
                         {% if 'estimar_sprint' in proyecto_perms or request.user|has_group:'Administrador' %}
+
                             <a class="btn btn-dark btn-flotante align-center" href="{% url 'estimar_sprint' slug=proyecto.slug %}" >
                                 Estimar Sprint e Iniciar Desarrollo
                             </a>
@@ -226,3 +293,56 @@
         </div>
     </div>
 {% endif %}
+
+
+{% block script %}
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+ <script >
+        var iDia;
+        var iMes;
+        var iAnio;
+        var fDia;
+        var fMes;
+        var fAnio;
+
+        var iDia = $('#idia').val();
+        var iMes = $('#imes').val();
+        var iAnio = $('#ianio').val();
+        var fDia = $('#fdia').val();
+        var fMes = $('#fmes').val();
+        var fAnio = $('#fanio').val();
+        var hora=0;
+        var min=0;
+        var seg=0;
+
+        var defaultData = null;
+        console.log(iDia);
+        console.log(fDia);
+        const days=document.getElementById('days');
+        const hours=document.getElementById('hours');
+        const minutes=document.getElementById('minutes');
+        const seconds=document.getElementById('seconds');
+
+        const fecha_final= new Date(fAnio,fMes-1,fDia);
+        console.log(fecha_final)
+
+        function updateCountdown(){
+            const tiempoActual=new Date()
+            const diff=fecha_final-tiempoActual
+            const d=Math.floor(diff/1000/60/60/24);
+            const h=Math.floor(diff/1000/60/60)%24;
+            const m=Math.floor(diff/1000/60)%60;
+            const s=Math.floor(diff/1000)%60;
+
+
+
+            days.innerHTML=d;
+            hours.innerHTML=h;
+            minutes.innerHTML=m;
+            seconds.innerHTML=s ;
+            }
+        setInterval(updateCountdown,1000);
+
+
+    </script>
+{% endblock %}
