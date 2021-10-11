@@ -8,6 +8,7 @@ class TestForms(TestCase):
     """
            Clase de Testing para formularios
     """
+
     def setUp(self):
         """
         Deja listas las variables para que se utilicen en los tests.
@@ -43,17 +44,16 @@ class TestForms(TestCase):
         })
 
         self.assertFalse(form.is_valid())
-        self.assertEquals(len(form.errors), 1) 
-    
+        self.assertEquals(len(form.errors), 1)
+
     def test_crear_user_story(self):
         """
         Test para verificar sin los datos ingresados son correctos en la cración de user story
         """
         form = ProyectoUs(data={
             'descripción_de_user_story': 'crear un servidor',
-            'prioridad_1_al_10': 10
+            'prioridad_1_al_10': 10,
+            'documentación': 'test'
         })
 
         self.assertTrue(form.is_valid())
-    
-

@@ -7,13 +7,11 @@ Proyecto
    :members:
    :show-inheritance:
 
-
 QA
 ----
 .. automodule:: projectmanager.models.QA_models
    :members:
    :show-inheritance:
-
 
 Rol
 ----
@@ -29,10 +27,9 @@ Sprint
 
 System Activity
 --------------------
-.. automodule:: projectmanager.models.system_activity__model
+.. automodule:: projectmanager.models.system_activity_model
    :members:
    :show-inheritance:
-
 
 UserStory
 --------------------
