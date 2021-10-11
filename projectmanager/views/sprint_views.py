@@ -263,6 +263,9 @@ class PlanningPokerSMemberView(View):
 
 
 class EstimarSprint(View):
+    """
+    Vista basada en clase utilizada para la estimacion de sprint
+    """
     def get(self, request, slug, *args, **kwargs):
         form = EstimacionSprint()
         proyecto = Proyecto.objects.get(slug=slug)
@@ -315,7 +318,7 @@ class EstimarSprint(View):
             diasEstimados = form.cleaned_data['dias_estimados']
             sprint.duracion_estimada_dias = diasEstimados
             sprint.fecha_inicio_desarrollo = timezone.now().date()
-            sprint.fecha_finalizacion = timezone.now().date()+ timedelta(days=diasEstimados)
+            sprint.fecha_finalizacion = timezone.now().date()+ timedelta(hours=diasEstimados*24 + 16)
 
             sprint.estado = 'conf3'
             sprint.save()
@@ -334,6 +337,9 @@ class EstimarSprint(View):
 
 
 class VerBurndownChartView(View):
+    """
+    Vista basada en clase para la visusalizacion del burndownchart
+    """
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         context = {
@@ -343,6 +349,9 @@ class VerBurndownChartView(View):
 
 
 class getDataForBurndownChart(View):
+    """
+    Vista basada en clase para la obtención de los datos para el burndownchart
+    """
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         horas_us_total = 0

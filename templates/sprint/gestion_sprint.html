@@ -36,53 +36,7 @@
     </style>
 
 {% endblock %}
-<div class="row mt-2">
-    {% if proyecto.sprint_actual.estado != 'conf3' %}
-         <h4>Configura el proximo Sprint</h4>
-    {% else %}
-        <div class="col-md-9">
-            <h4>Duración del Sprint {{ proyecto.sprint_actual.duracion_estimada_dias }} dias</h4>
-            <h4>Fecha inicio {{ proyecto.sprint_actual.fecha_inicio_desarrollo.day }}/{{ proyecto.sprint_actual.fecha_inicio_desarrollo.month }}
-            /{{ proyecto.sprint_actual.fecha_inicio_desarrollo.year }}</h4>
-            <h4>Fecha finalizacion {{ proyecto.sprint_actual.fecha_finalizacion.day }}/{{ proyecto.sprint_actual.fecha_finalizacion.month }}
-            /{{ proyecto.sprint_actual.fecha_finalizacion.year }}</h4>
-            <div id="countdown" class="countdown">
-                <div  class="time">
-                    <h5 id="days"></h5>
-                    <small>Dias</small>
-                </div>
 
-                <div  class="time">
-                    <h5 id="hours"></h5>
-                    <small>Horas</small>
-                </div>
-
-                <div  class="time">
-                    <h5 id="minutes"></h5>
-                    <small>Minutos</small>
-                </div>
-
-                <div  class="time">
-                    <h5 id="seconds"></h5>
-                    <small>Segundos</small>
-                </div>
-
-            </div>
-        </div>
-
-        <input id='idia' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio_desarrollo.day }}">
-        <input id='imes' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio_desarrollo.month }}">
-        <input id='ianio' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio_desarrollo.year }}">
-        <input id='fdia' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion.day }}">
-        <input id='fmes' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion.month }}">
-        <input id='fanio' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion.year }}">
-
-        <div class="col-md-3">
-            <a class="btn btn-dark m-3" href="{% url 'ver_burndownchart_actual' proyecto.slug %}">Ver Burndown Chart</a>
-        </div>
-    {% endif %}
-
-</div>
 {% if proyecto.sprint_actual.estado != 'conf3' %}
 <div class="row mt-2">
     <div class="col-md-6 border border-2">
@@ -292,6 +246,60 @@
 
         </div>
     </div>
+
+    <div class="row m-3"><h2>Información del avance del Sprint</h2>
+        <hr/>
+    </div>
+    <div class="row mt-2">
+
+    {% if proyecto.sprint_actual.estado != 'conf3' %}
+         <h4>Configura el proximo Sprint</h4>
+    {% else %}
+
+
+        <input id='idia' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio_desarrollo.day }}">
+        <input id='imes' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio_desarrollo.month }}">
+        <input id='ianio' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio_desarrollo.year }}">
+        <input id='fdia' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion.day }}">
+        <input id='fmes' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion.month }}">
+        <input id='fanio' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion.year }}">
+        <div class="col-md-9">
+            <h4>Duración del Sprint {{ proyecto.sprint_actual.duracion_estimada_dias }} dias laborales</h4>
+            <h4>Fecha inicio {{ proyecto.sprint_actual.fecha_inicio_desarrollo.day }}/{{ proyecto.sprint_actual.fecha_inicio_desarrollo.month }}
+            /{{ proyecto.sprint_actual.fecha_inicio_desarrollo.year }}</h4>
+            <h4>Fecha estimada de finalizacion {{ proyecto.sprint_actual.fecha_finalizacion.day }}/{{ proyecto.sprint_actual.fecha_finalizacion.month }}
+            /{{ proyecto.sprint_actual.fecha_finalizacion.year }}</h4>
+            <div id="countdown" class="countdown">
+                <div  class="time">
+                    <h5 id="days"></h5>
+                    <small>Dias</small>
+                </div>
+
+                <div  class="time">
+                    <h5 id="hours"></h5>
+                    <small>Horas</small>
+                </div>
+
+                <div  class="time">
+                    <h5 id="minutes"></h5>
+                    <small>Minutos</small>
+                </div>
+
+                <div  class="time">
+                    <h5 id="seconds"></h5>
+                    <small>Segundos</small>
+                </div>
+
+            </div>
+        </div>
+        <div class="col-md-3">
+            <a class="btn btn-dark m-3" href="{% url 'ver_burndownchart_actual' proyecto.slug %}">Ver Burndown Chart</a>
+        </div>
+    {% endif %}
+
+</div>
+
+
 {% endif %}
 
 

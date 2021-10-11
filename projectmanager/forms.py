@@ -215,7 +215,7 @@ class ProyectoUs(forms.Form):
     descripción_de_user_story = forms.CharField(max_length=100, widget=forms.Textarea(attrs={
         'class': 'form-control'
     }))
-    documentación =  forms.CharField(max_length=100, widget=forms.Textarea(attrs={
+    documentación =  forms.CharField(label='Requisitos para pasar a Done',max_length=100, widget=forms.Textarea(attrs={
         'class': 'form-control'
     }))
     prioridad_1_al_10 = forms.IntegerField(widget=forms.NumberInput(attrs={

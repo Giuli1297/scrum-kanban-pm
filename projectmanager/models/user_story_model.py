@@ -59,7 +59,7 @@ class UserStory(models.Model):
     proyecto = models.ForeignKey(Proyecto, related_name='product_backlog', null=True, on_delete=models.CASCADE)
     sprint = models.ForeignKey(Sprint, related_name='sprint_backlog', null=True, blank=True, on_delete=models.SET_NULL)
     prioridad = models.IntegerField(default=1)
-    descripcionDone=models.TextField(blank=True,max_length=255)
+    descripcionDone = models.TextField(blank=True, max_length=255)
 
     def historial(self):
         return HistorialUs.objects.filter(descripcion=self).order_by('version')
@@ -75,7 +75,54 @@ class UserStory(models.Model):
         return self.descripcion + self.proyecto.slug
 
 
+class logHistorial(models.Model):
+    """
+        Guarda y define el registro de las actividades realizadas en el user story
+
+        Atributos:
+
+        Parameters
+        ----------
+        us
+            identificador del user story
+
+        fecha
+            fecha en la que se realizo el cambio
+
+        descripcion
+            descripcion breve del cambio realizado.
+
+        usuaria
+            usuario que realiza el cambio
+        """
+    us = models.ForeignKey(UserStory, related_name='logHistorial', null=True, on_delete=models.CASCADE)
+    descripcion = models.TextField(blank=True, max_length=255)
+    fecha=models.DateTimeField(auto_now_add=True)
+    usuario=models.ForeignKey(User,null=True,on_delete=models.CASCADE)
+
+
+
+
 class HistorialUs(models.Model):
+    """
+        Guarda y define el registro de las actividades realizadas en el user story
+
+        Atributos:
+
+        Parameters
+        ----------
+        us
+            identificador del user story
+
+        fecha
+            fecha en la que se realizo el cambio
+
+        descripcion
+            descripcion breve del cambio realizado.
+
+        usuaria
+            usuario que realiza el cambio
+        """
     version = models.IntegerField(editable=False)
 
     us = models.ForeignKey(UserStory, related_name='UsHistorial', null=True, on_delete=models.CASCADE)
@@ -101,12 +148,37 @@ class HistorialUs(models.Model):
 class UserInfo(models.Model):
     """
     Modelo que guarda informacion util sobre cada usuario del sistema
+    Atributos:
+
+        Parameters
+        ----------
+        usuario
+            identificador de usuario
+
+        horasisponibles
+            horas disponibles del usuario.
     """
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='info', primary_key=True)
     horasDisponibles = models.FloatField(default=40.0)
 
 
 class RegistroActividadDiairia(models.Model):
+    """
+        Guarda y define el registro de las actividades realizadas diariamente
+
+        Atributos:
+
+        Parameters
+        ----------
+        us
+            identificador del user story
+
+        hora
+            hora en la que se realizo el cambio
+
+        descripcion
+            descripcion breve del cambio realizado.
+    """
     us = models.ForeignKey(UserStory, related_name='RegistroActividad', null=True, on_delete=models.CASCADE)
     descripcion = models.TextField(blank=True, max_length=5000)
     hora = models.FloatField(default=0)

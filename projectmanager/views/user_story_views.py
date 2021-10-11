@@ -16,7 +16,7 @@ from django.views.generic import (
     DetailView
 )
 
-from projectmanager.models.user_story_model import RegistroActividadDiairia
+from projectmanager.models.user_story_model import RegistroActividadDiairia, logHistorial
 from scrum_kanban_pm.settings.development import EMAIL_HOST_USER
 from projectmanager.forms import *
 from django.core.mail import EmailMessage
@@ -81,11 +81,13 @@ class UserStoryCreate(View):
         if form.is_valid():
             descripcion = form.cleaned_data['descripción_de_user_story']
             prioridad = form.cleaned_data['prioridad_1_al_10']
-            documentacion=form.cleaned_data['documentación']
+            documentacion = form.cleaned_data['documentación']
             if prioridad > 0 and prioridad < 11:
-                US = UserStory.objects.create(descripcion=descripcion, proyecto=proyecto, prioridad=prioridad,descripcionDone=documentacion)
+                US = UserStory.objects.create(descripcion=descripcion, proyecto=proyecto, prioridad=prioridad,
+                                              descripcionDone=documentacion)
                 US.save()
                 # Log activity
+
                 SystemActivity.objects.create(usuario=request.user,
                                               descripcion="Ha creado un user story en el proyecto " + proyecto.nombre)
                 messages.success(request, "User Story Creado Correctamente!")
@@ -118,7 +120,7 @@ class UserStoryUpdate(View):
         form = ProyectoUs(initial={
             'descripción_de_user_story': US2.descripcion,
             'prioridad_1_al_10': US2.prioridad,
-            'documentación':US2.descripcionDone
+            'documentación': US2.descripcionDone
         })
         context = {
             'form': form,
@@ -148,14 +150,16 @@ class UserStoryUpdate(View):
             prioridad = form.cleaned_data['prioridad_1_al_10']
             documentacion = form.cleaned_data['documentación']
             if prioridad > 0 and prioridad < 11:
-                nuevoHistorial = HistorialUs(us=US2, descripcion=US2.descripcion, usuario=request.user,descripcionDone=documentacion)
-                nuevoHistorial.save()
+               # nuevoHistorial = HistorialUs(us=US2, descripcion=US2.descripcion, usuario=request.user,
+                #                             descripcionDone=documentacion)
+                #nuevoHistorial.save()
                 US2.descripcion = descripcion
                 US2.prioridad = prioridad
-                US2.descripcionDone=documentacion
+                US2.descripcionDone = documentacion
 
                 US2.save()
                 # Log activity
+                logHistorial.objects.create(usuario=request.user, us=US2, descripcion="Se ha modificado el user story")
                 SystemActivity.objects.create(usuario=request.user,
                                               descripcion="Ha modificado un user story en el proyecto " + proyecto.nombre)
                 messages.success(request, "User Story se actualizó Correctamente!")
@@ -207,8 +211,26 @@ class listarHistorial(View):
         }
         return render(request, 'UserStory/historial.html', context)
 
+class listarLogHistorial(View):
+    """
+    Vista basada en clase utilizada para mostrar el historial de cambio de un User Story
+    """
+
+    def get(self, request, slug, pk):
+        proyecto = Proyecto.objects.get(slug=slug)
+        ustory = UserStory.objects.get(pk=pk).logHistorial.all()
+        us = UserStory.objects.get(pk=pk)
+        context = {
+            'history': ustory,
+            'proyecto': proyecto,
+            'us': us
+        }
+        return render(request, 'UserStory/logHistorial.html', context)
 
 class RegistroDiario(View):
+    """
+    Vista basada en clase utilizada para el registro de las actividades diarias
+    """
 
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
@@ -239,11 +261,14 @@ class RegistroDiario(View):
         if form.is_valid():
             descripcion = form.cleaned_data['descripcion']
             horas = form.cleaned_data['horas']
+
             nuevoRegistro = RegistroActividadDiairia(us=US, descripcion=descripcion, hora=horas)
+
             nuevoRegistro.save()
             US.tiempoEnDesarrollo = US.tiempoEnDesarrollo + horas
             US.save()
             # Log activity
+            logHistorial.objects.create(usuario=request.user, us=US, descripcion="Se ha agregado un registro de actividad al user story" )
 
             SystemActivity.objects.create(usuario=request.user,
                                           descripcion="Ha realizado un registro de actividad en el user story " + US.descripcion + " del proyecto " + proyecto.nombre)
@@ -311,7 +336,8 @@ class RegistroDiarioUpdate(View):
             US.tiempoEnDesarrollo = US.tiempoEnDesarrollo + horas
             US.save()
             # Log activity
-
+            logHistorial.objects.create(usuario=request.user, us=US,
+                                        descripcion="Se ha actualizado un registro de actividad en el user story")
             SystemActivity.objects.create(usuario=request.user,
                                           descripcion="Ha realizado una actualización en el registro de actividad en el user story " + US.descripcion + " del proyecto " + proyecto.nombre)
             messages.success(request, "Registro se actualizó Correctamente!")
@@ -341,6 +367,8 @@ class RegistroDiarioDelete(View):
         US.tiempoEnDesarrollo = US.tiempoEnDesarrollo - registro.hora
         US.save()
         registro.delete()
+        logHistorial.objects.create(usuario=request.user, us=US,
+                                    descripcion="Se ha eliminado un registro de actividad en el user story")
         SystemActivity.objects.create(usuario=request.user,
                                       descripcion="Ha eliminado un registro de actividad en el user story " + US.descripcion + " del proyecto " + proyecto.nombre)
         messages.success(request, "Registro de actividad eliminado")
@@ -348,6 +376,10 @@ class RegistroDiarioDelete(View):
 
 
 class MarcarUSComoDoneView(View):
+    """
+    Vista basada en clase para la marcacion de un userstory como Done
+    """
+
     def get(self, request, slug, usPk, *args, **kwargs):
         user_story = UserStory.objects.get(pk=usPk)
         if not request.user.has_perms(('projectmanager.desarrollar_user_story',),
@@ -365,6 +397,10 @@ class MarcarUSComoDoneView(View):
 
 
 class RealizarQAUSView(View):
+    """
+    Vista basada en clase para la realizacion del control de calidad de un user story
+    """
+
     def get(self, request, slug, usPk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         user_story = UserStory.objects.get(pk=usPk)
