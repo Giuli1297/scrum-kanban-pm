@@ -32,73 +32,48 @@ right: 20px;
 }
 
 
-    	div{
-		border-radius: 5px;
+    div{
+		border-radius: 3px;
 	}
 	.contenedor{
 		background-color:#CCC;
 		width:100%;
 		height:50px;
     display:flex;
-    justify-content: space-around;
+    justify-content: space-between;
 	}
 	.contenido{
 		height:100px;
 		width:30%;
 		float:left;
-		margin: 15px;
+		margin: 1px;
 	}
 </style>
 {% endblock %}
-
-{% block body %}
-<div >
-
-
- <div class="col-md-12  "  >
-            <div class="card card-default" >
-              <div class="card-header">
-                <h3 class="card-title">
-                    Historial de User Story {{ us.descripcion }}
-                </h3>
-              </div>
-
-            <div class="contenedor">
-                <div class="contenido">
-                    <h4 class="card-title">
-                        Descripción
-                    </h4>
-                </div>
-                <div class="contenido">
-                    <h4 class="card-title">
-                        Fecha de modificación
-                    </h4>
-                </div>
-                <div class="contenido">
-                    <h4 class="card-title">
-                        Usuario
-                    </h4>
-                </div>
-            </div>
-              <!-- /.card-header -->
-              <div class="card-body">
-                <table class="table" id="data">
-                    {% for list in history %}
+{% block content %}
+    <table class="table">
+     <thead>
+                     <tr>
+                        <th scope="col">Descripcion</th>
+                        <th scope="col">Meta</th>
+                        <th scope="col">Fecha de modificación</th>
+                        <th scope="col">Usuario</th>
+                        </tr>
+                 </thead>
+  <tbody>
+      {% for list in history %}
                         <tr>
-
-                            <td class="contenido">{{ list.descripcion }}</td>
-                            <td class="contenido ">{{ list.fecha }}</td>
-                            <td class="contenido">{{ list.usuario }}</td>
+                            <td >{{ list.descripcion }}</td>
+                            <td >{{ list.descripcionDone }}</td>
+                            <td >{{ list.fecha }}</td>
+                            <td >{{ list.usuario }}</td>
                         </tr>
                     {% endfor %}
-
-                </table>
-              </div>
-
-            </div>
-          </div>
-<a href="{% url 'create_us' proyecto.slug %}" class="btn-flotante">Nuevo User Story</a>
-</div>
+  </tbody>
+</table>
 {% endblock %}
+
+
+
 
 

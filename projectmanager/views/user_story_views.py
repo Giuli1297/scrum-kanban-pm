@@ -81,8 +81,10 @@ class UserStoryCreate(View):
         if form.is_valid():
             descripcion = form.cleaned_data['descripción_de_user_story']
             prioridad = form.cleaned_data['prioridad_1_al_10']
+            documentacion = form.cleaned_data['documentación']
             if prioridad > 0 and prioridad < 11:
-                US = UserStory.objects.create(descripcion=descripcion, proyecto=proyecto, prioridad=prioridad)
+                US = UserStory.objects.create(descripcion=descripcion, proyecto=proyecto, prioridad=prioridad,
+                                              descripcionDone=documentacion)
                 US.save()
                 # Log activity
                 SystemActivity.objects.create(usuario=request.user,
@@ -116,7 +118,8 @@ class UserStoryUpdate(View):
             return redirect('create_us', slug=slug)
         form = ProyectoUs(initial={
             'descripción_de_user_story': US2.descripcion,
-            'prioridad_1_al_10': US2.prioridad
+            'prioridad_1_al_10': US2.prioridad,
+            'documentación': US2.descripcionDone
         })
         context = {
             'form': form,
@@ -144,11 +147,14 @@ class UserStoryUpdate(View):
         if form.is_valid():
             descripcion = form.cleaned_data['descripción_de_user_story']
             prioridad = form.cleaned_data['prioridad_1_al_10']
+            documentacion = form.cleaned_data['documentación']
             if prioridad > 0 and prioridad < 11:
-                nuevoHistorial = HistorialUs(us=US2, descripcion=US2.descripcion, usuario=request.user)
+                nuevoHistorial = HistorialUs(us=US2, descripcion=US2.descripcion, usuario=request.user,
+                                             descripcionDone=documentacion)
                 nuevoHistorial.save()
                 US2.descripcion = descripcion
                 US2.prioridad = prioridad
+                US2.descripcionDone = documentacion
 
                 US2.save()
                 # Log activity
@@ -350,6 +356,7 @@ class MarcarUSComoDoneView(View):
     """
     Vista basada en clase para la marcacion de un userstory como Done
     """
+
     def get(self, request, slug, usPk, *args, **kwargs):
         user_story = UserStory.objects.get(pk=usPk)
         if not request.user.has_perms(('projectmanager.desarrollar_user_story',),
@@ -370,6 +377,7 @@ class RealizarQAUSView(View):
     """
     Vista basada en clase para la realizacion del control de calidad de un user story
     """
+
     def get(self, request, slug, usPk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         user_story = UserStory.objects.get(pk=usPk)

@@ -59,6 +59,7 @@ class UserStory(models.Model):
     proyecto = models.ForeignKey(Proyecto, related_name='product_backlog', null=True, on_delete=models.CASCADE)
     sprint = models.ForeignKey(Sprint, related_name='sprint_backlog', null=True, blank=True, on_delete=models.SET_NULL)
     prioridad = models.IntegerField(default=1)
+    descripcionDone = models.TextField(blank=True, max_length=255)
 
     def historial(self):
         return HistorialUs.objects.filter(descripcion=self).order_by('version')
@@ -100,6 +101,7 @@ class HistorialUs(models.Model):
     descripcion = models.TextField(blank=True, max_length=255)
     fecha = models.DateTimeField(default=timezone.now)
     usuario = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
+    descripcionDone = models.TextField(blank=True, max_length=255)
 
     class Meta:
         unique_together = ('version', 'us')
