@@ -318,7 +318,7 @@ class EstimarSprint(View):
             diasEstimados = form.cleaned_data['dias_estimados']
             sprint.duracion_estimada_dias = diasEstimados
             sprint.fecha_inicio_desarrollo = timezone.now().date()
-            sprint.fecha_finalizacion = timezone.now().date()+ timedelta(days=diasEstimados)
+            sprint.fecha_finalizacion = timezone.now().date()+ timedelta(hours=diasEstimados*24 + 16)
 
             sprint.estado = 'conf3'
             sprint.save()

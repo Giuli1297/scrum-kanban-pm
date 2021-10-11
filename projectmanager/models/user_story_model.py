@@ -75,6 +75,34 @@ class UserStory(models.Model):
         return self.descripcion + self.proyecto.slug
 
 
+class logHistorial(models.Model):
+    """
+        Guarda y define el registro de las actividades realizadas en el user story
+
+        Atributos:
+
+        Parameters
+        ----------
+        us
+            identificador del user story
+
+        fecha
+            fecha en la que se realizo el cambio
+
+        descripcion
+            descripcion breve del cambio realizado.
+
+        usuaria
+            usuario que realiza el cambio
+        """
+    us = models.ForeignKey(UserStory, related_name='logHistorial', null=True, on_delete=models.CASCADE)
+    descripcion = models.TextField(blank=True, max_length=255)
+    fecha=models.DateTimeField(auto_now_add=True)
+    usuario=models.ForeignKey(User,null=True,on_delete=models.CASCADE)
+
+
+
+
 class HistorialUs(models.Model):
     """
         Guarda y define el registro de las actividades realizadas en el user story
@@ -99,9 +127,10 @@ class HistorialUs(models.Model):
 
     us = models.ForeignKey(UserStory, related_name='UsHistorial', null=True, on_delete=models.CASCADE)
     descripcion = models.TextField(blank=True, max_length=255)
-    fecha = models.DateTimeField(default=timezone.now)
-    usuario = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
+    fecha=models.DateTimeField(default=timezone.now)
+    usuario=models.ForeignKey(User,null=True,on_delete=models.CASCADE)
     descripcionDone = models.TextField(blank=True, max_length=255)
+
 
     class Meta:
         unique_together = ('version', 'us')
