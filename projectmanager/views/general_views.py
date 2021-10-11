@@ -75,8 +75,8 @@ class VerificationView(View):
             user.is_active = True
             user.save()
             # Log activity
-            #SystemActivity.objects.create(usuario=request.user,
-             #                             descripcion="Se ha verificado al usuario " + user.username)
+            SystemActivity.objects.create(usuario=User.objects.get(groups__in=Group.objects.filter(name="Administrador")),
+                                         descripcion="Se ha verificado al usuario " + user.username)
 
             messages.success(request, "Usuario " + user.username + " habilitado")
             return redirect('home')
