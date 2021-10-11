@@ -52,8 +52,8 @@ class TestForms(TestCase):
         """
         form = ProyectoUs(data={
             'descripción_de_user_story': 'crear un servidor',
-            'prioridad_1_al_10': 10,
-            'documentación': 'test'
+            'prioridad_1_al_10': 8,
+            'documentación': 'preparar las herramientas correspondientes'
         })
 
         self.assertTrue(form.is_valid())
