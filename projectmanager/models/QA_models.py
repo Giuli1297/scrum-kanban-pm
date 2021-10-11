@@ -5,6 +5,6 @@ from projectmanager.models import UserStory
 
 class QA(models.Model):
     user_story = models.OneToOneField(UserStory, related_name='QA', on_delete=models.CASCADE)
-    fecha = models.DateTimeField(auto_now_add=True)
+    fecha = models.DateTimeField(auto_now=True)
     comentario = models.TextField(max_length=255)
     aceptar = models.BooleanField(default=False)

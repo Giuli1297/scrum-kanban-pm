@@ -61,7 +61,6 @@ class UserStory(models.Model):
     prioridad = models.IntegerField(default=1)
     descripcionDone=models.TextField(blank=True,max_length=255)
 
-
     def historial(self):
         return HistorialUs.objects.filter(descripcion=self).order_by('version')
 
@@ -73,7 +72,7 @@ class UserStory(models.Model):
         ordering = ['-prioridad']
 
     def __str__(self):
-        return self.descripcion
+        return self.descripcion + self.proyecto.slug
 
 
 class HistorialUs(models.Model):
@@ -84,7 +83,6 @@ class HistorialUs(models.Model):
     fecha=models.DateTimeField(default=timezone.now)
     usuario=models.ForeignKey(User,null=True,on_delete=models.CASCADE)
     descripcionDone = models.TextField(blank=True, max_length=255)
-
 
 
     class Meta:
@@ -107,7 +105,8 @@ class UserInfo(models.Model):
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='info', primary_key=True)
     horasDisponibles = models.FloatField(default=40.0)
 
+
 class RegistroActividadDiairia(models.Model):
-    us=models.ForeignKey(UserStory,related_name='RegistroActividad',null=True,on_delete=models.CASCADE)
-    descripcion=models.TextField(blank=True,max_length=5000)
-    hora=models.FloatField(default=0)
+    us = models.ForeignKey(UserStory, related_name='RegistroActividad', null=True, on_delete=models.CASCADE)
+    descripcion = models.TextField(blank=True, max_length=5000)
+    hora = models.FloatField(default=0)
