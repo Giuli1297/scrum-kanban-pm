@@ -81,8 +81,10 @@ class UserStoryCreate(View):
         if form.is_valid():
             descripcion = form.cleaned_data['descripción_de_user_story']
             prioridad = form.cleaned_data['prioridad_1_al_10']
+            documentacion = form.cleaned_data['documentación']
             if prioridad > 0 and prioridad < 11:
-                US = UserStory.objects.create(descripcion=descripcion, proyecto=proyecto, prioridad=prioridad)
+                US = UserStory.objects.create(descripcion=descripcion, proyecto=proyecto, prioridad=prioridad,
+                                              descripcionDone=documentacion)
                 US.save()
                 # Log activity
                 SystemActivity.objects.create(usuario=request.user,
@@ -116,7 +118,8 @@ class UserStoryUpdate(View):
             return redirect('create_us', slug=slug)
         form = ProyectoUs(initial={
             'descripción_de_user_story': US2.descripcion,
-            'prioridad_1_al_10': US2.prioridad
+            'prioridad_1_al_10': US2.prioridad,
+            'documentación': US2.descripcionDone
         })
         context = {
             'form': form,
@@ -144,11 +147,14 @@ class UserStoryUpdate(View):
         if form.is_valid():
             descripcion = form.cleaned_data['descripción_de_user_story']
             prioridad = form.cleaned_data['prioridad_1_al_10']
+            documentacion = form.cleaned_data['documentación']
             if prioridad > 0 and prioridad < 11:
-                nuevoHistorial = HistorialUs(us=US2, descripcion=US2.descripcion, usuario=request.user)
+                nuevoHistorial = HistorialUs(us=US2, descripcion=US2.descripcion, usuario=request.user,
+                                             descripcionDone=documentacion)
                 nuevoHistorial.save()
                 US2.descripcion = descripcion
                 US2.prioridad = prioridad
+                US2.descripcionDone = documentacion
 
                 US2.save()
                 # Log activity
@@ -205,6 +211,9 @@ class listarHistorial(View):
 
 
 class RegistroDiario(View):
+    """
+    Vista basada en clase utilizada para el registro de las actividades diarias
+    """
 
     def get(self, request, slug, pk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
@@ -344,6 +353,10 @@ class RegistroDiarioDelete(View):
 
 
 class MarcarUSComoDoneView(View):
+    """
+    Vista basada en clase para la marcacion de un userstory como Done
+    """
+
     def get(self, request, slug, usPk, *args, **kwargs):
         user_story = UserStory.objects.get(pk=usPk)
         if not request.user.has_perms(('projectmanager.desarrollar_user_story',),
@@ -355,12 +368,16 @@ class MarcarUSComoDoneView(View):
         user_story.save()
         # Log activity
         SystemActivity.objects.create(usuario=request.user,
-                                      descripcion="Ha marcadoo como DONE es User Story " + str(user_story.pk))
+                                      descripcion="Ha marcado como DONE el User Story " + str(user_story.pk))
         messages.success(request, "User Story marcado como done")
         return redirect('proyecto_gestion', slug=slug)
 
 
 class RealizarQAUSView(View):
+    """
+    Vista basada en clase para la realizacion del control de calidad de un user story
+    """
+
     def get(self, request, slug, usPk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         user_story = UserStory.objects.get(pk=usPk)
@@ -405,7 +422,6 @@ class RealizarQAUSView(View):
                 user_story.estado = 'Release'
             else:
                 user_story.estado = 'To-Do'
-                current_site = get_current_site(request)
                 email_subject = 'User Story rechazado por QA.'
                 email = EmailMessage(
                     email_subject,
@@ -416,6 +432,10 @@ class RealizarQAUSView(View):
                 )
                 email.send(fail_silently=False)
             user_story.save()
+            # Log activity
+            SystemActivity.objects.create(usuario=request.user,
+                                          descripcion="Ha realizado un QA sobre el user story con pk =" + str(
+                                              user_story.pk))
             messages.success(request, "QA realizado")
             return redirect('proyecto_gestion', slug=slug)
         messages.error(request, 'Algo fue mal')

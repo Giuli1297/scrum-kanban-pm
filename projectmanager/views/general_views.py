@@ -75,13 +75,13 @@ class VerificationView(View):
             user.is_active = True
             user.save()
             # Log activity
-            SystemActivity.objects.create(usuario=request.user,
-                                          descripcion="Se ha verificado al usuario " + user.username)
+            #SystemActivity.objects.create(usuario=request.user,
+             #                             descripcion="Se ha verificado al usuario " + user.username)
 
             messages.success(request, "Usuario " + user.username + " habilitado")
             return redirect('home')
         except Exception as ex:
-            messages.error(request, "El usuario no pudo ser habilitado")
+            messages.error(request, "El usuario no pudo ser habilitado_exception")
             return redirect('home')
 
 
@@ -103,6 +103,9 @@ class HomePage(LoginRequiredMixin, TemplateView):
 
 
 class SystemActivityView(View):
+    """
+    Vista basada en clase para administras el registro de las actividades del sistema
+    """
     def get(self, request, *args, **kwargs):
         if not request.user.groups.filter(name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")

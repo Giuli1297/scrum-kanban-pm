@@ -43,6 +43,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from projectmanager.views.general_views import UserAccessMixin
 from django.utils import timezone
 import datetime
+import numpy
 
 
 class CargarSprintBacklog(View):
@@ -262,6 +263,9 @@ class PlanningPokerSMemberView(View):
 
 
 class EstimarSprint(View):
+    """
+    Vista basada en clase utilizada para la estimacion de sprint
+    """
     def get(self, request, slug, *args, **kwargs):
         form = EstimacionSprint()
         proyecto = Proyecto.objects.get(slug=slug)
@@ -314,6 +318,8 @@ class EstimarSprint(View):
             diasEstimados = form.cleaned_data['dias_estimados']
             sprint.duracion_estimada_dias = diasEstimados
             sprint.fecha_inicio_desarrollo = timezone.now().date()
+            sprint.fecha_finalizacion = timezone.now().date()+ timedelta(days=diasEstimados)
+
             sprint.estado = 'conf3'
             sprint.save()
             for us in sprint.sprint_backlog.all():
@@ -331,6 +337,9 @@ class EstimarSprint(View):
 
 
 class VerBurndownChartView(View):
+    """
+    Vista basada en clase para la visusalizacion del burndownchart
+    """
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         context = {
@@ -340,6 +349,9 @@ class VerBurndownChartView(View):
 
 
 class getDataForBurndownChart(View):
+    """
+    Vista basada en clase para la obtención de los datos para el burndownchart
+    """
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         horas_us_total = 0
@@ -349,9 +361,25 @@ class getDataForBurndownChart(View):
                 return redirect('proyecto_gestion', slug=slug)
             horas_us_total = horas_us_total + us.tiempoEstimado
         duracionSprint = proyecto.sprint_actual.duracion_estimada_dias
+        progreso = []
+        for x in range(0, duracionSprint):
+            progreso.append(horas_us_total)
+        for us in proyecto.sprint_actual.sprint_backlog.all():
+            if hasattr(us, 'QA') and us.QA.aceptar:
+                diferencia_dia = int(numpy.busday_count(proyecto.sprint_actual.fecha_inicio_desarrollo.date(),
+                                                        us.QA.fecha.date()))
+                for i in range(0, duracionSprint - diferencia_dia):
+                    if (duracionSprint - 1) - i != 0:
+                        progreso[(duracionSprint - 1) - i] -= us.tiempoEstimado
+        print(progreso)
+        passed_days = int(numpy.busday_count(proyecto.sprint_actual.fecha_inicio_desarrollo.date(),
+                                             datetime.datetime.now(timezone.utc).date()))
+        print(passed_days)
         data = {
             'dias_estimados': duracionSprint,
             'horas_us_totales': horas_us_total,
+            'progreso': progreso,
+            'passed_days': passed_days,
             'horas_desarrolladas': 0
         }
         return JsonResponse(data)

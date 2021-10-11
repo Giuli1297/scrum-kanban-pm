@@ -21,7 +21,11 @@ class UserWorkTime(models.Model):
     dias_laborales
         dias laborales, lunes a viernes
 
+    proyecto
+        proyecto en el que esta trabajando
 
+    desarrollador
+        identificador de desarrolador
 
     """
     DIAS_LABORALES = (

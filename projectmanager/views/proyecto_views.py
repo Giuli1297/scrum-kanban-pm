@@ -191,9 +191,22 @@ class AgregarSMember(UserAccessMixin, View):
             name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('/')
+        users_work = []
+        for user in User.objects.all():
+            if user.username != 'AnonymousUser' and user.username != 'admin':
+                x = {'usuario': user.username,
+                     'LUN': 0,
+                     'MAR': 0,
+                     'MIE': 0,
+                     'JUE': 0,
+                     'VIE': 0}
+                users_work.append(x)
+                for work in user.tiempos_de_trabajo.all():
+                    x[work.dia] += work.horas
         form = AgregarScrumMemberForm(slug=slug)
         context = {
             'proyecto': proyecto,
+            'users_work': users_work,
             'form': form
         }
         return render(request, 'proyecto/agregar_scrum_member.html', context)
