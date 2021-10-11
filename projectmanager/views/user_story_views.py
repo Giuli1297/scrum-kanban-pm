@@ -368,7 +368,7 @@ class MarcarUSComoDoneView(View):
         user_story.save()
         # Log activity
         SystemActivity.objects.create(usuario=request.user,
-                                      descripcion="Ha marcadoo como DONE es User Story " + str(user_story.pk))
+                                      descripcion="Ha marcado como DONE el User Story " + str(user_story.pk))
         messages.success(request, "User Story marcado como done")
         return redirect('proyecto_gestion', slug=slug)
 
@@ -422,7 +422,6 @@ class RealizarQAUSView(View):
                 user_story.estado = 'Release'
             else:
                 user_story.estado = 'To-Do'
-                current_site = get_current_site(request)
                 email_subject = 'User Story rechazado por QA.'
                 email = EmailMessage(
                     email_subject,
@@ -433,6 +432,10 @@ class RealizarQAUSView(View):
                 )
                 email.send(fail_silently=False)
             user_story.save()
+            # Log activity
+            SystemActivity.objects.create(usuario=request.user,
+                                          descripcion="Ha realizado un QA sobre el user story con pk =" + str(
+                                              user_story.pk))
             messages.success(request, "QA realizado")
             return redirect('proyecto_gestion', slug=slug)
         messages.error(request, 'Algo fue mal')
