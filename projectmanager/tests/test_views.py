@@ -7,7 +7,7 @@ from django.urls.base import reverse, resolve
 # Create your tests here.
 from allauth.account.forms import BaseSignupForm, ResetPasswordForm, SignupForm
 from ..models import Proyecto, Rol
-from projectmanager.forms import * 
+from projectmanager.forms import *
 import datetime
 
 
@@ -118,19 +118,19 @@ class TestViews(TestCase):
         """
         response = self.client.get(reverse('proyecto_agregar_sm', args=[self.proyecto.slug]))
         self.assertEquals(response.status_code, 200)
-        self.assertTemplateUsed(response, 'proyecto/agregar_scrum_member.html') 
-    
+        self.assertTemplateUsed(response, 'proyecto/agregar_scrum_member.html')
+
     def test_proyecto_verificar_estado_POST(self):
         """
         Prueba para verificar el estado imediatamente luego de haberse creado
         """
 
         User.objects.create(username='juan', email="juan@gmail.com", password="Probando1")
-        proyecto = Proyecto.objects.create(nombre='Proyecto test', descripcion="probando test", scrum_master=User.objects.get(username='juan'))
+        proyecto = Proyecto.objects.create(nombre='Proyecto test', descripcion="probando test",
+                                           scrum_master=User.objects.get(username='juan'))
 
         self.assertEquals(proyecto.nombre, "proyecto test")
-        self.assertEquals(proyecto.estado, "PEN") 
-    
+        self.assertEquals(proyecto.estado, "PEN")
 
     def test_proyecto_crear_user_story(self):
         """
@@ -145,7 +145,6 @@ class TestViews(TestCase):
         })
 
         self.assertEquals(response.status_code, 302)
-
 
     def test_proyecto_verificar_rol_crear_user_story(self):
         """
@@ -179,8 +178,7 @@ class TestViews(TestCase):
             'prioridad_1_al_10': '5'
         }, follow=True)
 
-        self.assertEquals(response.redirect_chain[0][0], '/proyectos/slug/gestionar/') 
-    
+        self.assertEquals(response.redirect_chain[0][0], '/proyectos/slug/gestionar/')
 
     def test_proyecto_visualizar_tablero_kanban_y_registro_actividades(self):
         """
@@ -189,58 +187,54 @@ class TestViews(TestCase):
         user = User.objects.create(username='juan', email="user1@gmail.com")
         self.proyecto.estado = 'ACT'
         self.proyecto.scrum_member.add(user)
-        self.proyecto.save() 
+        self.proyecto.save()
         sprint = Sprint.objects.create(proyecto=self.proyecto, proyecto_actual=self.proyecto)
-        #Registro actividades
-        userStory = UserStory.objects.create(descripcion="test1", prioridad=4, proyecto=self.proyecto, sprint=sprint, desarrolladorAsignado=user, tiempoEstimado=8)
+        # Registro actividades
+        userStory = UserStory.objects.create(descripcion="test1", prioridad=4, proyecto=self.proyecto, sprint=sprint,
+                                             desarrolladorAsignado=user, tiempoEstimado=8)
 
         self.assertEquals(userStory.desarrolladorAsignado.username, 'juan')
-        self.assertEquals(userStory.tiempoEstimado, 8) 
-    
+        self.assertEquals(userStory.tiempoEstimado, 8)
 
     def test_proyecto_user_story_cambio_estado(self):
         """
         Prueba de cambio de estado en un user story
         """
         userStory = UserStory.objects.create(
-            descripcion="userStory1", 
+            descripcion="userStory1",
             prioridad=5, proyecto=self.proyecto,
             estado="Nuevo"
         )
 
         userStory.estado = "Doing"
-        self.assertEquals(userStory.estado, "Doing") 
+        self.assertEquals(userStory.estado, "Doing")
 
         userStory.estado = "Done"
-        self.assertEquals(userStory.estado, "Done") 
-        
-    
+        self.assertEquals(userStory.estado, "Done")
 
     def test_proyecto_cargar_actividades_user_story(self):
         """
         Prueba cargar de actividades en un user story
         """
         userStory = userStory = UserStory.objects.create(
-            descripcion="Probar server", 
+            descripcion="Probar server",
             prioridad=5, proyecto=self.proyecto,
             estado="Doing"
         )
 
         historial = HistorialUs.objects.create(
-            descripcion="Testeo primera parte",
             us=userStory,
             usuario=self.admin
-        ) 
+        )
 
-        self.assertEquals(historial.descripcion, "Testeo primera parte") 
-    
+        self.assertEquals(historial.descripcion, "Testeo primera parte")
 
     def test_proyecto_habilitar_qa(self):
         """
         Prueba para habilitar qa de un user story
         """
         userStory = userStory = UserStory.objects.create(
-            descripcion="Probar server", 
+            descripcion="Probar server",
             prioridad=5, proyecto=self.proyecto,
             estado="QA"
         )
@@ -251,8 +245,7 @@ class TestViews(TestCase):
             aceptar=False
         )
 
-        self.assertFalse(qa.aceptar) 
-    
+        self.assertFalse(qa.aceptar)
 
     def test_proyecto_gestionar_horas_user_story(self):
         """
@@ -261,7 +254,7 @@ class TestViews(TestCase):
 
         user = User.objects.create(username='dev', email="user1@gmail.com")
         userStory = userStory = UserStory.objects.create(
-            descripcion="Probar server", 
+            descripcion="Probar server",
             prioridad=5, proyecto=self.proyecto,
             estado="Nuevo",
             desarrolladorAsignado=user,
@@ -269,18 +262,3 @@ class TestViews(TestCase):
         )
 
         self.assertEquals(userStory.tiempoEstimadoSMaster, 4)
-
-    
-
-
-
-
-       
-        
-
-        
-
-
-    
-
-

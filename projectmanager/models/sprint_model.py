@@ -36,8 +36,8 @@ class Sprint(models.Model):
     ESTADOS = (
         ('conf1', 'Carga de Sprint Backlog'),
         ('conf2', 'Planning Poker'),
-        ('conf3', 'Ultimas Configuraciones'),
-        ('en_desarrollo', 'Sprint en desarrollo'),
+        ('conf3', 'Sprint en desarrollo'),
+        ('fin', 'Sprint finalizado'),
     )
     fecha_inicio = models.DateTimeField(null=True, blank=True)
     fecha_inicio_desarrollo = models.DateTimeField(null=True, blank=True)

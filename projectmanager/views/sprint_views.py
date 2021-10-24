@@ -266,6 +266,7 @@ class EstimarSprint(View):
     """
     Vista basada en clase utilizada para la estimacion de sprint
     """
+
     def get(self, request, slug, *args, **kwargs):
         form = EstimacionSprint()
         proyecto = Proyecto.objects.get(slug=slug)
@@ -318,7 +319,7 @@ class EstimarSprint(View):
             diasEstimados = form.cleaned_data['dias_estimados']
             sprint.duracion_estimada_dias = diasEstimados
             sprint.fecha_inicio_desarrollo = timezone.now().date()
-            sprint.fecha_finalizacion = timezone.now().date()+ timedelta(hours=diasEstimados*24 + 16)
+            sprint.fecha_finalizacion = timezone.now().date() + timedelta(hours=diasEstimados * 24 + 16)
 
             sprint.estado = 'conf3'
             sprint.save()
@@ -340,6 +341,7 @@ class VerBurndownChartView(View):
     """
     Vista basada en clase para la visusalizacion del burndownchart
     """
+
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         context = {
@@ -352,6 +354,7 @@ class getDataForBurndownChart(View):
     """
     Vista basada en clase para la obtención de los datos para el burndownchart
     """
+
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         horas_us_total = 0
@@ -383,3 +386,38 @@ class getDataForBurndownChart(View):
             'horas_desarrolladas': 0
         }
         return JsonResponse(data)
+
+
+class FinalizarSprint(View):
+    """
+    Vista Basada en clase que finaliza un sprint;
+    """
+
+    def get(self, request, sprintPk, *args, **kwargs):
+        sprint = Sprint.objects.get(pk=sprintPk)
+        proyecto = sprint.proyecto_actual
+        if not request.user.has_perms(('projectmanager.finalizar_sprint',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('/')
+
+        if sprint.estado == 'conf3':
+            sprint.estado = 'fin'
+            nuevo_sprint = Sprint.objects.create(proyecto=proyecto)
+            sprint.proyecto_actual = None
+            sprint.fecha_finalizacion = timezone.now().date()
+            proyecto.sprint_actual = nuevo_sprint
+            nuevo_sprint.proyecto_actual = proyecto
+            proyecto.save()
+            sprint.save()
+            nuevo_sprint.save()
+        else:
+            messages.error(request, "Sprint no se puede finalizar")
+            return redirect('proyecto_gestion', slug=proyecto.slug)
+
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Se a finalizado sprint en proyecto " + proyecto.nombre)
+
+        messages.success(request, "Sprint Finalizado")
+        return redirect('proyecto_gestion', slug=proyecto.slug)
