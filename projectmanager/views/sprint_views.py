@@ -401,6 +401,9 @@ class FinalizarSprint(View):
             messages.error(request, "No tienes permisos para eso")
             return redirect('/')
 
+        #Logica de reinsercion de user storys.
+        #Guardado de burndown chart para cada sprint.
+
         if sprint.estado == 'conf3':
             sprint.estado = 'fin'
             nuevo_sprint = Sprint.objects.create(proyecto=proyecto)
