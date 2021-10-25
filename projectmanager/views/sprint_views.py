@@ -355,29 +355,31 @@ class getDataForBurndownChart(View):
     Vista basada en clase para la obtención de los datos para el burndownchart
     """
 
-    def get(self, request, slug, *args, **kwargs):
+    def get(self, request, slug, sprintPk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
+        sprint = Sprint.objects.get(pk=sprintPk)
         horas_us_total = 0
-        for us in proyecto.sprint_actual.sprint_backlog.all():
+        for us in sprint.sprint_backlog.all():
             if not us.tiempoEstimado > 0:
                 messages.error(request, "Faltan Estimar User Stories")
                 return redirect('proyecto_gestion', slug=slug)
             horas_us_total = horas_us_total + us.tiempoEstimado
-        duracionSprint = proyecto.sprint_actual.duracion_estimada_dias
+        duracionSprint = sprint.duracion_estimada_dias
         progreso = []
-        for x in range(0, duracionSprint):
+        for x in range(0, duracionSprint+1):
             progreso.append(horas_us_total)
-        for us in proyecto.sprint_actual.sprint_backlog.all():
+        for us in sprint.sprint_backlog.all().order_by('id'):
             if hasattr(us, 'QA') and us.QA.aceptar:
-                diferencia_dia = int(numpy.busday_count(proyecto.sprint_actual.fecha_inicio_desarrollo.date(),
+                diferencia_dia = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
                                                         us.QA.fecha.date()))
-                for i in range(0, duracionSprint - diferencia_dia):
+                for i in range(0, duracionSprint + 1 - diferencia_dia):
                     if (duracionSprint - 1) - i != 0:
-                        progreso[(duracionSprint - 1) - i] -= us.tiempoEstimado
-        print(progreso)
-        passed_days = int(numpy.busday_count(proyecto.sprint_actual.fecha_inicio_desarrollo.date(),
+                        progreso[(duracionSprint) - i] -= us.tiempoEstimado
+                        if progreso[(duracionSprint) - i] < 0:
+                            progreso[(duracionSprint) - i] = 0
+                        print(us.tiempoEstimado)
+        passed_days = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
                                              datetime.datetime.now(timezone.utc).date()))
-        print(passed_days)
         data = {
             'dias_estimados': duracionSprint,
             'horas_us_totales': horas_us_total,
@@ -424,3 +426,18 @@ class FinalizarSprint(View):
 
         messages.success(request, "Sprint Finalizado")
         return redirect('proyecto_gestion', slug=proyecto.slug)
+
+
+class VerSprintDetail(View):
+
+    def get(self, request, sprintPk, *args, **kwargs):
+        sprint = Sprint.objects.get(pk=sprintPk)
+        proyecto = sprint.proyecto_actual
+        if not request.user.has_perms(('projectmanager.finalizar_sprint',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('/')
+        context = {
+            'sprint': Sprint.objects.get(pk=sprintPk)
+        }
+        return render(request, 'sprint/sprint_detail.html', context)
