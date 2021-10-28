@@ -376,10 +376,9 @@ class getDataForBurndownChart(View):
                 diferencia_dia = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
                                                         us.QA.fecha.date()))
                 for i in range(0, duracionSprint + 1 - diferencia_dia):
-                    if (duracionSprint - 1) - i != 0:
-                        progreso[(duracionSprint) - i] -= us.tiempoEstimado
-                        if progreso[(duracionSprint) - i] < 0:
-                            progreso[(duracionSprint) - i] = 0
+                    progreso[(duracionSprint) - i] -= us.tiempoEstimado
+                    if progreso[(duracionSprint) - i] < 0:
+                        progreso[(duracionSprint) - i] = 0
         passed_days = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
                                              datetime.datetime.now(timezone.utc).date()))
         if sprint.estado == 'fin':
@@ -395,6 +394,23 @@ class getDataForBurndownChart(View):
         return JsonResponse(data)
 
 
+class ConfirmarFinalizarSprint(View):
+    """
+    Vista basada en clase que sirve una pagina de confirmacion para terminar sprint;
+    """
+    def get(self, request, sprintPk, *args, **kwargs):
+        sprint = Sprint.objects.get(pk=sprintPk)
+        proyecto = sprint.proyecto_actual
+        if not request.user.has_perms(('projectmanager.finalizar_sprint',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('/')
+        context = {
+            'sprint': Sprint.objects.get(pk=sprintPk)
+        }
+        return render(request, 'sprint/sprint_confirmar_finalizar.html', context)
+
+
 class FinalizarSprint(View):
     """
     Vista Basada en clase que finaliza un sprint;
@@ -408,8 +424,6 @@ class FinalizarSprint(View):
             messages.error(request, "No tienes permisos para eso")
             return redirect('/')
 
-        #Logica de reinsercion de user storys.
-        #Guardado de burndown chart para cada sprint.
         horas_us_total = 0
         for us in sprint.sprint_backlog.all():
             horas_us_total = horas_us_total + us.tiempoEstimado
@@ -422,10 +436,9 @@ class FinalizarSprint(View):
                 diferencia_dia = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
                                                         us.QA.fecha.date()))
                 for i in range(0, duracionSprint + 1 - diferencia_dia):
-                    if (duracionSprint - 1) - i != 0:
-                        progreso[(duracionSprint) - i] -= us.tiempoEstimado
-                        if progreso[(duracionSprint) - i] < 0:
-                            progreso[(duracionSprint) - i] = 0
+                    progreso[(duracionSprint) - i] -= us.tiempoEstimado
+                    if progreso[(duracionSprint) - i] < 0:
+                        progreso[(duracionSprint) - i] = 0
         sprint.saved_us_progress = progreso
         sprint.saved_horas_us_total = horas_us_total
         sprint.save()

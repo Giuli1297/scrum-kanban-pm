@@ -256,6 +256,6 @@ def get_list_users_group(request):
         users = User.objects.filter(groups=body["data"])
         user_list = []
         for user in users:
-            user_list.append(user.username);
+            user_list.append(user.username)
         return JsonResponse({"status": 200, "usuarios": user_list})
     return JsonResponse({"status": 400})

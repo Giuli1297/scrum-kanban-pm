@@ -251,7 +251,7 @@
         <div class="col-md-10"></div>
         <div class="col-md-2">
             <a class="mb-3 btn btn-dark"
-                href="{% url 'finalizar_sprint' sprintPk=proyecto.sprint_actual.pk %}">
+                href="{% url 'confirmar_finalizar_sprint' sprintPk=proyecto.sprint_actual.pk %}">
                 Finalizar Sprint
             </a>
         </div>
@@ -323,7 +323,7 @@
                     <h5 class="card-title">Sprint {{ forloop.counter }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">Fecha Inicio: {{ sprint.fecha_inicio_desarrollo|date:"M d, Y" }}</h6>
                     <h6 class="card-subtitle mb-2 text-muted">Fecha Fin: {{ sprint.fecha_finalizacion|date:"M d, Y" }}</h6>
-                    <p class="card-text">Descripcion Final o Algo</p>
+{#                    <p class="card-text">Descripcion Final o Algo</p>#}
                     <a href="{% url 'ver_sprint_detail' sprint.pk %}" class="card-link">Ver en detalle</a>
                   </div>
                 </div>
@@ -333,8 +333,9 @@
 </div>
 
 
+
 {% block script %}
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
  <script >
         var iDia;
         var iMes;

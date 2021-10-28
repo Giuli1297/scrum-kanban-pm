@@ -55,6 +55,8 @@ urlpatterns = [
     path('planningPoker/<uidb64>/<token>/<int:usPk>/', views.PlanningPokerSMemberView.as_view(),
          name='planning_poker_smember'),
     path('planningPoker/<slug:slug>/estimarSprint/', views.EstimarSprint.as_view(), name='estimar_sprint'),
+    path('proyectos/confirmFinalizarSprint/<int:sprintPk>/', views.ConfirmarFinalizarSprint.as_view(),
+         name='confirmar_finalizar_sprint'),
     path('proyectos/finalizarSprint/<int:sprintPk>/', views.FinalizarSprint.as_view(), name='finalizar_sprint'),
     path('proyectos/sprint/<int:sprintPk>/', views.VerSprintDetail.as_view(), name='ver_sprint_detail'),
 
