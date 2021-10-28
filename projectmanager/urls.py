@@ -59,6 +59,7 @@ urlpatterns = [
          name='confirmar_finalizar_sprint'),
     path('proyectos/finalizarSprint/<int:sprintPk>/', views.FinalizarSprint.as_view(), name='finalizar_sprint'),
     path('proyectos/sprint/<int:sprintPk>/', views.VerSprintDetail.as_view(), name='ver_sprint_detail'),
+    path('proyectos/extenderSprint/<slug:slug>/', views.ExtenderSprint.as_view(), name='extender_sprint'),
 
     # URLS DE KANBAN
     path('kanban/<int:usPk>/seleccionarpararealizar/', views.SeleccionarParaRealizarUserStory.as_view(),
