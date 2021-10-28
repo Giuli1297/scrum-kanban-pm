@@ -42,7 +42,9 @@ urlpatterns = [
     path('proyectos/<slug:slug>/createUs/', views.UserStoryCreate.as_view(), name='create_us'),
     path('proyectos/<slug:slug>/updateUs/<int:pk>/', views.UserStoryUpdate.as_view(), name='update_us'),
     path('proyectos/<slug:slug>/eliminarUs/<int:pk>/', views.EliminarUs.as_view(), name='elimnar_us'),
-    path('proyectos/<slug:slug>/historial/<int:pk>/', views.listarLogHistorial.as_view(), name='historial_us'),
+    path('proyectos/<slug:slug>/historial/<int:pk>/', views.listarHistorial.as_view(), name='historial_us'),
+    path('proyectos/<slug:slug>/revertir/<int:pk>/', views.RevertirHistorial.as_view(), name='revertir_us'),
+    #path('proyectos/<slug:slug>/historial/<int:pk>/', views.listarLogHistorial.as_view(), name='historial_us'),
 
     # URLS DE SPRINTS
     path('proyectos/cargarSprintBacklog/<int:usPk>/<int:sprintPk>/', views.CargarSprintBacklog.as_view(),

@@ -67,10 +67,12 @@ right: 20px;
                             <td >{{ list.descripcionDone }}</td>
                             <td >{{ list.fecha }}</td>
                             <td >{{ list.usuario }}</td>
+                            <td> <a class="btn btn-primary btn-success " href="{% url 'revertir_us'  slug=proyecto.slug pk=list.pk %}" >Revertir</a></td>
                         </tr>
                     {% endfor %}
   </tbody>
 </table>
+    <a href="{% url 'create_us' proyecto.slug %}" class="btn-flotante">VOLVER A SPRINT</a>
 {% endblock %}
 
 

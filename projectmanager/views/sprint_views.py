@@ -1,5 +1,5 @@
-from datetime import timedelta
-
+from datetime import timedelta,date,datetime
+import  pandas as pd
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -318,9 +318,13 @@ class EstimarSprint(View):
             diasEstimados = form.cleaned_data['dias_estimados']
             sprint.duracion_estimada_dias = diasEstimados
             sprint.fecha_inicio_desarrollo = timezone.now().date()
-            sprint.fecha_finalizacion = timezone.now().date()+ timedelta(hours=diasEstimados*24 + 16)
+            fecha=numpy.busday_offset(sprint.fecha_inicio_desarrollo,diasEstimados,roll='backward')
+            ts=pd.to_datetime(str(fecha))#hace conversion de tipo numpy a datetime str
+            d=ts.strftime('%Y-%m-%d')#de str pasa a datime
 
+            sprint.fecha_finalizacion =  d
             sprint.estado = 'conf3'
+
             sprint.save()
             for us in sprint.sprint_backlog.all():
                 us.estado = 'To-Do'

@@ -152,16 +152,17 @@ class UserStoryUpdate(View):
             if prioridad > 0 and prioridad < 11:
                # nuevoHistorial = HistorialUs(us=US2, descripcion=US2.descripcion, usuario=request.user,
                 #                             descripcionDone=documentacion)
-                #nuevoHistorial.save()
+
+                # Log activity
+                logHistorial.objects.create(usuario=request.user, us=US2, descripcion="Se ha modificado el user story")
+                HistorialUs.objects.create(idUs=US2.pk ,usuario=request.user, us=US2, descripcion=US2.descripcion,descripcionDone=US2.descripcionDone,prioridad=US2.prioridad)
+                SystemActivity.objects.create(usuario=request.user,
+                                              descripcion="Ha modificado un user story en el proyecto " + proyecto.nombre)
+               # nuevoHistorial.save()
                 US2.descripcion = descripcion
                 US2.prioridad = prioridad
                 US2.descripcionDone = documentacion
-
                 US2.save()
-                # Log activity
-                logHistorial.objects.create(usuario=request.user, us=US2, descripcion="Se ha modificado el user story")
-                SystemActivity.objects.create(usuario=request.user,
-                                              descripcion="Ha modificado un user story en el proyecto " + proyecto.nombre)
                 messages.success(request, "User Story se actualizó Correctamente!")
             else:
                 messages.error(request, "Prioridad invalida, fuera del rango 1 al 10")
@@ -187,12 +188,35 @@ class EliminarUs(View):
         if US.desarrolladorAsignado:
             messages.error(request, 'User Story en sprint')
             return redirect('create_us', slug=slug)
+        #HistorialUs.objects.create(id=US.pk ,usuario=request.user, us=US, descripcion=US.descripcion,descripcionDone=US.descripcionDone)
         US.delete()
         # Log activity
         SystemActivity.objects.create(usuario=request.user,
                                       descripcion="Ha eliminado un user story en el proyecto " + proyecto.nombre)
         messages.success(request, "User Story Eliminado")
         return redirect('create_us', slug=slug)
+
+
+
+class RevertirHistorial(View):
+
+    def get(self,request,slug,pk,*args,**kwargs):
+
+        proyecto=Proyecto.objects.get(slug=slug)
+        USH=HistorialUs.objects.get(pk=pk)
+        print("aaaaaaaaaaa",USH)
+        US=UserStory.objects.get(pk=USH.idUs)
+
+        US.descripcion=USH.descripcion
+        US.descripcionDone=USH.descripcionDone
+        US.prioridad=USH.prioridad
+        US.save()
+        HistorialUs.objects.filter(fecha__gt=USH.fecha).delete()
+        USH.delete()
+        return redirect('create_us', slug=slug)
+
+
+
 
 
 class listarHistorial(View):
