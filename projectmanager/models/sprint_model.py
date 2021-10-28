@@ -6,6 +6,7 @@ from django.template.defaultfilters import slugify
 from django.core.validators import MinValueValidator, MaxValueValidator
 from guardian.shortcuts import assign_perm
 from django.contrib.auth.models import Permission
+from django.contrib.postgres.fields import ArrayField
 from .proyecto_model import Proyecto
 
 
@@ -49,6 +50,8 @@ class Sprint(models.Model):
     proyecto = models.ForeignKey(Proyecto, related_name="registro_sprints", on_delete=models.CASCADE, null=True)
     proyecto_actual = models.OneToOneField(Proyecto, related_name="sprint_actual", blank=True, null=True,
                                            on_delete=models.CASCADE)
+    saved_us_progress = ArrayField(models.IntegerField(), null=True, blank=True)
+    saved_horas_us_total = models.IntegerField(null=True, blank=True)
 
     class Meta:
         verbose_name = 'Sprint'

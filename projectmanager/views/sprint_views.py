@@ -217,7 +217,9 @@ class PlanningPokerSMemberView(View):
                 return redirect('home')
 
             ustory = UserStory.objects.get(pk=usPk)
-            if ustory.tiempoEstimado != 0:
+            ustory.tiempoEstimado = 0
+            ustory.save()
+            if ustory.tiempoEstimado != 0 and ustory.tiempoEstimado is not None:
                 messages.error(request, 'Este User Story ya a sido estimado')
                 return redirect('home')
             form = PlanningPokerSMemberForm()
@@ -228,6 +230,7 @@ class PlanningPokerSMemberView(View):
             return render(request, 'sprint/planning_poker_scrummember.html', context)
         except Exception as ex:
             messages.error(request, "Error de Token")
+            print(ex)
             return redirect('home')
 
     def post(self, request, uidb64, token, usPk, *args, **kwargs):
@@ -377,9 +380,11 @@ class getDataForBurndownChart(View):
                         progreso[(duracionSprint) - i] -= us.tiempoEstimado
                         if progreso[(duracionSprint) - i] < 0:
                             progreso[(duracionSprint) - i] = 0
-                        print(us.tiempoEstimado)
         passed_days = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
                                              datetime.datetime.now(timezone.utc).date()))
+        if sprint.estado == 'fin':
+            progreso = sprint.saved_us_progress
+            horas_us_total = sprint.saved_horas_us_total
         data = {
             'dias_estimados': duracionSprint,
             'horas_us_totales': horas_us_total,
@@ -405,9 +410,32 @@ class FinalizarSprint(View):
 
         #Logica de reinsercion de user storys.
         #Guardado de burndown chart para cada sprint.
-
+        horas_us_total = 0
+        for us in sprint.sprint_backlog.all():
+            horas_us_total = horas_us_total + us.tiempoEstimado
+        duracionSprint = sprint.duracion_estimada_dias
+        progreso = []
+        for x in range(0, duracionSprint + 1):
+            progreso.append(horas_us_total)
+        for us in sprint.sprint_backlog.all().order_by('id'):
+            if hasattr(us, 'QA') and us.QA.aceptar:
+                diferencia_dia = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
+                                                        us.QA.fecha.date()))
+                for i in range(0, duracionSprint + 1 - diferencia_dia):
+                    if (duracionSprint - 1) - i != 0:
+                        progreso[(duracionSprint) - i] -= us.tiempoEstimado
+                        if progreso[(duracionSprint) - i] < 0:
+                            progreso[(duracionSprint) - i] = 0
+        sprint.saved_us_progress = progreso
+        sprint.saved_horas_us_total = horas_us_total
+        sprint.save()
         if sprint.estado == 'conf3':
             sprint.estado = 'fin'
+            for user_story in sprint.sprint_backlog.all():
+                if user_story.estado != 'Release':
+                    user_story.estado = 'no-terminado'
+                    user_story.desarrolladorAsignado = None
+                    user_story.save()
             nuevo_sprint = Sprint.objects.create(proyecto=proyecto)
             sprint.proyecto_actual = None
             sprint.fecha_finalizacion = timezone.now().date()
