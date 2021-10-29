@@ -213,10 +213,13 @@ class ProyectoUs(forms.Form):
         Clase formulario para la creacion de User Stories de proyecto
     """
     descripción_de_user_story = forms.CharField(max_length=100, widget=forms.Textarea(attrs={
-        'class': 'form-control'
+        'class': 'form-control',
+        'rows': 4
     }))
-    documentación =  forms.CharField(label='Requisitos para pasar a Done',max_length=100, widget=forms.Textarea(attrs={
-        'class': 'form-control'
+    documentación =  forms.CharField(label='Describa requisitos para pasar a Done',max_length=100, widget=forms.Textarea(attrs={
+        'class': 'form-control',
+        'rows': 4,
+        'placeholder': 'Cuando el user story esta considerado done?'
     }))
     prioridad_1_al_10 = forms.IntegerField(widget=forms.NumberInput(attrs={
         'class': 'form-control'

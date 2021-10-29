@@ -57,12 +57,16 @@ urlpatterns = [
     path('planningPoker/<uidb64>/<token>/<int:usPk>/', views.PlanningPokerSMemberView.as_view(),
          name='planning_poker_smember'),
     path('planningPoker/<slug:slug>/estimarSprint/', views.EstimarSprint.as_view(), name='estimar_sprint'),
+    path('proyectos/confirmFinalizarSprint/<int:sprintPk>/', views.ConfirmarFinalizarSprint.as_view(),
+         name='confirmar_finalizar_sprint'),
+    path('proyectos/finalizarSprint/<int:sprintPk>/', views.FinalizarSprint.as_view(), name='finalizar_sprint'),
+    path('proyectos/sprint/<int:sprintPk>/', views.VerSprintDetail.as_view(), name='ver_sprint_detail'),
 
     # URLS DE KANBAN
     path('kanban/<int:usPk>/seleccionarpararealizar/', views.SeleccionarParaRealizarUserStory.as_view(),
          name='seleccionar_p_realizar_user_story'),
-    path('proyectos/<slug:slug>/burndownchart/', views.VerBurndownChartView.as_view(), name='ver_burndownchart_actual'),
-    path('proyectos/<slug:slug>/dataBurndownChart/', views.getDataForBurndownChart.as_view(),
+    path('proyectos/<slug:slug>/burndownchart/<int:sprintPk>/', views.VerBurndownChartView.as_view(), name='ver_burndownchart_actual'),
+    path('proyectos/<slug:slug>/dataBurndownChart/<int:sprintPk>/', views.getDataForBurndownChart.as_view(),
          name='data_burndownchart'),
     path('proyectos/<slug:slug>/RegistroActividad/<int:pk>/', views.RegistroDiario.as_view(),
          name='registro_actividad'),

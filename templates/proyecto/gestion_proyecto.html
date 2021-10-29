@@ -105,7 +105,8 @@
               </thead>
               <tbody>
                 {% for ustory in proyecto.product_backlog.all %}
-                    {% if not ustory.sprint != null %}
+                    {% if ustory.estado == 'Nuevo' or ustory.estado == 'no-terminado' %}
+                        {% if ustory.sprint == null or ustory.sprint != proyecto.sprint_actual %}
                         <tr>
                           <td>{{ ustory.descripcion }}</td>
                           <td>{{ ustory.estado }}</td>
@@ -118,6 +119,7 @@
                             </td>
                         {% endif %}
                         </tr>
+                        {% endif %}
                     {% endif %}
                 {% empty %}
                     <div class="mb-2">

@@ -155,15 +155,21 @@ class UserStoryUpdate(View):
 
                 # Log activity
                 logHistorial.objects.create(usuario=request.user, us=US2, descripcion="Se ha modificado el user story")
-                HistorialUs.objects.create(idUs=US2.pk ,usuario=request.user, us=US2, descripcion=US2.descripcion,descripcionDone=US2.descripcionDone,prioridad=US2.prioridad)
                 SystemActivity.objects.create(usuario=request.user,
                                               descripcion="Ha modificado un user story en el proyecto " + proyecto.nombre)
-               # nuevoHistorial.save()
-                US2.descripcion = descripcion
-                US2.prioridad = prioridad
-                US2.descripcionDone = documentacion
-                US2.save()
-                messages.success(request, "User Story se actualizó Correctamente!")
+
+
+
+                if US2.descripcion!=descripcion or US2.descripcionDone!=documentacion or US2.prioridad!=prioridad:
+
+                    HistorialUs.objects.create(idUs=US2.pk, usuario=request.user, us=US2, descripcion=US2.descripcion,
+                                       descripcionDone=US2.descripcionDone, prioridad=US2.prioridad)
+                    # nuevoHistorial.save()
+                    US2.descripcion = descripcion
+                    US2.prioridad = prioridad
+                    US2.descripcionDone = documentacion
+                    US2.save()
+                    messages.success(request, "User Story se actualizó Correctamente!")
             else:
                 messages.error(request, "Prioridad invalida, fuera del rango 1 al 10")
 

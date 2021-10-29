@@ -219,7 +219,7 @@ class TestUrlsUserStory(SimpleTestCase):
         Test para verificar que se carga correctamente la vista correspondiente para historial user story
         """
         url = reverse('historial_us', args=['slug', 1])
-        self.assertEquals(resolve(url).func.view_class, views.listarHistorial)
+        self.assertEquals(resolve(url).func.view_class, views.listarLogHistorial)
 
 
 class TestUrlsSprint(SimpleTestCase):

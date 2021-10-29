@@ -247,7 +247,15 @@
 
         </div>
     </div>
-
+    <div class="row mt-2">
+        <div class="col-md-10"></div>
+        <div class="col-md-2">
+            <a class="mb-3 btn btn-dark"
+                href="{% url 'confirmar_finalizar_sprint' sprintPk=proyecto.sprint_actual.pk %}">
+                Finalizar Sprint
+            </a>
+        </div>
+    </div>
     <div class="row m-3"><h2>Información del avance del Sprint</h2>
         <hr/>
     </div>
@@ -294,7 +302,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <a class="btn btn-dark m-3" href="{% url 'ver_burndownchart_actual' proyecto.slug %}">Ver Burndown Chart</a>
+            <a class="btn btn-dark m-3" href="{% url 'ver_burndownchart_actual' slug=proyecto.slug sprintPk=proyecto.sprint_actual.pk %}">Ver Burndown Chart</a>
         </div>
     {% endif %}
 
@@ -302,10 +310,32 @@
 
 
 {% endif %}
+<div class="row mt-4"></div>
+<hr/>
+<hr/>
+<div class="row mt-1"><h4>Registro de Sprints</h4></div>
+<div class="row mt-3">
+    {% for sprint in proyecto.registro_sprints.all %}
+        {% if sprint != proyecto.sprint_actual %}
+            <div class="row">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Sprint {{ forloop.counter }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">Fecha Inicio: {{ sprint.fecha_inicio_desarrollo|date:"M d, Y" }}</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">Fecha Fin: {{ sprint.fecha_finalizacion|date:"M d, Y" }}</h6>
+{#                    <p class="card-text">Descripcion Final o Algo</p>#}
+                    <a href="{% url 'ver_sprint_detail' sprint.pk %}" class="card-link">Ver en detalle</a>
+                  </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
 
 
 {% block script %}
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
  <script >
         var iDia;
         var iMes;

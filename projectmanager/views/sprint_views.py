@@ -217,7 +217,9 @@ class PlanningPokerSMemberView(View):
                 return redirect('home')
 
             ustory = UserStory.objects.get(pk=usPk)
-            if ustory.tiempoEstimado != 0:
+            ustory.tiempoEstimado = 0
+            ustory.save()
+            if ustory.tiempoEstimado != 0 and ustory.tiempoEstimado is not None:
                 messages.error(request, 'Este User Story ya a sido estimado')
                 return redirect('home')
             form = PlanningPokerSMemberForm()
@@ -228,6 +230,7 @@ class PlanningPokerSMemberView(View):
             return render(request, 'sprint/planning_poker_scrummember.html', context)
         except Exception as ex:
             messages.error(request, "Error de Token")
+            print(ex)
             return redirect('home')
 
     def post(self, request, uidb64, token, usPk, *args, **kwargs):
@@ -266,6 +269,7 @@ class EstimarSprint(View):
     """
     Vista basada en clase utilizada para la estimacion de sprint
     """
+
     def get(self, request, slug, *args, **kwargs):
         form = EstimacionSprint()
         proyecto = Proyecto.objects.get(slug=slug)
@@ -320,7 +324,7 @@ class EstimarSprint(View):
             sprint.fecha_inicio_desarrollo = timezone.now().date()
             fecha=numpy.busday_offset(sprint.fecha_inicio_desarrollo,diasEstimados,roll='backward')
             ts=pd.to_datetime(str(fecha))#hace conversion de tipo numpy a datetime str
-            d=ts.strftime('%Y-%m-%d')#de str pasa a datime
+            d=ts.strftime('%Y-%m-%d')#de str pasa a datetime
 
             sprint.fecha_finalizacion =  d
             sprint.estado = 'conf3'
@@ -344,6 +348,7 @@ class VerBurndownChartView(View):
     """
     Vista basada en clase para la visusalizacion del burndownchart
     """
+
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         context = {
@@ -356,29 +361,33 @@ class getDataForBurndownChart(View):
     """
     Vista basada en clase para la obtención de los datos para el burndownchart
     """
-    def get(self, request, slug, *args, **kwargs):
+
+    def get(self, request, slug, sprintPk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
+        sprint = Sprint.objects.get(pk=sprintPk)
         horas_us_total = 0
-        for us in proyecto.sprint_actual.sprint_backlog.all():
+        for us in sprint.sprint_backlog.all():
             if not us.tiempoEstimado > 0:
                 messages.error(request, "Faltan Estimar User Stories")
                 return redirect('proyecto_gestion', slug=slug)
             horas_us_total = horas_us_total + us.tiempoEstimado
-        duracionSprint = proyecto.sprint_actual.duracion_estimada_dias
+        duracionSprint = sprint.duracion_estimada_dias
         progreso = []
-        for x in range(0, duracionSprint):
+        for x in range(0, duracionSprint+1):
             progreso.append(horas_us_total)
-        for us in proyecto.sprint_actual.sprint_backlog.all():
+        for us in sprint.sprint_backlog.all().order_by('id'):
             if hasattr(us, 'QA') and us.QA.aceptar:
-                diferencia_dia = int(numpy.busday_count(proyecto.sprint_actual.fecha_inicio_desarrollo.date(),
+                diferencia_dia = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
                                                         us.QA.fecha.date()))
-                for i in range(0, duracionSprint - diferencia_dia):
-                    if (duracionSprint - 1) - i != 0:
-                        progreso[(duracionSprint - 1) - i] -= us.tiempoEstimado
-        print(progreso)
-        passed_days = int(numpy.busday_count(proyecto.sprint_actual.fecha_inicio_desarrollo.date(),
+                for i in range(0, duracionSprint + 1 - diferencia_dia):
+                    progreso[(duracionSprint) - i] -= us.tiempoEstimado
+                    if progreso[(duracionSprint) - i] < 0:
+                        progreso[(duracionSprint) - i] = 0
+        passed_days = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
                                              datetime.datetime.now(timezone.utc).date()))
-        print(passed_days)
+        if sprint.estado == 'fin':
+            progreso = sprint.saved_us_progress
+            horas_us_total = sprint.saved_horas_us_total
         data = {
             'dias_estimados': duracionSprint,
             'horas_us_totales': horas_us_total,
@@ -387,3 +396,93 @@ class getDataForBurndownChart(View):
             'horas_desarrolladas': 0
         }
         return JsonResponse(data)
+
+
+class ConfirmarFinalizarSprint(View):
+    """
+    Vista basada en clase que sirve una pagina de confirmacion para terminar sprint;
+    """
+    def get(self, request, sprintPk, *args, **kwargs):
+        sprint = Sprint.objects.get(pk=sprintPk)
+        proyecto = sprint.proyecto_actual
+        if not request.user.has_perms(('projectmanager.finalizar_sprint',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('/')
+        context = {
+            'sprint': Sprint.objects.get(pk=sprintPk)
+        }
+        return render(request, 'sprint/sprint_confirmar_finalizar.html', context)
+
+
+class FinalizarSprint(View):
+    """
+    Vista Basada en clase que finaliza un sprint;
+    """
+
+    def get(self, request, sprintPk, *args, **kwargs):
+        sprint = Sprint.objects.get(pk=sprintPk)
+        proyecto = sprint.proyecto_actual
+        if not request.user.has_perms(('projectmanager.finalizar_sprint',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('/')
+
+        horas_us_total = 0
+        for us in sprint.sprint_backlog.all():
+            horas_us_total = horas_us_total + us.tiempoEstimado
+        duracionSprint = sprint.duracion_estimada_dias
+        progreso = []
+        for x in range(0, duracionSprint + 1):
+            progreso.append(horas_us_total)
+        for us in sprint.sprint_backlog.all().order_by('id'):
+            if hasattr(us, 'QA') and us.QA.aceptar:
+                diferencia_dia = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
+                                                        us.QA.fecha.date()))
+                for i in range(0, duracionSprint + 1 - diferencia_dia):
+                    progreso[(duracionSprint) - i] -= us.tiempoEstimado
+                    if progreso[(duracionSprint) - i] < 0:
+                        progreso[(duracionSprint) - i] = 0
+        sprint.saved_us_progress = progreso
+        sprint.saved_horas_us_total = horas_us_total
+        sprint.save()
+        if sprint.estado == 'conf3':
+            sprint.estado = 'fin'
+            for user_story in sprint.sprint_backlog.all():
+                if user_story.estado != 'Release':
+                    user_story.estado = 'no-terminado'
+                    user_story.desarrolladorAsignado = None
+                    user_story.save()
+            nuevo_sprint = Sprint.objects.create(proyecto=proyecto)
+            sprint.proyecto_actual = None
+            sprint.fecha_finalizacion = timezone.now().date()
+            proyecto.sprint_actual = nuevo_sprint
+            nuevo_sprint.proyecto_actual = proyecto
+            proyecto.save()
+            sprint.save()
+            nuevo_sprint.save()
+        else:
+            messages.error(request, "Sprint no se puede finalizar")
+            return redirect('proyecto_gestion', slug=proyecto.slug)
+
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Se a finalizado sprint en proyecto " + proyecto.nombre)
+
+        messages.success(request, "Sprint Finalizado")
+        return redirect('proyecto_gestion', slug=proyecto.slug)
+
+
+class VerSprintDetail(View):
+
+    def get(self, request, sprintPk, *args, **kwargs):
+        sprint = Sprint.objects.get(pk=sprintPk)
+        proyecto = sprint.proyecto_actual
+        if not request.user.has_perms(('projectmanager.finalizar_sprint',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('/')
+        context = {
+            'sprint': Sprint.objects.get(pk=sprintPk)
+        }
+        return render(request, 'sprint/sprint_detail.html', context)
