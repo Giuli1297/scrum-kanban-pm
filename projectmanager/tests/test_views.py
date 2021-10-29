@@ -261,4 +261,11 @@ class TestViews(TestCase):
             tiempoEstimadoSMaster=4
         )
 
-        self.assertEquals(userStory.tiempoEstimadoSMaster, 4)
+        self.assertEquals(userStory.tiempoEstimadoSMaster, 4) 
+
+    def test_crear_rol(self):
+        """
+        Prueba para verificar si creo correctamente un rol.
+        """ 
+        rol = Rol.objects.create(descripcion="rol1", tipo="sistema")
+        self.assertEquals(rol.descripcion, "rol1") 
