@@ -37,6 +37,7 @@ urlpatterns = [
     path('proyectos/<slug:slug>/roles/<int:pk>/eliminar/', views.EliminarRolProyecto.as_view(),
          name='proyecto_rol_eliminar'),
     path('proyecto/list-users-by-group', views.get_list_users_group, name='poryecto_rol_usuarios'),
+    path('proyectos/<slug:slug>/finalizarProyecto/', views.FinalizarProyecto.as_view(), name='finalizar_proyecto'),
 
     # URLS DE USER STORY
     path('proyectos/<slug:slug>/createUs/', views.UserStoryCreate.as_view(), name='create_us'),
@@ -64,7 +65,8 @@ urlpatterns = [
     # URLS DE KANBAN
     path('kanban/<int:usPk>/seleccionarpararealizar/', views.SeleccionarParaRealizarUserStory.as_view(),
          name='seleccionar_p_realizar_user_story'),
-    path('proyectos/<slug:slug>/burndownchart/<int:sprintPk>/', views.VerBurndownChartView.as_view(), name='ver_burndownchart_actual'),
+    path('proyectos/<slug:slug>/burndownchart/<int:sprintPk>/', views.VerBurndownChartView.as_view(),
+         name='ver_burndownchart_actual'),
     path('proyectos/<slug:slug>/dataBurndownChart/<int:sprintPk>/', views.getDataForBurndownChart.as_view(),
          name='data_burndownchart'),
     path('proyectos/<slug:slug>/RegistroActividad/<int:pk>/', views.RegistroDiario.as_view(),
