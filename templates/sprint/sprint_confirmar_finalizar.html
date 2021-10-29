@@ -13,14 +13,7 @@
         <li>Todos los User Stories que no se hayan finalizado volverían al product backlog.</li>
     </ul>
 </div>
-<div class="row">
-    <div class="col-md-4">
-        <a href="{% url 'finalizar_sprint' sprintPk=sprint.pk %}" class="btn btn-primary">Finalizar</a>
-    </div>
-    <div class="col-md-2">
-        <a href="{% url 'proyecto_gestion' slug=sprint.proyecto_actual.slug %}" class="btn btn-danger">Cancelar</a>
-    </div>
-</div>
+
 <div class="row mt-2">
     <div class="col-md-6 border border-2">
         <div class="row m-1">
@@ -66,15 +59,26 @@
                 </ul>
             </div>
         </div>
-            <div class="row">
-                <input id='slug' type="hidden" value="{{ sprint.proyecto.slug }}">
-                <input id='sprintPk' type="hidden" value="{{ sprint.pk }}">
-                <canvas id="myChart"></canvas>
-            </div>
-            <div class="row">
-                <div class="col-md-3">    <a class="m-3 btn btn-danger" href="{% url 'proyecto_gestion' slug=sprint.proyecto.slug %}">Volver</a>
+        <div class="row">
+            <input id='slug' type="hidden" value="{{ sprint.proyecto.slug }}">
+            <input id='sprintPk' type="hidden" value="{{ sprint.pk }}">
+            <canvas id="myChart"></canvas>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <a class="m-3 btn btn-danger" href="{% url 'proyecto_gestion' slug=sprint.proyecto.slug %}">Volver</a>
             </div>
         </div>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-md-8"></div>
+    <div class="col-md-2">
+
+    </div>
+    <div class="col-md-2">
+        <a href="{% url 'finalizar_sprint' sprintPk=sprint.pk %}" class="btn btn-primary">Finalizar</a>
+        <a href="{% url 'proyecto_gestion' slug=sprint.proyecto_actual.slug %}" class="btn btn-danger">Cancelar</a>
     </div>
 </div>
 {% endblock %}
