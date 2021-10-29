@@ -223,7 +223,7 @@ class Command(BaseCommand):
         UserWorkTime.objects.create(proyecto=pr, desarrollador=user, dia='JUE', horas=5, totalEnProyecto=25)
         UserWorkTime.objects.create(proyecto=pr, desarrollador=user, dia='VIE', horas=5, totalEnProyecto=25)
         pr.scrum_member.add(user)
-        pr.scrum_member.add()
+        pr.scrum_member.add(adminuser)
         sprint = Sprint.objects.create(fecha_inicio=timezone.now() - timezone.timedelta(days=19),
                                        fecha_inicio_desarrollo=timezone.now() - timezone.timedelta(days=15),
                                        duracion_estimada_dias=20,
@@ -246,5 +246,3 @@ class Command(BaseCommand):
         us4.save()
         us5.save()
         pr.save()
-        SystemActivity.objects.create(usuario=self.admin,
-                                      descripcion="Ha creado el " + proyecto['nombre'])
