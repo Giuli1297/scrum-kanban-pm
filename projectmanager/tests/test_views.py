@@ -81,12 +81,12 @@ class TestViews(TestCase):
             'scrum_master': User.objects.all()[1]}, follow=True)
         self.assertEquals(response.status_code, 200)
 
-    '''def test_proyecto_agregar_sm_POST(self):
+    def test_proyecto_agregar_sm_POST(self):
         """
-
+        Prueba para agregar un scrum memberes
         :return:
         """
-        url = reverse('proyecto_agregar_sm', args=['slug'])
+        url = reverse('proyecto_agregar_sm', args=[self.proyecto.slug])
         response = self.client.post(url, {
             'scrum_member': self.admin,
             'lunes': 1,
@@ -94,7 +94,7 @@ class TestViews(TestCase):
             'miercoles': 1,
             'jueves': 1,
             'viernes': 1}, follow=True)
-        self.assertEquals(response.status_code, 200)'''
+        self.assertEquals(response.status_code, 200)
 
     def test_proyecto_list_GET(self):
         """
@@ -267,7 +267,12 @@ class TestViews(TestCase):
         """
         Prueba para verificar si creo correctamente un rol.
         """ 
-        rol = Rol.objects.create(descripcion="rol1", tipo="sistema")
+
+        #Verificar creacion de groups
+        group = Group.objects.create(name="prueba1")
+        self.assertEquals(group.name, "prueba1")
+
+        rol = Rol.objects.create(descripcion="rol1", tipo="sistema", related_group=group)
         self.assertEquals(rol.descripcion, "rol1") 
 
     def test_finalizar_sprint(self):
