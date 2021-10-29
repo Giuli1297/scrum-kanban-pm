@@ -16,6 +16,7 @@
 			<th scope="col">Nombre</th>
 			<th scope="col">Estado</th>
 			<th scope="col">Fecha de inicio</th>
+            <th scope="col">Fecha Fin</th>
 			<th scope="col">Scrum Master</th>
 		</tr>
 	</thead>
@@ -28,6 +29,11 @@
                 <td>{{ proyecto.nombre }}</td>
                 <td>{{ proyecto.estado }}</td>
                 <td>{{ proyecto.fecha_inicio }}</td>
+                {% if proyecto.estado == 'FIN' %}
+                    <td>{{ proyecto.fecha_fin }}</td>
+                {% else %}
+                    <td>--</td>
+                {% endif %}
                 <td>{{ proyecto.scrum_master }}</td>
             </tr>
 		{% endfor %}

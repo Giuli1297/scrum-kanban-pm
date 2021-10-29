@@ -39,6 +39,7 @@ from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.contrib.sites.shortcuts import get_current_site
 from projectmanager.views.general_views import UserAccessMixin
+from django.utils import timezone
 
 
 class ProyectoCreate(UserAccessMixin, CreateView):
@@ -125,7 +126,6 @@ class ProyectoUpdate(UserAccessMixin, UpdateView):
 
     extra_context = {}
 
-
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         if not self.object.estado != 'PEN':
@@ -147,7 +147,6 @@ class ProyectoUpdate(UserAccessMixin, UpdateView):
     #     context = super(ExtraContext, self).get_context_data(**kwargs)
     #     context.update(self.extra_context)
     #     return context
-
 
 
 class GestionProyectoView(UserAccessMixin, View):
@@ -174,8 +173,9 @@ class GestionProyectoView(UserAccessMixin, View):
         for us in proyecto.product_backlog.all():
             if us.estado != 'Release':
                 finalizar = False
-        if proyecto.sprint_actual.estado !=  'conf1':
-            finalizar = False
+        if hasattr(proyecto, 'sprint_actual'):
+            if proyecto.sprint_actual.estado != 'conf1':
+                finalizar = False
         context = {
             'proyecto': proyecto,
             'finalizar': finalizar
@@ -427,3 +427,42 @@ class ProyectoCancelarView(UserAccessMixin, View):
 
         messages.success(request, "Proyecto Cancelado")
         return redirect('proyecto_listar')
+
+
+class FinalizarProyecto(View):
+    """
+    Vista basada en clases utilizada para la
+    finalizacion de un prouectp
+    """
+
+
+    def get(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        for us in proyecto.product_backlog.all():
+            if us.estado != 'Release':
+                messages.error(request, "Proyecto no se puede finalizar")
+                return redirect('proyecto_gestion', slug=slug)
+        if proyecto.sprint_actual.estado != 'conf1':
+            messages.error(request, "Proyecto no se puede finalizar")
+            return redirect('proyecto_gestion', slug=slug)
+        count = 0
+        sprint_cantidad = proyecto.product_backlog.count()
+        for us in proyecto.product_backlog.all():
+            count += us.tiempoEstimado
+        context = {
+            'proyecto': proyecto,
+            'horas': count,
+            'sprints_realizados': sprint_cantidad
+        }
+        return render(request, 'proyecto/finalizar_proyecto.html', context)
+
+    def post(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        proyecto.estado = 'FIN'
+        proyecto.sprint_actual.delete()
+        proyecto.fecha_fin = timezone.now().date()
+        for uw in proyecto.tiempos_de_usuarios.all():
+            uw.delete()
+        proyecto.save()
+
+        return redirect('proyecto_gestion', slug=slug)

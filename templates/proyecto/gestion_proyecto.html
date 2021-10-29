@@ -138,8 +138,8 @@ right: 20px;
               </thead>
               <tbody>
                 {% for ustory in proyecto.product_backlog.all %}
-                    {% if ustory.estado == 'Nuevo' or ustory.estado == 'no-terminado' %}
-                        {% if ustory.sprint == null or ustory.sprint != proyecto.sprint_actual %}
+                    {% if ustory.estado == 'Nuevo' or ustory.estado == 'no-terminado' or proyecto.estado == 'FIN' %}
+                        {% if ustory.sprint == null or ustory.sprint.estado == 'fin' %}
                         <tr>
                           <td>{{ ustory.descripcion }}</td>
                           <td>{{ ustory.estado }}</td>
@@ -186,9 +186,30 @@ right: 20px;
 {% if proyecto.estado == 'ACT' %}
     {% include 'sprint/gestion_sprint.html' %}
 {% endif %}
-    {% if finalizar %}
-        <div>
-            <a href="#" class="btn btn-flotante">Finalizar Proyecto</a>
-        </div>
-    {% endif %}
+{% if proyecto.estado == 'FIN' %}
+    <div class="row mt-4"></div>
+    <hr/>
+    <hr/>
+    <div class="row mt-1"><h4>Registro de Sprints</h4></div>
+    <div class="row mt-3">
+        {% for sprint in proyecto.registro_sprints.all %}
+            <div class="row">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Sprint {{ forloop.counter }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">Fecha Inicio: {{ sprint.fecha_inicio_desarrollo|date:"M d, Y" }}</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">Fecha Fin: {{ sprint.fecha_finalizacion|date:"M d, Y" }}</h6>
+{#                    <p class="card-text">Descripcion Final o Algo</p>#}
+                    <a href="{% url 'ver_sprint_detail' sprint.pk %}" class="card-link">Ver en detalle</a>
+                  </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% if finalizar %}
+    <div>
+        <a href="{% url 'finalizar_proyecto' slug=proyecto.slug %}" class="btn btn-flotante">Finalizar Proyecto</a>
+    </div>
+{% endif %}
 {% endblock %}
