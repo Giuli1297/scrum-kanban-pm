@@ -15,8 +15,8 @@ class Command(BaseCommand):
                              secret='Z1sNtrKMTOGMIR-UZ20vTUF5')
             sapp.save()
             site = Site.objects.all()[0]
-            site.domain = '127.0.0.1:8080'
-            site.name = '127.0.0.1:8080'
+            site.domain = '127.0.0.1:8000'
+            site.name = '127.0.0.1:8000'
             site.save()
         except Exception as error:
             print(error)

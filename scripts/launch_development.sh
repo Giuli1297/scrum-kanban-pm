@@ -23,7 +23,6 @@ python ../manage.py makemigrations projectmanager
 python ../manage.py migrate 
 
 echo "CREACION DEL ADMINISTRADOR MAS CARGA DE BD\n\n\n"
-python ../manage.py createsuperuser
 python ../manage.py crear_admin
 python ../manage.py modify_site_dev
 python ../manage.py runserver
