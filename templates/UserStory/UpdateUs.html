@@ -34,8 +34,8 @@ right: 20px;
 {% endblock %}
 
 {% block body %}
-<div >
-<div class="col-md-12  "  >
+<div class="row">
+<div class="col-md-6"  >
             <div class="card card-default" >
               <div class="card-header">
                 <h3 class="card-title">
@@ -50,13 +50,44 @@ right: 20px;
                     {{ form.as_p }}
                     <button type="submit">Guardar</button>
                 </form>
-
+                    <a class="mb-3 btn btn-danger" href="{% url 'proyecto_gestion' slug=proyecto.slug %}">Volver</a>
                 </table>
               </div>
 
             </div>
           </div>
-
+    {% if US2.RegistroActividad != Null %}
+            <div class="col-md-6 border border-2">
+            <h3>Actividades</h3>
+            <table bgcolor="#f0ffff" class="table mb-2" border="5"  >
+              <thead>
+                <tr align="justify">
+                    <th scope="col">Descipcion</th>
+                    <th scope="col">Horas Invertidas</th>
+                    <th scope="col">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for list in US2.RegistroActividad.all %}
+                    <tr>
+                        <td>{{ list.descripcion }}</td>
+                        <td>{{ list.hora }}</td>
+                        <td>
+                            <a class=" mb-3 btn btn-primary btn-warning"
+                               href="{% url 'registro_actividad_update'  slug=proyecto.slug pk=list.pk uspk=US2.pk %}" >
+                                Editar
+                            </a>
+                            <a class="mb-3 btn btn-primary btn-danger"
+                               href="{% url 'registro_actividad_delete'  slug=proyecto.slug pk=list.pk uspk=US2.pk %}">
+                                Eliminar
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
 

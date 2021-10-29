@@ -107,13 +107,13 @@
             <div style="margin-block: 10px;">
                 {% if 'iniciar_ppoker_proyecto' in proyecto_perms or request.user|has_group:'Administrador' %}
                     {% if proyecto.sprint_actual.estado == 'conf1' %}
-                        <a class="btn btn-dark btn-flotante align-center" href="{% url 'planning_poker_smaster' slug=proyecto.slug %}" >
+                        <a class="btn btn-dark align-center" href="{% url 'planning_poker_smaster' slug=proyecto.slug %}" >
                             Realizar Planning Poker
                         </a>
                     {% elif proyecto.sprint_actual.estado == 'conf2' %}
                         {% if 'estimar_sprint' in proyecto_perms or request.user|has_group:'Administrador' %}
 
-                            <a class="btn btn-dark btn-flotante align-center" href="{% url 'estimar_sprint' slug=proyecto.slug %}" >
+                            <a class="btn btn-dark align-center" href="{% url 'estimar_sprint' slug=proyecto.slug %}" >
                                 Estimar Sprint e Iniciar Desarrollo
                             </a>
                         {% endif %}
@@ -247,7 +247,23 @@
 
         </div>
     </div>
-
+    {% if "estimar_sprint" in proyecto_perms or request.user|has_group:'Administrador' %}
+        <div class="row mt-2">
+            <div class="col-md-8"></div>
+            <div class="col-md-2">
+                <a class="mb-3 btn btn-warning"
+                    href="{% url 'extender_sprint' slug=proyecto.slug %}">
+                    Extender Sprint
+                </a>
+            </div>
+            <div class="col-md-2">
+                <a class="mb-3 btn btn-dark"
+                    href="{% url 'confirmar_finalizar_sprint' sprintPk=proyecto.sprint_actual.pk %}">
+                    Finalizar Sprint
+                </a>
+            </div>
+        </div>
+    {% endif %}
     <div class="row m-3"><h2>Información del avance del Sprint</h2>
         <hr/>
     </div>
@@ -294,7 +310,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <a class="btn btn-dark m-3" href="{% url 'ver_burndownchart_actual' proyecto.slug %}">Ver Burndown Chart</a>
+            <a class="btn btn-dark m-3" href="{% url 'ver_burndownchart_actual' slug=proyecto.slug sprintPk=proyecto.sprint_actual.pk %}">Ver Burndown Chart</a>
         </div>
     {% endif %}
 
@@ -305,7 +321,7 @@
 
 
 {% block script %}
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
  <script >
         var iDia;
         var iMes;
@@ -338,10 +354,17 @@
         function updateCountdown(){
             const tiempoActual=new Date()
             const diff=fecha_final-tiempoActual
+            console.log(diff);
+            console.log(fAnio);
+            console.log(fMes);
+            console.log(fDia);
+            console.log(fecha_final);
+            console.log(tiempoActual);
             const d=Math.floor(diff/1000/60/60/24);
-            const h=Math.floor(diff/1000/60/60)%24;
+            const h=Math.floor(diff/1000/60/60)%24 -8 ;
             const m=Math.floor(diff/1000/60)%60;
             const s=Math.floor(diff/1000)%60;
+            console.log(d);
 
 
 

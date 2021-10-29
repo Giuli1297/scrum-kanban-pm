@@ -1,0 +1,158 @@
+{% extends "layout/base.html" %}
+
+{% block content %}
+<div class="row mt-3">
+    <h4>Finalizacion del Sprint</h4>
+    <h6>Considere la siguiente informacion: </h6>
+    <ul>
+    {% for us in sprint.sprint_backlog.all %}
+        {% if us.estado != 'Release' %}
+            <li>El user story {{ us.descripcion }} no se ha finalizado!.</li>
+        {% endif %}
+    {% endfor %}
+        <li>Todos los User Stories que no se hayan finalizado volverían al product backlog.</li>
+    </ul>
+</div>
+
+<div class="row mt-2">
+    <div class="col-md-6 border border-2">
+        <div class="row m-1">
+            <div class="col-md-4">
+                <h4>Sprint Backlog Desarrollado</h4>
+            </div>
+            <div class="col-md-8"></div>
+        </div>
+        <div class="row m-1">
+            <table class="table mb-2">
+              <thead>
+                <tr>
+                    <th scope="col">User Story</th>
+                    <th scope="col">Encargado</th>
+                    <th scope="col">Horas (Planning Poker)</th>
+                    <th scope="col">Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user_story in sprint.sprint_backlog.all %}
+                    <tr>
+                        <th scope="row">{{ user_story.descripcion }}</th>
+                        <td>{{ user_story.desarrolladorAsignado.username }}</td>
+                        <td>
+                                {{ user_story.tiempoEstimado }}
+                        </td>
+                        <td>{{ user_story.estado }}</td>
+                    </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-6 border border-2">
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col-md-11">
+                <h3>Burndown Chart</h3>
+                <p>Este grafico muestra el progreso actual del Sprint en curso.</p>
+                <ul>
+                    <li>El eje de las abscisas representa los dias restantes de acuerdo a la planificacion del Sprint</li>
+                    <li>El eje de las ordenadas representa las horas a desarrollar del Sprint.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <input id='slug' type="hidden" value="{{ sprint.proyecto.slug }}">
+            <input id='sprintPk' type="hidden" value="{{ sprint.pk }}">
+            <canvas id="myChart"></canvas>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <a class="m-3 btn btn-danger" href="{% url 'proyecto_gestion' slug=sprint.proyecto.slug %}">Volver</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-md-8"></div>
+    <div class="col-md-2">
+
+    </div>
+    <div class="col-md-2">
+        <a href="{% url 'finalizar_sprint' sprintPk=sprint.pk %}" class="btn btn-primary">Finalizar</a>
+        <a href="{% url 'proyecto_gestion' slug=sprint.proyecto_actual.slug %}" class="btn btn-danger">Cancelar</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        //SetUp
+        const slug = $('#slug').val();
+        const sprintPk = $('#sprintPk').val();
+        var defaultData = null;
+        console.log(slug);
+        $.ajax({
+            method: 'GET',
+            url: '/proyectos/'+slug+'/dataBurndownChart/'+sprintPk,
+            success: function(data){
+                console.log(data);
+                defaultData = data;
+                setChart();
+            },
+            error: function (error_data){
+                console.log('pero que a pasao');
+            }
+        });
+        function setChart(){
+            const lab = [];
+            var dataset1 = [];
+            var dataset2 = [];
+            console.log(defaultData.horas_us_totales);
+            for(let i=0;i<=parseInt(defaultData.dias_estimados);i++){
+                lab.push(defaultData.dias_estimados-i);
+                dataset1.push(defaultData.horas_us_totales-(defaultData.horas_us_totales/defaultData.dias_estimados)*i);
+            }
+            for(let i=0;i<=defaultData.passed_days;i++){
+                dataset2.push(defaultData.progreso[i]);
+            }
+            const data = {
+              labels: lab,
+              datasets: [
+                {
+                  label: 'Progreso Estimado',
+                  data: dataset1,
+                  borderColor: 'rgb(255, 100, 50)',
+                  backgroundColor: 'rgb(255, 100, 50)',
+                },
+                {
+                  label: 'Progreso Real',
+                  data: dataset2,
+                  borderColor: 'rgb(100, 100, 255)',
+                  backgroundColor: 'rgb(100, 100, 255)',
+                }
+              ]
+            };
+            //Config
+            const config = {
+              type: 'line',
+              data: data,
+              options: {
+                responsive: true,
+                plugins: {
+                  legend: {
+                    position: 'top',
+                  },
+                  title: {
+                    display: true,
+                    text: 'Chart.js Line Chart'
+                  }
+                }
+              },
+            };
+            var myChart = new Chart(
+                document.getElementById('myChart'),
+                config
+            );
+        }
+
+    </script>
+{% endblock %}

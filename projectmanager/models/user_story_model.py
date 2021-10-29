@@ -41,7 +41,7 @@ class UserStory(models.Model):
     """
     ESTADOS = (
         ('Nuevo', 'Nuevo'),
-        ('Cancelado', 'Cancelado'),
+        ('no-terminado', 'No Terminado'),
         ('To-Do', 'To-Do'),
         ('Doing', 'Doing'),
         ('Done', 'Done'),
@@ -50,11 +50,11 @@ class UserStory(models.Model):
     )
     descripcion = models.TextField(blank=True, max_length=255)
     tiempoEstimadoSMaster = models.FloatField(default=0.0)
-    tiempoEstimado = models.FloatField(validators=[MinValueValidator(0)], default=0)
+    tiempoEstimado = models.FloatField(validators=[MinValueValidator(0)], default=0, null=True)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Nuevo')
 
-    tiempoEnDesarrollo = models.FloatField(validators=[MinValueValidator(0)], default=0)
-    desarrolladorAsignado = models.ForeignKey(User, related_name='desarrollador_asignado', null=True,
+    tiempoEnDesarrollo = models.FloatField(validators=[MinValueValidator(0)], default=0, null=True)
+    desarrolladorAsignado = models.ForeignKey(User, related_name='desarrollador_asignado', null=True, blank=True,
                                               on_delete=models.CASCADE)
     proyecto = models.ForeignKey(Proyecto, related_name='product_backlog', null=True, on_delete=models.CASCADE)
     sprint = models.ForeignKey(Sprint, related_name='sprint_backlog', null=True, blank=True, on_delete=models.SET_NULL)
@@ -69,7 +69,7 @@ class UserStory(models.Model):
             ('desarrollar_user_story', 'Puede desarrollar un user story'),)
         verbose_name = 'User Story'
         verbose_name_plural = 'Users Storys'
-        ordering = ['-prioridad']
+        ordering = ['estado', '-prioridad']
 
     def __str__(self):
         return self.descripcion + self.proyecto.slug
@@ -124,13 +124,13 @@ class HistorialUs(models.Model):
             usuario que realiza el cambio
         """
     version = models.IntegerField(editable=False)
-
     us = models.ForeignKey(UserStory, related_name='UsHistorial', null=True, on_delete=models.CASCADE)
     descripcion = models.TextField(blank=True, max_length=255)
     fecha=models.DateTimeField(default=timezone.now)
     usuario=models.ForeignKey(User,null=True,on_delete=models.CASCADE)
     descripcionDone = models.TextField(blank=True, max_length=255)
-
+    prioridad=models.IntegerField(blank=True,default=0)
+    idUs = models.IntegerField(blank=True,default=0)
 
     class Meta:
         unique_together = ('version', 'us')

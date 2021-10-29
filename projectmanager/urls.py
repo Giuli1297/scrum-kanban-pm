@@ -37,12 +37,15 @@ urlpatterns = [
     path('proyectos/<slug:slug>/roles/<int:pk>/eliminar/', views.EliminarRolProyecto.as_view(),
          name='proyecto_rol_eliminar'),
     path('proyecto/list-users-by-group', views.get_list_users_group, name='poryecto_rol_usuarios'),
+    path('proyectos/<slug:slug>/finalizarProyecto/', views.FinalizarProyecto.as_view(), name='finalizar_proyecto'),
 
     # URLS DE USER STORY
     path('proyectos/<slug:slug>/createUs/', views.UserStoryCreate.as_view(), name='create_us'),
     path('proyectos/<slug:slug>/updateUs/<int:pk>/', views.UserStoryUpdate.as_view(), name='update_us'),
     path('proyectos/<slug:slug>/eliminarUs/<int:pk>/', views.EliminarUs.as_view(), name='elimnar_us'),
-    path('proyectos/<slug:slug>/historial/<int:pk>/', views.listarLogHistorial.as_view(), name='historial_us'),
+    path('proyectos/<slug:slug>/historial/<int:pk>/', views.listarHistorial.as_view(), name='historial_us'),
+    path('proyectos/<slug:slug>/revertir/<int:pk>/', views.RevertirHistorial.as_view(), name='revertir_us'),
+    #path('proyectos/<slug:slug>/historial/<int:pk>/', views.listarLogHistorial.as_view(), name='historial_us'),
 
     # URLS DE SPRINTS
     path('proyectos/cargarSprintBacklog/<int:usPk>/<int:sprintPk>/', views.CargarSprintBacklog.as_view(),
@@ -55,12 +58,18 @@ urlpatterns = [
     path('planningPoker/<uidb64>/<token>/<int:usPk>/', views.PlanningPokerSMemberView.as_view(),
          name='planning_poker_smember'),
     path('planningPoker/<slug:slug>/estimarSprint/', views.EstimarSprint.as_view(), name='estimar_sprint'),
+    path('proyectos/confirmFinalizarSprint/<int:sprintPk>/', views.ConfirmarFinalizarSprint.as_view(),
+         name='confirmar_finalizar_sprint'),
+    path('proyectos/finalizarSprint/<int:sprintPk>/', views.FinalizarSprint.as_view(), name='finalizar_sprint'),
+    path('proyectos/sprint/<int:sprintPk>/', views.VerSprintDetail.as_view(), name='ver_sprint_detail'),
+    path('proyectos/extenderSprint/<slug:slug>/', views.ExtenderSprint.as_view(), name='extender_sprint'),
 
     # URLS DE KANBAN
     path('kanban/<int:usPk>/seleccionarpararealizar/', views.SeleccionarParaRealizarUserStory.as_view(),
          name='seleccionar_p_realizar_user_story'),
-    path('proyectos/<slug:slug>/burndownchart/', views.VerBurndownChartView.as_view(), name='ver_burndownchart_actual'),
-    path('proyectos/<slug:slug>/dataBurndownChart/', views.getDataForBurndownChart.as_view(),
+    path('proyectos/<slug:slug>/burndownchart/<int:sprintPk>/', views.VerBurndownChartView.as_view(),
+         name='ver_burndownchart_actual'),
+    path('proyectos/<slug:slug>/dataBurndownChart/<int:sprintPk>/', views.getDataForBurndownChart.as_view(),
          name='data_burndownchart'),
     path('proyectos/<slug:slug>/RegistroActividad/<int:pk>/', views.RegistroDiario.as_view(),
          name='registro_actividad'),
