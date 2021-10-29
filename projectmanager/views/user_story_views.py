@@ -206,7 +206,8 @@ class EliminarUs(View):
 
 class RevertirHistorial(View):
     """
-    Vista basada en clases utilizada para la reversion del historial de un userstory
+    Vista basada en clases utilizada para la reversion
+    del historial de un userstory
     """
 
     def get(self,request,slug,pk,*args,**kwargs):
