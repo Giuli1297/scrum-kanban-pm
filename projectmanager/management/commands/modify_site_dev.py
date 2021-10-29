@@ -17,7 +17,7 @@ class Command(BaseCommand):
             site.domain = '127.0.0.1:8000'
             site.name = '127.0.0.1:8000'
             site.save()
-            sapp.sites.add(site)
+            sapp.sites.add(1)
             sapp.save()
         except Exception as error:
             print(error)
