@@ -280,12 +280,14 @@ class TestViews(TestCase):
         se crea un sprint para verificar su estado finalizado
         :return:
         '''
-        sprint = Sprint.objects.create(estado="fin")
+        sprint = Sprint.objects.create(estado="conf3")
+        sprint.estado="fin"
 
-        self.assertEquals(sprint.estado,"fin")
+        self.assertEquals(sprint.estado,"fin","El dprint no fue cancelado")
 
     def test_devolver_user_storys_no_terminados(self):
         '''
+            verificca si un user story esta en estado cancelado
         :return:
         '''
 
@@ -296,4 +298,5 @@ class TestViews(TestCase):
         )
 
         userStory.estado = "Cancelado"
-        self.assertEquals(userStory.estado, "Cancelado")
+        self.assertEquals(userStory.estado, "Cancelado","el user story aun no fue cancelado")
+
