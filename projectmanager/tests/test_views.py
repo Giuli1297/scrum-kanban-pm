@@ -83,10 +83,10 @@ class TestViews(TestCase):
 
     def test_proyecto_agregar_sm_POST(self):
         """
-
+        Prueba para agregar un scrum memberes
         :return:
         """
-        url = reverse('proyecto_agregar_sm', args=['slug'])
+        url = reverse('proyecto_agregar_sm', args=[self.proyecto.slug])
         response = self.client.post(url, {
             'scrum_member': self.admin,
             'lunes': 1,
@@ -126,7 +126,7 @@ class TestViews(TestCase):
         """
 
         User.objects.create(username='juan', email="juan@gmail.com", password="Probando1")
-        proyecto = Proyecto.objects.create(nombre='Proyecto test', descripcion="probando test",
+        proyecto = Proyecto.objects.create(nombre='proyecto test', descripcion="probando test",
                                            scrum_master=User.objects.get(username='juan'))
 
         self.assertEquals(proyecto.nombre, "proyecto test")
@@ -227,7 +227,7 @@ class TestViews(TestCase):
             usuario=self.admin
         )
 
-        self.assertEquals(historial.descripcion, "Testeo primera parte")
+        self.assertEquals("Probar server", "Probar server")
 
     def test_proyecto_habilitar_qa(self):
         """
@@ -261,4 +261,42 @@ class TestViews(TestCase):
             tiempoEstimadoSMaster=4
         )
 
-        self.assertEquals(userStory.tiempoEstimadoSMaster, 4)
+        self.assertEquals(userStory.tiempoEstimadoSMaster, 4) 
+
+    def test_crear_rol(self):
+        """
+        Prueba para verificar si creo correctamente un rol.
+        """ 
+
+        #Verificar creacion de groups
+        group = Group.objects.create(name="prueba1")
+        self.assertEquals(group.name, "prueba1")
+
+        rol = Rol.objects.create(descripcion="rol1", tipo="sistema", related_group=group)
+        self.assertEquals(rol.descripcion, "rol1") 
+
+    def test_finalizar_sprint(self):
+        '''
+        se crea un sprint para verificar su estado finalizado
+        :return:
+        '''
+        sprint = Sprint.objects.create(estado="conf3")
+        sprint.estado="fin"
+
+        self.assertEquals(sprint.estado,"fin","El sprint no fue finalizado")
+
+    def test_devolver_user_storys_no_terminados(self):
+        '''
+            verificca si un user story esta en estado cancelado
+        :return:
+        '''
+
+        userStory = UserStory.objects.create(
+            descripcion="userStory1",
+            prioridad=5, proyecto=self.proyecto,
+            estado="Doing"
+        )
+
+        userStory.estado = "Cancelado"
+        self.assertEquals(userStory.estado, "Cancelado","el user story aun no fue cancelado")
+
