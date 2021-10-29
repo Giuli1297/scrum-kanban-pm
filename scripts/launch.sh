@@ -1,5 +1,6 @@
 #!/bin/bash
 echo "CREACION DEL ENTORNO VIRTUAL"
+sudo apt-get install python3-venv
 python3 -m venv env_desarrollo
 
 echo "\n\n\nACTIVACION\n\n\n"
