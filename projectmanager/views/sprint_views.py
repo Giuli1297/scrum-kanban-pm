@@ -474,6 +474,10 @@ class FinalizarSprint(View):
 
 
 class VerSprintDetail(View):
+    """
+    Vista basada en clase para la visualizacion de los
+    detalles de un Sprint
+    """
 
     def get(self, request, sprintPk, *args, **kwargs):
         sprint = Sprint.objects.get(pk=sprintPk)
@@ -489,6 +493,10 @@ class VerSprintDetail(View):
 
 
 class ExtenderSprint(View):
+    """
+    Viusta basada en clase para la exxtension de tiempo
+    de un sprint en caso de que ya llegue a su limite
+    """
     def get(self, request, slug, *args, **kwargs):
         form = EstimacionSprint()
         proyecto = Proyecto.objects.get(slug=slug)
