@@ -430,6 +430,11 @@ class ProyectoCancelarView(UserAccessMixin, View):
 
 
 class FinalizarProyecto(View):
+    """
+    Vista basada en clases utilizada para la
+    finalizacion de un prouectp
+    """
+
 
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
