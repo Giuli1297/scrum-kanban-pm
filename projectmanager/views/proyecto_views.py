@@ -123,6 +123,9 @@ class ProyectoUpdate(UserAccessMixin, UpdateView):
     template_name = 'proyecto/proyecto_form.html'  # Indicar el template
     success_url = reverse_lazy('proyecto_listar')  # Redireccionar
 
+    extra_context = {}
+
+
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         if not self.object.estado != 'PEN':
@@ -139,6 +142,12 @@ class ProyectoUpdate(UserAccessMixin, UpdateView):
             return super().get(request, *args, **kwargs)
         messages.error(request, "No se puede editar este proyecto")
         return redirect('proyecto_gestion', slug=self.object.slug)
+
+    # def get_context_data(self, **kwargs):
+    #     context = super(ExtraContext, self).get_context_data(**kwargs)
+    #     context.update(self.extra_context)
+    #     return context
+
 
 
 class GestionProyectoView(UserAccessMixin, View):
@@ -161,8 +170,15 @@ class GestionProyectoView(UserAccessMixin, View):
             for work in scrum_member.tiempos_de_trabajo.all():
                 if work.proyecto == proyecto:
                     tiempos_totales[scrum_member.username] = work.totalEnProyecto
+        finalizar = True
+        for us in proyecto.product_backlog.all():
+            if us.estado != 'Release':
+                finalizar = False
+        if proyecto.sprint_actual.estado !=  'conf1':
+            finalizar = False
         context = {
-            'proyecto': proyecto
+            'proyecto': proyecto,
+            'finalizar': finalizar
         }
         return render(request, 'proyecto/gestion_proyecto.html', context)
 

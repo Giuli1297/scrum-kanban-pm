@@ -486,3 +486,72 @@ class VerSprintDetail(View):
             'sprint': Sprint.objects.get(pk=sprintPk)
         }
         return render(request, 'sprint/sprint_detail.html', context)
+
+
+class ExtenderSprint(View):
+    def get(self, request, slug, *args, **kwargs):
+        form = EstimacionSprint()
+        proyecto = Proyecto.objects.get(slug=slug)
+        sprint = proyecto.sprint_actual
+        horas_us_total = 0
+        horas_desarrolladas = 0
+        horas_desarrolladores = 0
+        horas_por_dia = {'lun': 0,
+                         'mar': 0,
+                         'mie': 0,
+                         'jue': 0,
+                         'vie': 0}
+        for us in sprint.sprint_backlog.all():
+            if not us.tiempoEstimado > 0:
+                messages.error(request, "Faltan Estimar User Stories")
+                return redirect('proyecto_gestion', slug=slug)
+            horas_us_total = horas_us_total + us.tiempoEstimado
+            if us.estado == 'Release':
+                horas_desarrolladas += us.tiempoEstimado
+        for tiempo in proyecto.tiempos_de_usuarios.all():
+            horas_desarrolladores += tiempo.horas
+            if tiempo.dia == 'LUN':
+                horas_por_dia['lun'] += tiempo.horas
+            if tiempo.dia == 'MAR':
+                horas_por_dia['mar'] += tiempo.horas
+            if tiempo.dia == 'MIE':
+                horas_por_dia['mie'] += tiempo.horas
+            if tiempo.dia == 'JUE':
+                horas_por_dia['jue'] += tiempo.horas
+            if tiempo.dia == 'VIE':
+                horas_por_dia['vie'] += tiempo.horas
+        today = datetime.datetime.today().weekday()
+        print(today)
+        if today == 5 or today == 6:
+            today = 0
+        # proyecto.sprint_actual.duracion_estimada
+        context = {
+            'horas': horas_us_total,
+            'horas_desarrolladores': horas_desarrolladores,
+            'horas_por_dia': horas_por_dia,
+            'horas_por_desarrollar': horas_us_total - horas_desarrolladas,
+            'hoy': today,
+            'form': form,
+            'proyecto': proyecto
+        }
+        return render(request, 'sprint/extenderSprint.html', context)
+
+    def post(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        sprint = proyecto.sprint_actual
+        form = EstimacionSprint(request.POST)
+
+        if form.is_valid():
+            diasEstimados = form.cleaned_data['dias_estimados']
+            sprint.duracion_estimada_dias += diasEstimados
+            sprint.fecha_finalizacion = timezone.now().date() + timedelta(hours=sprint.duracion_estimada_dias * 24 + 16)
+            sprint.save()
+            # Log activity
+            SystemActivity.objects.create(usuario=request.user,
+                                          descripcion="Ha extendido el sprint con id " + str(sprint.pk))
+            messages.success(request, "Se ha asignado la estimación al Sprint")
+
+        else:
+            messages.error(request, "Un error a ocurrido")
+
+        return redirect('proyecto_gestion', slug=slug)
