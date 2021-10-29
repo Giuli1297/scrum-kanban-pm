@@ -271,3 +271,30 @@ class TestUrlsSprint(SimpleTestCase):
         """
         url = reverse('estimar_sprint', args=['slug'])
         self.assertEquals(resolve(url).func.view_class, views.EstimarSprint)
+
+    def test_ver_en_detalle_sprint_anteriores(self):
+
+        '''
+            Test para verificar si carga correctamente ver sprint anteriores
+        :return:
+        '''
+        url = reverse('ver_sprint_detail', args=['1'])
+        self.assertEquals(resolve(url).func.view_class,views.VerSprintDetail)
+    def test_ver_burndown_charts_sprint_anteriores(self):
+
+        '''
+            Test para verificar si carga correctamente ver sprint anteriores
+        :return:
+        '''
+        url = reverse('ver_sprint_detail', args=['1'])
+        self.assertEquals(resolve(url).func.view_class,views.VerSprintDetail)
+
+    def test_reversion_us(self):
+        '''
+        Test para verificar si carga correctamente la pagina al revertir User storys
+        :return:
+        '''
+
+        url = reverse('revertir_us', args=['slug','1'])
+        self.assertEquals(resolve(url).func.view_class, views.RevertirHistorial)
+
