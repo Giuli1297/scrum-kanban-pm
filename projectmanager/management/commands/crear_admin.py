@@ -222,6 +222,11 @@ class Command(BaseCommand):
         UserWorkTime.objects.create(proyecto=pr, desarrollador=user, dia='MIE', horas=5, totalEnProyecto=25)
         UserWorkTime.objects.create(proyecto=pr, desarrollador=user, dia='JUE', horas=5, totalEnProyecto=25)
         UserWorkTime.objects.create(proyecto=pr, desarrollador=user, dia='VIE', horas=5, totalEnProyecto=25)
+        UserWorkTime.objects.create(proyecto=pr, desarrollador=adminuser, dia='LUN', horas=5, totalEnProyecto=25)
+        UserWorkTime.objects.create(proyecto=pr, desarrollador=adminuser, dia='MAR', horas=5, totalEnProyecto=25)
+        UserWorkTime.objects.create(proyecto=pr, desarrollador=adminuser, dia='MIE', horas=5, totalEnProyecto=25)
+        UserWorkTime.objects.create(proyecto=pr, desarrollador=adminuser, dia='JUE', horas=5, totalEnProyecto=25)
+        UserWorkTime.objects.create(proyecto=pr, desarrollador=adminuser, dia='VIE', horas=5, totalEnProyecto=25)
         pr.scrum_member.add(user)
         pr.scrum_member.add(adminuser)
         sprint = Sprint.objects.create(fecha_inicio=timezone.now() - timezone.timedelta(days=19),
