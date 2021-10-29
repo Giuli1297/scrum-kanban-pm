@@ -18,7 +18,7 @@ class Command(BaseCommand):
                              client_id='502746393109-njpkkl1tlfrhdki9i1jkgdaitga2knic.apps.googleusercontent.com',
                              secret='Z1sNtrKMTOGMIR-UZ20vTUF5')
             sapp.save()
-            sapp.sites.add(site)
+            sapp.sites.add(1)
             sapp.save()
         except Exception as error:
             print(error)
