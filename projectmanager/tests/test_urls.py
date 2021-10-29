@@ -298,3 +298,21 @@ class TestUrlsSprint(SimpleTestCase):
         url = reverse('revertir_us', args=['slug','1'])
         self.assertEquals(resolve(url).func.view_class, views.RevertirHistorial)
 
+    def test_finalizar_sprint(self):
+        '''
+          Test para verificar si carga correctamente la pagina al finalizar sprint
+          :return:
+          '''
+
+        url = reverse('finalizar_sprint', args=['1'])
+        self.assertEquals(resolve(url).func.view_class, views.FinalizarSprint,"No son iguales las vistas")
+
+    def test_extender_sprint(self):
+        '''
+                  Test para verificar si carga correctamente la pagina al finalizar sprint
+                  :return:
+                  '''
+
+        url = reverse('extender_sprint', args=['slug'])
+        self.assertEquals(resolve(url).func.view_class, views.ExtenderSprint,"no son iguales las vistas")
+

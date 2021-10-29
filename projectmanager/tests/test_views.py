@@ -283,7 +283,7 @@ class TestViews(TestCase):
         sprint = Sprint.objects.create(estado="conf3")
         sprint.estado="fin"
 
-        self.assertEquals(sprint.estado,"fin","El dprint no fue cancelado")
+        self.assertEquals(sprint.estado,"fin","El sprint no fue finalizado")
 
     def test_devolver_user_storys_no_terminados(self):
         '''
