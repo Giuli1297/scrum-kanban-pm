@@ -13,11 +13,12 @@ class Command(BaseCommand):
             sapp = SocialApp(provider='google', name='scrum-kanban',
                              client_id='502746393109-njpkkl1tlfrhdki9i1jkgdaitga2knic.apps.googleusercontent.com',
                              secret='Z1sNtrKMTOGMIR-UZ20vTUF5')
-            sapp.save()
             site = Site.objects.all()[0]
             site.domain = '127.0.0.1:8000'
             site.name = '127.0.0.1:8000'
             site.save()
+            sapp.sites.add(site)
+            sapp.save()
         except Exception as error:
             print(error)
             raise CommandError('Error intente de nuevo')

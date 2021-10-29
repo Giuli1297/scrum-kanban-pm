@@ -16,8 +16,9 @@ class Command(BaseCommand):
             site.save()
             sapp = SocialApp(provider='google', name='scrum-kanban',
                              client_id='502746393109-njpkkl1tlfrhdki9i1jkgdaitga2knic.apps.googleusercontent.com',
-                             secret='Z1sNtrKMTOGMIR-UZ20vTUF5',
-                             site=site)
+                             secret='Z1sNtrKMTOGMIR-UZ20vTUF5')
+            sapp.save()
+            sapp.sites.add(site)
             sapp.save()
         except Exception as error:
             print(error)

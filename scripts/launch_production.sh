@@ -27,4 +27,4 @@ python ../manage.py crear_admin
 python ../manage.py modify_site_prod
 heroku pg:reset --confirm scrumkanbanpm
 git push heroku --force main
-PGUSER=postgres PGPASSWORD=postgres heroku pg:push DATABASE_URL pmsdb --app scrumkanbanpm
+PGUSER=postgres PGPASSWORD=postgres heroku pg:push pmsdb DATABASE_URL --app scrumkanbanpm
