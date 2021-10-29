@@ -1,5 +1,5 @@
 #!/bin/bash
-git checkout desarrollo
+#git checkout desarrollo
 echo "CREACION DEL ENTORNO VIRTUAL"
 sudo apt-get install python3-venv
 python3 -m venv env_desarrollo
