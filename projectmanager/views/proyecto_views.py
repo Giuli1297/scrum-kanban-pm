@@ -387,7 +387,6 @@ class ProyectoIniciarView(UserAccessMixin, View):
 
         if proyecto.estado == 'PEN':
             proyecto.estado = 'ACT'
-            sprint = Sprint.objects.create(proyecto=proyecto, proyecto_actual=proyecto)
             proyecto.save()
         else:
             messages.error(request, "Proyecto no se puede iniciar")

@@ -46,18 +46,61 @@ import datetime
 import numpy
 
 
+class PlanificarSprint(View):
+    """
+    Vista basada en clase que sirve para la planificacion de sprints.
+    """
+
+    def get(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.cargar_sprint_backlog_proyecto',),
+                                      proyecto) and not request.user.groups.filter(
+            name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=proyecto.slug)
+        context = {
+            'proyecto': proyecto
+        }
+        return render(request, 'sprint/planificar_sprint.html', context)
+
+    def post(self, request, slug, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.cargar_sprint_backlog_proyecto',),
+                                      proyecto) and not request.user.groups.filter(
+            name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=proyecto.slug)
+        print(request.POST.get('fecha_inicio'))
+        fecha_incio = datetime.datetime.strptime(request.POST.get('fecha_inicio'), "%Y-%m-%d")
+        fecha_fin = datetime.datetime.strptime(request.POST.get('fecha_fin'), "%Y-%m-%d")
+        if hasattr(proyecto, "sprint_actual"):
+            Sprint.objects.create(fecha_inicio=fecha_incio, fecha_finalizacion=fecha_fin,
+                                  proyecto_sig=proyecto)
+        elif hasattr(proyecto, "siguiente_sprint"):
+            messages.error(request, "Ya tienes un sprint planificado")
+            return redirect('proyecto_gestion', slug=proyecto.slug)
+        else:
+            Sprint.objects.create(fecha_inicio=fecha_incio, fecha_finalizacion=fecha_fin,
+                                  proyecto_actual=proyecto)
+        return redirect('proyecto_gestion', slug=slug)
+
+
 class CargarSprintBacklog(View):
     """
     Vista basada en clase que sirve para cargar el sprint backlog
     """
 
-    def get(self, request, usPk, sprintPk, *args, **kwargs):
+    def post(self, request, usPk, sprintPk, *args, **kwargs):
         sprint = Sprint.objects.get(pk=sprintPk)
+        proyecto = sprint.proyecto_actual
         if not request.user.has_perms(('projectmanager.cargar_sprint_backlog_proyecto',),
                                       sprint.proyecto) and not request.user.groups.filter(
             name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('proyecto_gestion', slug=sprint.proyecto.slug)
+        sprint_selected = request.POST.get("sprintx")
+        if sprint_selected == "2":
+            sprint = sprint.proyecto_actual.siguiente_sprint
         if sprint.estado != 'conf1':
             messages.error(request, "Ya no puedes agregar user stories al sprint backlog")
             return redirect('proyecto_gestion', slug=sprint.proyecto.slug)
@@ -68,9 +111,9 @@ class CargarSprintBacklog(View):
         # Log activity
         SystemActivity.objects.create(usuario=request.user,
                                       descripcion="Ha agregado el user story con id " + str(ustory.pk)
-                                                  + " al sprint backlog del proyecto " + sprint.proyecto_actual.nombre)
+                                                  + " al sprint backlog del proyecto " + proyecto.nombre)
         messages.success(request, 'User Story agregado al SprintBacklog')
-        return redirect('proyecto_gestion', slug=sprint.proyecto_actual.slug)
+        return redirect('proyecto_gestion', slug=proyecto.slug)
 
 
 class QuitarUSFromSprintBacklog(View):
@@ -153,26 +196,27 @@ class PlanningPokerView(View):
     Vista basada en clase para la gestion de planning poker
     """
 
-    def get(self, request, slug, *args, **kwargs):
+    def get(self, request, slug, sprintPk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
+        sprint = Sprint.objects.get(pk=sprintPk)
         if not request.user.has_perms(('projectmanager.iniciar_ppoker_proyecto',),
                                       proyecto) and not request.user.groups.filter(
             name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('proyecto_gestion', slug=proyecto.slug)
-        if not proyecto.sprint_actual.sprint_backlog.exists():
+        if not sprint.sprint_backlog.exists():
             messages.error(request, 'No tienes user stories!')
             return redirect('proyecto_gestion', slug=proyecto.slug)
-        if proyecto.sprint_actual.estado != 'conf1':
+        if sprint.estado != 'conf1':
             messages.error(request, 'No se puede realizar planning poker')
             return redirect('proyecto_gestion', slug=proyecto.slug)
-        for us in proyecto.sprint_actual.sprint_backlog.all():
+        for us in sprint.sprint_backlog.all():
             if not us.desarrolladorAsignado != None:
                 messages.error(request, "Debes asignar todos los User Stories")
                 return redirect('proyecto_gestion', slug=slug)
-        proyecto.sprint_actual.estado = 'conf2'
-        proyecto.sprint_actual.save()
-        for us in proyecto.sprint_actual.sprint_backlog.all():
+        sprint.estado = 'conf2'
+        sprint.save()
+        for us in sprint.sprint_backlog.all():
             current_site = get_current_site(request)
             email_body = {
                 'user': us.desarrolladorAsignado,

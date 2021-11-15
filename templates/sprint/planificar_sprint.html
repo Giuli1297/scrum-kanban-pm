@@ -1,0 +1,53 @@
+{% extends "layout/base.html" %}
+
+{% block content %}
+<div class="row mb-3">
+    <h3>Planificacion del proximo Sprint</h3>
+</div>
+
+<div class="row mb-3">
+    <div class="form-group col-md-4">
+        <form method="post">
+            {% csrf_token %}
+            <label for="fecha_inicio" class="form-label">Fecha de Inicio</label>
+            <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" REQUIRED>
+            <label for="fecha_inicio" class="form-label">Fecha de Finalizacion</label>
+            <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" REQUIRED>
+            <button class="btn btn-dark mt-3" type="submit">Guardar</button>
+        </form>
+    </div>
+</div>
+{% if not proyecto.sprint_actual %}
+<script>
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth() + 1; //January is 0!
+    var yyyy = today.getFullYear();
+
+    if (dd < 10) {
+       dd = '0' + dd;
+    }
+
+    if (mm < 10) {
+       mm = '0' + mm;
+    }
+
+    today = yyyy + '-' + mm + '-' + dd;
+    document.getElementById("fecha_inicio").setAttribute("min", today);
+    document.getElementById("fecha_inicio").addEventListener("change", ()=>{
+        document.getElementById("fecha_fin").setAttribute("min", document.getElementById("fecha_inicio").value)
+    })
+</script>
+{% else %}
+<script>
+    date1 = {{ proyecto.sprint_actual.fecha_finalizacion.date.year }}+'-'+
+            {{ proyecto.sprint_actual.fecha_finalizacion.date.month }}+'-'+
+            {{ proyecto.sprint_actual.fecha_finalizacion.date.day }};
+    console.log(date1)
+    document.getElementById("fecha_inicio").setAttribute("min", date1);
+    document.getElementById("fecha_inicio").addEventListener("change", ()=>{
+        document.getElementById("fecha_fin").setAttribute("min", document.getElementById("fecha_inicio").value)
+    })
+</script>
+{% endif %}
+{% endblock %}

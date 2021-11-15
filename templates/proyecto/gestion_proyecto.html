@@ -145,10 +145,19 @@ right: 20px;
                           <td>{{ ustory.estado }}</td>
                         {% if proyecto.estado == 'ACT' and proyecto.sprint_actual.estado == 'conf1' %}
                             <td>
-                                <a class="btn btn-success"
-                                   href="{% url 'cargar_sprint_backlog' usPk=ustory.pk sprintPk=proyecto.sprint_actual.pk %}">
-                                    <h4>+</h4>
-                                </a>
+                                <form method="POST"
+                                        action="{% url 'cargar_sprint_backlog' usPk=ustory.pk sprintPk=proyecto.sprint_actual.pk %}">
+                                    {% csrf_token %}
+                                    <select name="sprintx" id="sprint" style="width: 150px">
+                                        <option value="1">Sprint Actual</option>
+                                        {% if proyecto.siguiente_sprint %}
+                                            <option value="2">Sprint Siguiente</option>
+                                        {% endif %}
+                                    </select>
+                                    <button class="btn btn-success">
+                                        <h4>+</h4>
+                                    </button>
+                                </form>
                             </td>
                         {% endif %}
                         </tr>
@@ -180,10 +189,15 @@ right: 20px;
             {% endif %}
         </div>
     </div>
-
-
 {% endif %}
-{% if proyecto.estado == 'ACT' %}
+{% if not proyecto.sprint_actual or not proyecto.siguiente_sprint and proyecto.estado == 'ACT' %}
+    <div class="row mt-2">
+        <div class="col-md-2">
+            <a href="{% url 'crear_sprint' slug=proyecto.slug %}" class="btn btn-dark">Planificar Sprint</a>
+        </div>
+    </div>
+{% endif %}
+{%  if proyecto.sprint_actual %}
     {% include 'sprint/gestion_sprint.html' %}
 {% endif %}
 {% if proyecto.estado == 'FIN' %}
