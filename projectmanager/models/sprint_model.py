@@ -41,15 +41,20 @@ class Sprint(models.Model):
         ('fin', 'Sprint finalizado'),
     )
     fecha_inicio = models.DateTimeField(null=True, blank=True)
-    fecha_inicio_desarrollo = models.DateTimeField(null=True, blank=True)
+    fecha_finalizacion = models.DateTimeField(null=True, blank=True)
+    capacidad_horas = models.FloatField(null=True, blank=True, default=0)
+    horas_ocupadas_us = models.FloatField(null=True, blank=True, default=0)
     duracion_estimada_dias = models.IntegerField(null=True, blank=True)
     duracion_restante_dias = models.IntegerField(blank=True, null=True)
     horas_realizadas = models.FloatField(null=True, blank=True, default=0)
-    fecha_finalizacion = models.DateTimeField(null=True, blank=True)
+    fecha_inicio_desarrollo = models.DateTimeField(null=True, blank=True)
+    fecha_finalizacion_real = models.DateTimeField(null=True, blank=True)
     estado = models.CharField(max_length=20, choices=ESTADOS, default='conf1')
     proyecto = models.ForeignKey(Proyecto, related_name="registro_sprints", on_delete=models.CASCADE, null=True)
     proyecto_actual = models.OneToOneField(Proyecto, related_name="sprint_actual", blank=True, null=True,
                                            on_delete=models.CASCADE)
+    proyecto_sig = models.OneToOneField(Proyecto, related_name="siguiente_sprint", blank=True, null=True,
+                                        on_delete=models.CASCADE)
     saved_us_progress = ArrayField(models.IntegerField(), null=True, blank=True)
     saved_horas_us_total = models.IntegerField(null=True, blank=True)
 

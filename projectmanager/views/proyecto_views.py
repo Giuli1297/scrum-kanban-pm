@@ -170,6 +170,8 @@ class GestionProyectoView(UserAccessMixin, View):
                 if work.proyecto == proyecto:
                     tiempos_totales[scrum_member.username] = work.totalEnProyecto
         finalizar = True
+        if proyecto.estado != 'ACT':
+            finalizar = False
         for us in proyecto.product_backlog.all():
             if us.estado != 'Release':
                 finalizar = False
@@ -385,7 +387,6 @@ class ProyectoIniciarView(UserAccessMixin, View):
 
         if proyecto.estado == 'PEN':
             proyecto.estado = 'ACT'
-            sprint = Sprint.objects.create(proyecto=proyecto, proyecto_actual=proyecto)
             proyecto.save()
         else:
             messages.error(request, "Proyecto no se puede iniciar")
@@ -434,7 +435,6 @@ class FinalizarProyecto(View):
     Vista basada en clases utilizada para la
     finalizacion de un prouectp
     """
-
 
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)

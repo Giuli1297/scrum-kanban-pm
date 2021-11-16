@@ -37,14 +37,19 @@
 
 {% endblock %}
 
-{% if proyecto.sprint_actual.estado != 'conf3' %}
+{% if proyecto.sprint_actual.estado == 'conf1' or proyecto.sprint_actual.estado == 'conf2' %}
 <div class="row mt-2">
     <div class="col-md-6 border border-2">
         <div class="row m-1">
             <div class="col-md-4">
-                <h4>Sprint Backlog</h4>
+                <h4>Sprint Backlog - (Sprint Actual)</h4>
             </div>
-            <div class="col-md-6"></div>
+            <div class="col-md-4"></div>
+            <div class="col-md-2">
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal1">
+                      Capacidad
+                    </button>
+            </div>
             <div class="col-md-2">
                 {% if proyecto.sprint_actual.estado == 'conf2' %}
                     <a class="btn btn-dark" href="{% url 'proyecto_gestion' proyecto.slug %}">Actualizar</a>
@@ -107,14 +112,14 @@
             <div style="margin-block: 10px;">
                 {% if 'iniciar_ppoker_proyecto' in proyecto_perms or request.user|has_group:'Administrador' %}
                     {% if proyecto.sprint_actual.estado == 'conf1' %}
-                        <a class="btn btn-dark align-center" href="{% url 'planning_poker_smaster' slug=proyecto.slug %}" >
+                        <a class="btn btn-dark align-center" href="{% url 'planning_poker_smaster' slug=proyecto.slug sprintPk=proyecto.sprint_actual.pk %}" >
                             Realizar Planning Poker
                         </a>
                     {% elif proyecto.sprint_actual.estado == 'conf2' %}
                         {% if 'estimar_sprint' in proyecto_perms or request.user|has_group:'Administrador' %}
 
                             <a class="btn btn-dark align-center" href="{% url 'estimar_sprint' slug=proyecto.slug %}" >
-                                Estimar Sprint e Iniciar Desarrollo
+                                Iniciar Desarrollo
                             </a>
                         {% endif %}
 
@@ -124,8 +129,180 @@
             </div>
         </div>
     </div>
+    {% if proyecto.siguiente_sprint %}
+        <div class="col-md-6 border border-2">
+        <div class="row m-1">
+            <div class="col-md-4">
+                <h4>Sprint Backlog - (Planificacion Sprint Siguiente)</h4>
+            </div>
+            <div class="col-md-4"></div>
+            <div class="col-md-2">
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+                      Capacidad
+                    </button>
+            </div>
+            <div class="col-md-2">
+                {% if proyecto.siguiente_sprint.estado == 'conf2' %}
+                    <a class="btn btn-dark" href="{% url 'proyecto_gestion' proyecto.slug %}">Actualizar</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row m-1">
+            <table class="table mb-2">
+              <thead>
+                <tr>
+                    <th scope="col">User Story</th>
+                    {% if proyecto.siguiente_sprint.estado == 'conf1' %}
+                        <th scope="col">Asignar</th>
+                        <th scope="col">Remover</th>
+                    {% elif proyecto.siguiente_sprint.estado == 'conf2' %}
+                        <th scope="col">Encargado</th>
+                        <th scope="col">Horas (Planning Poker)</th>
+                    {% endif %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for user_story in proyecto.siguiente_sprint.sprint_backlog.all %}
+                    <tr>
+                        <th scope="row">{{ user_story.descripcion }}</th>
+                        {% if proyecto.siguiente_sprint.estado == 'conf1' %}
+                            <td>
+                                {% if user_story.desarrolladorAsignado == null %}
+                                    <a class="btn btn-dark"
+                                       href="{% url 'asignar_estimar_user_story' usPk=user_story.pk %}">
+                                        Asignar/Estimar
+                                    </a>
+                                {% else %}
+                                    Ya esta Asignado y Estimado
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a class="btn btn-danger"
+                                   href="{% url 'quitar_us_de_sbacklog' usPk=user_story.pk %}">
+                                    <h4>-</h4>
+                                </a>
+                            </td>
+                        {% elif proyecto.siguiente_sprint.estado == 'conf2' %}
+                            <td>{{ user_story.desarrolladorAsignado.username }}</td>
+                            <td>
+                                {% if user_story.tiempoEstimado == 0 %}
+                                    Esperando estimacion de encargado
+                                {% else %}
+                                    {{ user_story.tiempoEstimado }}
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% empty %}
+                    <div class="mb-2">
+                        <p>No tienes US en tu SB, agregalos!</p>
+                    </div>
+                {% endfor %}
+              </tbody>
+            </table>
+            <div style="margin-block: 10px;">
+                {% if 'iniciar_ppoker_proyecto' in proyecto_perms or request.user|has_group:'Administrador' %}
+                    {% if proyecto.siguiente_sprint.estado == 'conf1' %}
+                        <a class="btn btn-dark align-center"
+                           href="{% url 'planning_poker_smaster' slug=proyecto.slug sprintPk=proyecto.siguiente_sprint.pk %}" >
+                            Realizar Planning Poker
+                        </a>
+                    {% endif %}
+
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% else %}
+        {% if proyecto.siguiente_sprint %}
+        <div class="row">
+        <div class="col-md-6 border border-2">
+        <div class="row m-1">
+            <div class="col-md-4">
+                <h4>Sprint Backlog - (Planificacion Sprint Siguiente)</h4>
+            </div>
+            <div class="col-md-4"></div>
+            <div class="col-md-2">
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+                      Capacidad
+                    </button>
+            </div>
+            <div class="col-md-2">
+                {% if proyecto.siguiente_sprint.estado == 'conf2' %}
+                    <a class="btn btn-dark" href="{% url 'proyecto_gestion' proyecto.slug %}">Actualizar</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row m-1">
+            <table class="table mb-2">
+              <thead>
+                <tr>
+                    <th scope="col">User Story</th>
+                    {% if proyecto.siguiente_sprint.estado == 'conf1' %}
+                        <th scope="col">Asignar</th>
+                        <th scope="col">Remover</th>
+                    {% elif proyecto.siguiente_sprint.estado == 'conf2' %}
+                        <th scope="col">Encargado</th>
+                        <th scope="col">Horas (Planning Poker)</th>
+                    {% endif %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for user_story in proyecto.siguiente_sprint.sprint_backlog.all %}
+                    <tr>
+                        <th scope="row">{{ user_story.descripcion }}</th>
+                        {% if proyecto.siguiente_sprint.estado == 'conf1' %}
+                            <td>
+                                {% if user_story.desarrolladorAsignado == null %}
+                                    <a class="btn btn-dark"
+                                       href="{% url 'asignar_estimar_user_story' usPk=user_story.pk %}">
+                                        Asignar/Estimar
+                                    </a>
+                                {% else %}
+                                    Ya esta Asignado y Estimado
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a class="btn btn-danger"
+                                   href="{% url 'quitar_us_de_sbacklog' usPk=user_story.pk %}">
+                                    <h4>-</h4>
+                                </a>
+                            </td>
+                        {% elif proyecto.siguiente_sprint.estado == 'conf2' %}
+                            <td>{{ user_story.desarrolladorAsignado.username }}</td>
+                            <td>
+                                {% if user_story.tiempoEstimado == 0 %}
+                                    Esperando estimacion de encargado
+                                {% else %}
+                                    {{ user_story.tiempoEstimado }}
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% empty %}
+                    <div class="mb-2">
+                        <p>No tienes US en tu SB, agregalos!</p>
+                    </div>
+                {% endfor %}
+              </tbody>
+            </table>
+            <div style="margin-block: 10px;">
+                {% if 'iniciar_ppoker_proyecto' in proyecto_perms or request.user|has_group:'Administrador' %}
+                    {% if proyecto.siguiente_sprint.estado == 'conf1' %}
+                        <a class="btn btn-dark align-center"
+                           href="{% url 'planning_poker_smaster' slug=proyecto.slug sprintPk=proyecto.siguiente_sprint.pk %}" >
+                            Realizar Planning Poker
+                        </a>
+                    {% endif %}
+
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    </div>
+    {% endif %}
     <div class="row mt-5"><h3 class="align-center">Sprint en Curso</h3><hr/></div>
     <div id="contenido" class="row mt-2">
 
@@ -281,15 +458,15 @@
     {% else %}
 
 
-        <input id='idia' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio_desarrollo.day }}">
-        <input id='imes' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio_desarrollo.month }}">
-        <input id='ianio' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio_desarrollo.year }}">
+        <input id='idia' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio.day }}">
+        <input id='imes' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio.month }}">
+        <input id='ianio' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio.year }}">
         <input id='fdia' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion.day }}">
         <input id='fmes' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion.month }}">
         <input id='fanio' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion.year }}">
         <div class="col-md-9">
             <h4>Duración del Sprint {{ proyecto.sprint_actual.duracion_estimada_dias }} dias laborales</h4>
-            <h4>Fecha inicio {{ proyecto.sprint_actual.fecha_inicio_desarrollo.day }}/{{ proyecto.sprint_actual.fecha_inicio_desarrollo.month }}
+            <h4>Dia Actual {{ proyecto.sprint_actual.fecha_inicio_desarrollo.day }}/{{ proyecto.sprint_actual.fecha_inicio_desarrollo.month }}
             /{{ proyecto.sprint_actual.fecha_inicio_desarrollo.year }}</h4>
             <h4>Fecha estimada de finalizacion {{ proyecto.sprint_actual.fecha_finalizacion.day }}/{{ proyecto.sprint_actual.fecha_finalizacion.month }}
             /{{ proyecto.sprint_actual.fecha_finalizacion.year }}</h4>
@@ -343,7 +520,49 @@
 
 
 {% endif %}
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 
+
+<div class="modal fade" id="exampleModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Capacidad del Sprint</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Capacidad en horas : {{ proyecto.sprint_actual.capacidad_horas }}</p>
+            <p>Horas consumidas por US: {{ proyecto.sprint_actual.horas_ocupadas_us }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Capacidad del Sprint</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Capacidad en horas: {{ proyecto.siguiente_sprint.capacidad_horas }}</p>
+            <p>Horas consumidas por US: {{ proyecto.siguiente_sprint.horas_ocupadas_us }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 {% block script %}
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
