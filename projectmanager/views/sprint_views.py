@@ -653,4 +653,17 @@ def get_list_user_current_sprint(request):
             if us.desarrolladorAsignado and us.desarrolladorAsignado.username != body['user']:
                 user_list.append(us.desarrolladorAsignado.username)
         return JsonResponse({"status": 200, "usuarios": user_list})
-    return JsonResponse({"status": 400})
+    return JsonResponse({"status": 400}) 
+
+def cambiar_dev_en_US(request):
+    """
+    Función para cambiar de desarrollador en un user story
+    """
+    if request.method == "POST":
+        body = json.loads(request.body)
+        user = User.objects.get(username=body['user'])
+        us = UserStory.objects.get(pk=body['id'])
+        us.desarrolladorAsignado = user 
+        us.save() 
+        return JsonResponse({"status": 200}) 
+    return JsonResponse({"status": 400}) 
