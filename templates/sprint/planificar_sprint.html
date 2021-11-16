@@ -4,7 +4,15 @@
 <div class="row mb-3">
     <h3>Planificacion del proximo Sprint</h3>
 </div>
-
+{% if proyecto.sprint_actual %}
+    <div class="row mb-3">
+        <h6>Sprint Actual</h6>
+        <ul>
+            <li>Fecha Inicio: {{ proyecto.sprint_actual.fecha_inicio }}</li>
+            <li>Fecha Fin: {{ proyecto.sprint_actual.fecha_finalizacion }}</li>
+        </ul>
+    </div>
+{% endif %}
 <div class="row mb-3">
     <div class="form-group col-md-4">
         <form method="post">
@@ -40,14 +48,24 @@
 </script>
 {% else %}
 <script>
+    let day = {{ proyecto.sprint_actual.fecha_finalizacion.date.day }};
+    let month = {{ proyecto.sprint_actual.fecha_finalizacion.date.month }};
+    if(day<10){
+        day = '0'+day;
+    }
+    if(month<10){
+        month = '0'+month;
+    }
     date1 = {{ proyecto.sprint_actual.fecha_finalizacion.date.year }}+'-'+
-            {{ proyecto.sprint_actual.fecha_finalizacion.date.month }}+'-'+
-            {{ proyecto.sprint_actual.fecha_finalizacion.date.day }};
-    console.log(date1)
-    document.getElementById("fecha_inicio").setAttribute("min", date1);
+            month+'-'+
+            day;
+    let datex = new Date(date1)
+    datex.setDate(datex.getDate() + 1);
+    document.getElementById("fecha_inicio").setAttribute("min", datex.toISOString().split('T')[0]);
     document.getElementById("fecha_inicio").addEventListener("change", ()=>{
         document.getElementById("fecha_fin").setAttribute("min", document.getElementById("fecha_inicio").value)
     })
+
 </script>
 {% endif %}
 {% endblock %}

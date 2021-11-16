@@ -1,5 +1,5 @@
-from datetime import timedelta,date,datetime
-import  pandas as pd
+from datetime import timedelta, date, datetime
+import pandas as pd
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -73,15 +73,40 @@ class PlanificarSprint(View):
         print(request.POST.get('fecha_inicio'))
         fecha_incio = datetime.datetime.strptime(request.POST.get('fecha_inicio'), "%Y-%m-%d")
         fecha_fin = datetime.datetime.strptime(request.POST.get('fecha_fin'), "%Y-%m-%d")
-        if hasattr(proyecto, "sprint_actual"):
-            Sprint.objects.create(fecha_inicio=fecha_incio, fecha_finalizacion=fecha_fin,
-                                  proyecto_sig=proyecto)
-        elif hasattr(proyecto, "siguiente_sprint"):
+
+        # Calcular capacidad de sprint
+        capacidad = 0
+        temp_date = fecha_incio
+        dia = ''
+        while temp_date < fecha_fin:
+
+            if temp_date.weekday() == 0:
+                dia = 'LUN'
+            elif temp_date.weekday() == 1:
+                dia = 'MAR'
+            elif temp_date.weekday() == 2:
+                dia = 'MIE'
+            elif temp_date.weekday() == 3:
+                dia = 'JUE'
+            elif temp_date.weekday() == 4:
+                dia = 'VIE'
+            else:
+                dia = ''
+
+            for work_user in proyecto.tiempos_de_usuarios.all():
+                if work_user.dia == dia:
+                    capacidad += work_user.horas
+            temp_date = temp_date + timedelta(days=1)
+
+        if hasattr(proyecto, "siguiente_sprint"):
             messages.error(request, "Ya tienes un sprint planificado")
             return redirect('proyecto_gestion', slug=proyecto.slug)
+        elif hasattr(proyecto, "sprint_actual"):
+            Sprint.objects.create(fecha_inicio=fecha_incio, fecha_finalizacion=fecha_fin, proyecto=proyecto,
+                                  proyecto_sig=proyecto, capacidad_horas=capacidad)
         else:
-            Sprint.objects.create(fecha_inicio=fecha_incio, fecha_finalizacion=fecha_fin,
-                                  proyecto_actual=proyecto)
+            Sprint.objects.create(fecha_inicio=fecha_incio, fecha_finalizacion=fecha_fin, proyecto=proyecto,
+                                  proyecto_actual=proyecto, capacidad_horas=capacidad)
         return redirect('proyecto_gestion', slug=slug)
 
 
@@ -92,18 +117,19 @@ class CargarSprintBacklog(View):
 
     def post(self, request, usPk, sprintPk, *args, **kwargs):
         sprint = Sprint.objects.get(pk=sprintPk)
-        proyecto = sprint.proyecto_actual
+        proyecto = sprint.proyecto
+        print(proyecto)
         if not request.user.has_perms(('projectmanager.cargar_sprint_backlog_proyecto',),
-                                      sprint.proyecto) and not request.user.groups.filter(
+                                      proyecto) and not request.user.groups.filter(
             name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
-            return redirect('proyecto_gestion', slug=sprint.proyecto.slug)
+            return redirect('proyecto_gestion', slug=proyecto.slug)
         sprint_selected = request.POST.get("sprintx")
         if sprint_selected == "2":
             sprint = sprint.proyecto_actual.siguiente_sprint
         if sprint.estado != 'conf1':
             messages.error(request, "Ya no puedes agregar user stories al sprint backlog")
-            return redirect('proyecto_gestion', slug=sprint.proyecto.slug)
+            return redirect('proyecto_gestion', slug=proyecto.slug)
         ustory = UserStory.objects.get(pk=usPk)
         ustory.sprint = sprint
         ustory.save()
@@ -128,10 +154,13 @@ class QuitarUSFromSprintBacklog(View):
             name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
+        sprint = ustory.sprint
+        sprint.horas_ocupadas_us -= ustory.tiempoEstimadoSMaster
         ustory.sprint = None
         ustory.desarrolladorAsignado = None
         ustory.tiempoEstimado = 0
         ustory.save()
+        sprint.save()
 
         # Log activity
         SystemActivity.objects.create(usuario=request.user,
@@ -176,6 +205,9 @@ class AsignarYEstimarUserStoryView(View):
             sm_asignado = form.cleaned_data['scrum_member_asignado']
             ustory.desarrolladorAsignado = sm_asignado
             ustory.tiempoEstimadoSMaster = horasEstimadas
+            sprint = ustory.sprint
+            sprint.horas_ocupadas_us += horasEstimadas
+            sprint.save()
             ustory.save()
             add_obj_perm_to_group('desarrollador_de_' + str(ustory.pk), 'desarrollar_user_story', ustory)
             add_user_to_obj_group(ustory.desarrolladorAsignado, 'desarrollador_de_' + str(ustory.pk))
@@ -300,6 +332,10 @@ class PlanningPokerSMemberView(View):
                 user_story.tiempoEstimado = float((horas_estimadas_smaster + horas_estimadas_smember) / 2)
                 user_story.save()
             # Log activity
+            sprint = user_story.sprint
+            sprint.horas_ocupadas_us -= user_story.tiempoEstimadoSMaster
+            sprint.horas_ocupadas_us += user_story.tiempoEstimado
+            sprint.save()
             SystemActivity.objects.create(usuario=request.user,
                                           descripcion="Ha estimado su User Story con id "
                                                       + str(user_story.pk) + " en el planning poker")
@@ -362,28 +398,19 @@ class EstimarSprint(View):
         sprint = proyecto.sprint_actual
         form = EstimacionSprint(request.POST)
 
-        if form.is_valid():
-            diasEstimados = form.cleaned_data['dias_estimados']
-            sprint.duracion_estimada_dias = diasEstimados
-            sprint.fecha_inicio_desarrollo = timezone.now().date()
-            fecha=numpy.busday_offset(sprint.fecha_inicio_desarrollo,diasEstimados,roll='backward')
-            ts=pd.to_datetime(str(fecha))#hace conversion de tipo numpy a datetime str
-            d=ts.strftime('%Y-%m-%d')#de str pasa a datetime
+        sprint.duracion_estimada_dias = numpy.busday_count(sprint.fecha_inicio.date(),
+                                                           sprint.fecha_finalizacion.date())
+        sprint.fecha_inicio_desarrollo = timezone.now().date()
+        sprint.estado = 'conf3'
 
-            sprint.fecha_finalizacion =  d
-            sprint.estado = 'conf3'
-
-            sprint.save()
-            for us in sprint.sprint_backlog.all():
-                us.estado = 'To-Do'
-                us.save()
-            # Log activity
-            SystemActivity.objects.create(usuario=request.user,
-                                          descripcion="Ha estimado el sprint con id " + str(sprint.pk))
-            messages.success(request, "Se ha asignado la estimación al Sprint")
-
-        else:
-            messages.error(request, "Un error a ocurrido")
+        sprint.save()
+        for us in sprint.sprint_backlog.all():
+            us.estado = 'To-Do'
+            us.save()
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha estimado el sprint con id " + str(sprint.pk))
+        messages.success(request, "Se ha asignado la estimación al Sprint")
 
         return redirect('proyecto_gestion', slug=slug)
 
@@ -417,7 +444,7 @@ class getDataForBurndownChart(View):
             horas_us_total = horas_us_total + us.tiempoEstimado
         duracionSprint = sprint.duracion_estimada_dias
         progreso = []
-        for x in range(0, duracionSprint+1):
+        for x in range(0, duracionSprint + 1):
             progreso.append(horas_us_total)
         for us in sprint.sprint_backlog.all().order_by('id'):
             if hasattr(us, 'QA') and us.QA.aceptar:
@@ -446,6 +473,7 @@ class ConfirmarFinalizarSprint(View):
     """
     Vista basada en clase que sirve una pagina de confirmacion para terminar sprint;
     """
+
     def get(self, request, sprintPk, *args, **kwargs):
         sprint = Sprint.objects.get(pk=sprintPk)
         proyecto = sprint.proyecto_actual
@@ -467,6 +495,9 @@ class FinalizarSprint(View):
     def get(self, request, sprintPk, *args, **kwargs):
         sprint = Sprint.objects.get(pk=sprintPk)
         proyecto = sprint.proyecto_actual
+        sprint_actual = proyecto.sprint_actual
+        if hasattr(proyecto, "siguiente_sprint"):
+            sprint_sig = proyecto.siguiente_sprint
         if not request.user.has_perms(('projectmanager.finalizar_sprint',),
                                       proyecto) and not request.user.groups.filter(name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
@@ -490,21 +521,22 @@ class FinalizarSprint(View):
         sprint.saved_us_progress = progreso
         sprint.saved_horas_us_total = horas_us_total
         sprint.save()
-        if sprint.estado == 'conf3':
-            sprint.estado = 'fin'
-            for user_story in sprint.sprint_backlog.all():
+        if sprint_actual.estado == 'conf3':
+            sprint_actual.estado = 'fin'
+            for user_story in sprint_actual.sprint_backlog.all():
                 if user_story.estado != 'Release':
                     user_story.estado = 'no-terminado'
                     user_story.desarrolladorAsignado = None
                     user_story.save()
-            nuevo_sprint = Sprint.objects.create(proyecto=proyecto)
-            sprint.proyecto_actual = None
-            sprint.fecha_finalizacion = timezone.now().date()
-            proyecto.sprint_actual = nuevo_sprint
-            nuevo_sprint.proyecto_actual = proyecto
+            sprint_actual.proyecto_actual = None
+            sprint_actual.fecha_finalizacion_real = timezone.now().date()
+            sprint_actual.save()
+            if hasattr(proyecto, "siguiente_sprint"):
+                if proyecto.siguiente_sprint is not None:
+                    sprint_sig.proyecto_actual = proyecto
+                    sprint_sig.proyecto_sig = None
+                    sprint_sig.save()
             proyecto.save()
-            sprint.save()
-            nuevo_sprint.save()
         else:
             messages.error(request, "Sprint no se puede finalizar")
             return redirect('proyecto_gestion', slug=proyecto.slug)
@@ -541,6 +573,7 @@ class ExtenderSprint(View):
     Viusta basada en clase para la exxtension de tiempo
     de un sprint en caso de que ya llegue a su limite
     """
+
     def get(self, request, slug, *args, **kwargs):
         form = EstimacionSprint()
         proyecto = Proyecto.objects.get(slug=slug)
