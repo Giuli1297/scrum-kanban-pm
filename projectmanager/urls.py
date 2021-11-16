@@ -37,6 +37,7 @@ urlpatterns = [
     path('proyectos/<slug:slug>/roles/<int:pk>/eliminar/', views.EliminarRolProyecto.as_view(),
          name='proyecto_rol_eliminar'),
     path('proyecto/list-users-by-group', views.get_list_users_group, name='poryecto_rol_usuarios'),
+    path('proyecto/list-users-by-sprint_current', views.get_list_user_current_sprint, name='poryecto_users_sprint'),
     path('proyectos/<slug:slug>/finalizarProyecto/', views.FinalizarProyecto.as_view(), name='finalizar_proyecto'),
 
     # URLS DE USER STORY
