@@ -74,3 +74,11 @@ def remove_all_perms_from_obj_group(group_name, instance):
         remove_perm(perm, group, instance)
     group.save()
     return group
+
+
+def calcular_capacidad_desarrollador(sm, proyecto):
+    capacidad = 0
+    for user_work in sm.tiempos_de_trabajo.all():
+        if user_work.proyecto == proyecto:
+            capacidad += user_work.horas
+    return capacidad

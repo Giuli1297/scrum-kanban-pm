@@ -195,12 +195,14 @@ right: 20px;
     </div>
 {% endif %}
 {% if not proyecto.sprint_actual or not proyecto.siguiente_sprint %}
-    {% if proyecto.estado == 'ACT' %}
-    <div class="row mt-2">
-        <div class="col-md-2">
-            <a href="{% url 'crear_sprint' slug=proyecto.slug %}" class="btn btn-dark">Planificar Sprint</a>
-        </div>
-    </div>
+    {% if "planificar_sprint" in proyecto_perms or request.user|has_group:'Administrador' %}
+        {% if proyecto.estado == 'ACT' %}
+            <div class="row mt-2">
+                <div class="col-md-2">
+                    <a href="{% url 'crear_sprint' slug=proyecto.slug %}" class="btn btn-dark">Planificar Sprint</a>
+                </div>
+            </div>
+        {% endif %}
     {% endif %}
 {% endif %}
 {%  if proyecto.sprint_actual %}

@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -312,7 +314,6 @@ class AgregarSMember(UserAccessMixin, View):
                                         totalEnProyecto=horas_totales)
             proyecto.scrum_member.add(scrum_member)
             proyecto.save()
-
         # Log activity
         SystemActivity.objects.create(usuario=request.user,
                                       descripcion="Ha agregado Scrum Members al proyecto " + proyecto.nombre)
@@ -442,9 +443,6 @@ class FinalizarProyecto(View):
             if us.estado != 'Release':
                 messages.error(request, "Proyecto no se puede finalizar")
                 return redirect('proyecto_gestion', slug=slug)
-        if proyecto.sprint_actual.estado != 'conf1':
-            messages.error(request, "Proyecto no se puede finalizar")
-            return redirect('proyecto_gestion', slug=slug)
         count = 0
         sprint_cantidad = proyecto.product_backlog.count()
         for us in proyecto.product_backlog.all():
@@ -459,7 +457,6 @@ class FinalizarProyecto(View):
     def post(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         proyecto.estado = 'FIN'
-        proyecto.sprint_actual.delete()
         proyecto.fecha_fin = timezone.now().date()
         for uw in proyecto.tiempos_de_usuarios.all():
             uw.delete()

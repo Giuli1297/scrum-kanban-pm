@@ -6,9 +6,15 @@
     <p>{{ ustory.descripcion }}</p>
     <h5>Informacion a tener en cuenta</h5>
     <ul>
-        <li>Cada dia consta de 8 horas de trabajo.</li>
-        <li>Capacidad del Sprint: {{ ustory.sprint.capacidad_horas }}.</li>
-        <li>Capacidad consumida: {{ ustory.sprint.horas_ocupadas_us }}</li>
+        <li>Capacidad del Sprint: {{ ustory.sprint.capacidad_horas }}. - Capacidad consumida: {{ ustory.sprint.horas_ocupadas_us }}</li>
+        {% for sm in ustory.proyecto.scrum_member.all %}
+           {% for capacidad in sm.capacidad_sprints.all %}
+               {% if capacidad.sprint == ustory.sprint %}
+                    <li>Scrum Member {{ sm.username }} -
+                        Capacidad: {{ capacidad.capacidad_horas }} hs. Saldo: {{ capacidad.saldo_horas }} hs.</li>
+               {% endif %}
+           {% endfor %}
+        {% endfor %}
     </ul>
 </div>
 <div class="row mb-3">

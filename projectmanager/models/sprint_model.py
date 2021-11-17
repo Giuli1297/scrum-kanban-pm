@@ -73,7 +73,9 @@ class Sprint(models.Model):
                                            on_delete=models.CASCADE)
     proyecto_sig = models.OneToOneField(Proyecto, related_name="siguiente_sprint", blank=True, null=True,
                                         on_delete=models.CASCADE)
+    scrum_member = models.ManyToManyField(User, related_name="sprints", blank=True)
     saved_us_progress = ArrayField(models.IntegerField(), null=True, blank=True)
+    saved_act_progress = ArrayField(models.IntegerField(), null=True, blank=True)
     saved_horas_us_total = models.IntegerField(null=True, blank=True)
 
     class Meta:

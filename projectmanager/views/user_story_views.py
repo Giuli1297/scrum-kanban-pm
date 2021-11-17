@@ -299,7 +299,7 @@ class RegistroDiario(View):
             horas = form.cleaned_data['horas']
             fecha = datetime.strptime(request.POST.get('fecha'), "%Y-%m-%d")
 
-            nuevoRegistro = RegistroActividadDiairia(us=US, descripcion=descripcion, hora=horas)
+            nuevoRegistro = RegistroActividadDiairia(us=US, descripcion=descripcion, hora=horas, fecha=fecha)
 
             nuevoRegistro.save()
             US.tiempoEnDesarrollo = US.tiempoEnDesarrollo + horas
@@ -467,15 +467,17 @@ class RealizarQAUSView(View):
         if form.is_valid():
             comentario = form.cleaned_data['comentario']
             aceptar = form.cleaned_data['aceptar']
+            fecha = datetime.strptime(request.POST.get('fecha'), "%Y-%m-%d")
             if aceptar == 'si':
                 aceptar = True
             else:
                 aceptar = False
             if not hasattr(user_story, 'QA'):
-                QA.objects.create(comentario=comentario, aceptar=aceptar, user_story=user_story)
+                QA.objects.create(comentario=comentario, aceptar=aceptar, user_story=user_story, fecha=fecha)
             else:
                 qa = user_story.QA
                 qa.comentario = comentario
+                qa.fecha = fecha
                 qa.aceptar = aceptar
                 qa.save()
             if user_story.QA.aceptar:

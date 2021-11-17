@@ -75,7 +75,8 @@ class Proyecto(models.Model):
                        ('cargar_sprint_backlog_proyecto', 'Puede cargar User Stories en el Sprint Backlog'),
                        ('estimar_sprint', 'Puede estimar sprint'),
                        ('realizar_qa', 'Puede realizar QA a user stories'),
-                       ('finalizar_sprint', 'Puede finalizar el sprint actual'),)
+                       ('finalizar_sprint', 'Puede finalizar el sprint actual'),
+                       ('planificar_sprint', 'Puede planficar Sprints'))
         default_permissions = ()
         ordering = ('-fecha_inicio',)
 
