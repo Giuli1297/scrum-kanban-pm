@@ -646,9 +646,8 @@ def get_list_user_current_sprint(request):
         body = json.loads(request.body)
         proyecto = Proyecto.objects.get(slug=body['slug'])
         user_list = []
-        for us in proyecto.product_backlog.all():
-            if us.desarrolladorAsignado and us.desarrolladorAsignado.username != body['user']:
-                user_list.append(us.desarrolladorAsignado.username)
+        for us in proyecto.scrum_member.all():
+            user_list.append(us.username)
         return JsonResponse({"status": 200, "usuarios": user_list})
     return JsonResponse({"status": 400}) 
 

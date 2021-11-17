@@ -352,7 +352,7 @@
                                             Realizar
                                     </a>
                                 {% endif %}
-                                {% with "scrum_master_"|add:proyecto.nombre as isGroup  %}
+                                {% with "scrum_master_"|add:proyecto.slug as isGroup  %}
                                     {% if request.user|has_group:isGroup %}
                                         <button id="{{user_story.pk}}" onclick="list_devs('{{ user_story.desarrolladorAsignado.username }}', '{{user_story.pk}}')" type="button" class="btn btn-danger mr-2" data-bs-toggle="modal" data-bs-target="#modalCambiarDev">
                                             Cambiar Dev
@@ -644,7 +644,8 @@
                 body: JSON.stringify({slug: id_proyecto, user: user})
             });
             let json = await resp.json();
-		    let parent = document.getElementById("listRadio");
+		    console.log(json)
+            let parent = document.getElementById("listRadio");
 		    for ( i = 0; i < json.usuarios.length; i++ ) {
 		    	let div = document.createElement("div");
 		    	div.setAttribute("class", "form-check");
