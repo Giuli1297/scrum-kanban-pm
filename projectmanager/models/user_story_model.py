@@ -27,17 +27,29 @@ class UserStory(models.Model):
     descripcion
         Breve descripcion del UserStory
 
+    tiempoEstimadoSMaster
+        tiempo estimado por el scrum master
+
+    tiempoEnDesarrollo
+        tiempo que lleva en desarrollo el userstory
+
     tiempoEstimado
         tiempo estimado para realizar el UserStory
 
     desarrolladorAsignado
         desarrollador asignado para realizar el UserStory
 
+    saldos_horas
+        El saldo de hora del sprint
+
     proyecto
         Proyecto al cual esta ligado el UserStory
 
     Sprint
         Sprint en donde esta contenido el UserStory
+
+    priodidad
+        priodidad asignada al userstory
     """
     ESTADOS = (
         ('Nuevo', 'Nuevo'),
