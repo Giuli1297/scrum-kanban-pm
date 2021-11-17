@@ -352,6 +352,13 @@
                                             Realizar
                                     </a>
                                 {% endif %}
+                                {% with "scrum_master_"|add:proyecto.nombre as isGroup  %}
+                                    {% if request.user|has_group:isGroup %}
+                                        <button id="{{user_story.pk}}" onclick="list_devs('{{ user_story.desarrolladorAsignado.username }}', '{{user_story.pk}}')" type="button" class="btn btn-danger mr-2" data-bs-toggle="modal" data-bs-target="#modalCambiarDev">
+                                            Cambiar Dev
+                                        </button>
+                                    {% endif %}
+                                {% endwith %}
                             </td>
                         </tr>
                     {% endif %}
@@ -513,6 +520,24 @@
 
 </div>
 
+<!--Modal para alerta de elimnación de rol-->
+<div class="modal fade" id="modalCambiarDev" tabindex="-1" aria-labelledby="modalCambiarDevLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalCambiarDev">Cambiar de Desarrollador</h5>
+        <button onclick="limpiar()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+	  <div id="listRadio" class="w-25 my-3 ms-3">
+	  </div>
+      <div class="modal-footer">
+        <button onclick="limpiar()" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <a href="{% url 'proyecto_gestion' proyecto.slug %}" id="cambiarDesarrollador" onclick="changeDev()" class="btn btn-primary" role="button">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 {% endif %}
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -562,6 +587,8 @@
 {% block script %}
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
  <script >
+
+        var pk_us;
         var iDia;
         var iMes;
         var iAnio;
@@ -580,30 +607,20 @@
         var seg=0;
 
         var defaultData = null;
-        console.log(iDia);
-        console.log(fDia);
         const days=document.getElementById('days');
         const hours=document.getElementById('hours');
         const minutes=document.getElementById('minutes');
         const seconds=document.getElementById('seconds');
 
         const fecha_final= new Date(fAnio,fMes-1,fDia);
-        console.log(fecha_final)
 
         function updateCountdown(){
             const tiempoActual=new Date()
             const diff=fecha_final-tiempoActual
-            console.log(diff);
-            console.log(fAnio);
-            console.log(fMes);
-            console.log(fDia);
-            console.log(fecha_final);
-            console.log(tiempoActual);
             const d=Math.floor(diff/1000/60/60/24);
-            const h=Math.floor(diff/1000/60/60)%24 -8 ;
+            const h=Math.floor(diff/1000/60/60)%24 -8;
             const m=Math.floor(diff/1000/60)%60;
             const s=Math.floor(diff/1000)%60;
-            console.log(d);
 
 
 
@@ -614,6 +631,74 @@
             }
         setInterval(updateCountdown,1000);
 
+		async function list_devs(user, id_us) {
+            pk_us = id_us;
+			let csrftoken = getCookie('csrftoken');
+            let id_proyecto = '{{ proyecto.slug }}';
+            let resp = await fetch("/proyecto/list-users-by-sprint_current", {  
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                },
+                body: JSON.stringify({slug: id_proyecto, user: user})
+            });
+            let json = await resp.json();
+		    let parent = document.getElementById("listRadio");
+		    for ( i = 0; i < json.usuarios.length; i++ ) {
+		    	let div = document.createElement("div");
+		    	div.setAttribute("class", "form-check");
+		    	let input = document.createElement("input");
+		    	input.setAttribute("class", "form-check-input");
+		    	input.setAttribute("type", "radio");
+		    	input.setAttribute("name", "usuario");
+		    	input.setAttribute("id", "default" + i);
+                input.setAttribute("value", json.usuarios[i]);
+		    	let label = document.createElement("label");
+		    	label.setAttribute("class", "form-check-label");
+		    	label.setAttribute("for", "default" + i);
+		    	label.innerHTML = json.usuarios[i];
+		    	div.appendChild(input);
+		    	div.appendChild(label);
+		    	parent.appendChild(div);
+		    }
+        }
+		    
+		function limpiar() {
+			let parent = document.getElementById("listRadio");
+			while ( parent.firstChild) {
+				parent.removeChild(parent.firstChild);
+			}
+		}
+
+		function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+    	}
+
+        async function changeDev() {
+            let csrftoken = getCookie('csrftoken');
+            let select = document.querySelector('input[name="usuario"]:checked').value;
+            let resp = await fetch("/proyecto/cambiar_dev", {  
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                },
+                body: JSON.stringify({id: pk_us, user: select})
+            });
+        }
 
     </script>
 {% endblock %}

@@ -8,7 +8,7 @@ from django.utils import timezone
 usuarios = [
     {'username': "juan"},
     {'username': "marcelo"},
-    {'username': "jessica_vecina"},
+    {'username': "jessica"},
     {'username': "juana"},
     {'username': "nelson"},
     {'username': "cesar"},
@@ -60,7 +60,7 @@ sm = [
 # Lista de proyectos iniciales
 proyectos = [
     {'nombre': "Proyecto1", 'descripcion': "Primer proyecto", 'scrum_master': 'ivan'},
-    {'nombre': "Proyecto2", 'descripcion': "Segundo proyecto", 'scrum_master': 'jessica_vecina'},
+    {'nombre': "Proyecto2", 'descripcion': "Segundo proyecto", 'scrum_master': 'jessica'},
     {'nombre': "Proyecto3", 'descripcion': "Tercer proyecto", 'scrum_master': 'nahuel'},
     {'nombre': "Proyecto4", 'descripcion': "Cuarto proyecto", 'scrum_master': 'claudia'},
     {'nombre': "Proyecto5", 'descripcion': "Quinto proyecto", 'scrum_master': 'marcelo'}
@@ -130,7 +130,6 @@ class Command(BaseCommand):
     admin = None
 
     def handle(self, *args, **options):
-        self.crearAdministrador()
         self.crearUsuarios()
         self.crearProyectos()
         self.crearUSPorProyecto()
@@ -142,7 +141,8 @@ class Command(BaseCommand):
         for usuario in usuarios:
             user = User.objects.create(username=usuario['username'], email="jperezis2fpuna@gmail.com")
             user.set_password("Probando1")
-            user.save()
+            user.save() 
+        self.admin = User.objects.get(is_superuser=True)
 
     def crearProyectos(self):
         print("...CREACION DE PROYECTOS....\n\n")
@@ -179,7 +179,7 @@ class Command(BaseCommand):
 
     def crear_proyecto_iniciado(self):
         pr = Proyecto.objects.create(nombre='Proyecto Iniciado', descripcion='Test',
-                                     scrum_master=User.objects.get(username='admin1'), estado='ACT',
+                                     scrum_master=User.objects.get(username='marcelo'), estado='ACT',
                                      fecha_inicio=timezone.now() - timezone.timedelta(days=20))
         user = User.objects.get(username='ivan')
         adminuser = User.objects.filter(groups__name="Administrador")[0]

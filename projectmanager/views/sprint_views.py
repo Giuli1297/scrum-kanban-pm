@@ -43,7 +43,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from projectmanager.views.general_views import UserAccessMixin
 from django.utils import timezone
 import datetime
-import numpy
+import numpy, json
 
 
 class PlanificarSprint(View):
@@ -270,7 +270,7 @@ class PlanningPokerView(View):
 
             email = EmailMessage(
                 email_subject,
-                'Realize su estimacions del user story: ' + activate_url,
+                'Realize su estimaciones:\n' + 'Nombre US: ' + us.descripcion + '\n' + 'Proyecto: ' + proyecto.nombre + '\n' + "Link: " + activate_url,
                 EMAIL_HOST_USER,
                 [us.desarrolladorAsignado.email],
             )
@@ -636,4 +636,31 @@ class ExtenderSprint(View):
                                       descripcion="Ha extendido el sprint con id " + str(sprint.pk))
         messages.success(request, "Se ha asignado la estimación al Sprint")
 
-        return redirect('proyecto_gestion', slug=slug)
+        return redirect('proyecto_gestion', slug=slug) 
+
+def get_list_user_current_sprint(request):
+    """
+    Obtiene todos los usuarios que estan en el sprint actual
+    """
+    if request.method == "POST":
+        body = json.loads(request.body)
+        proyecto = Proyecto.objects.get(slug=body['slug'])
+        user_list = []
+        for us in proyecto.product_backlog.all():
+            if us.desarrolladorAsignado and us.desarrolladorAsignado.username != body['user']:
+                user_list.append(us.desarrolladorAsignado.username)
+        return JsonResponse({"status": 200, "usuarios": user_list})
+    return JsonResponse({"status": 400}) 
+
+def cambiar_dev_en_US(request):
+    """
+    Función para cambiar de desarrollador en un user story
+    """
+    if request.method == "POST":
+        body = json.loads(request.body)
+        user = User.objects.get(username=body['user'])
+        us = UserStory.objects.get(pk=body['id'])
+        us.desarrolladorAsignado = user 
+        us.save() 
+        return JsonResponse({"status": 200}) 
+    return JsonResponse({"status": 400}) 
