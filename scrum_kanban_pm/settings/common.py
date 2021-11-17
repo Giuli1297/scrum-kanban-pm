@@ -129,7 +129,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-SITE_ID = 16
+SITE_ID = 17
 
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
