@@ -117,6 +117,9 @@ class PlanificarSprint(View):
                 CapacidadSMasteSprint.objects.create(capacidad_horas=capacidad_dev[s_member.username],
                                                      saldo_horas=capacidad_dev[s_member.username],
                                                      sprint=sprint1, scrum_member=s_member)
+                sprint1.scrum_member.add(s_member)
+
+            sprint1.save()
         else:
             sprint2 = Sprint.objects.create(fecha_inicio=fecha_incio, fecha_finalizacion=fecha_fin, proyecto=proyecto,
                                             fecha_inicio_desarrollo=fecha_incio, fecha_finalizacion_real=fecha_fin,
@@ -125,6 +128,8 @@ class PlanificarSprint(View):
                 CapacidadSMasteSprint.objects.create(capacidad_horas=capacidad_dev[s_member.username],
                                                      sprint=sprint2, scrum_member=s_member,
                                                      saldo_horas=capacidad_dev[s_member.username])
+                sprint2.scrum_member.add(s_member)
+            sprint2.save()
         return redirect('proyecto_gestion', slug=slug)
 
 
@@ -439,7 +444,7 @@ class EstimarSprint(View):
         if sprint.fecha_inicio_desarrollo > sprint.fecha_inicio:
             bandera_suma = False
             fecha_fin = sprint.fecha_inicio_desarrollo
-            fecha_incio = sprint.fecha_finalizacion
+            fecha_incio = sprint.fecha_inicio
         capacidad = sprint.capacidad_horas
         capacidad_dev = {}
         for s_member in proyecto.scrum_member.all():
