@@ -17,6 +17,8 @@ from django.views.generic import (
     TemplateView,
     DetailView
 )
+
+from projectmanager.models.user_story_model import RegistroActividadDiairia
 from scrum_kanban_pm.settings.development import EMAIL_HOST_USER
 from projectmanager.forms import *
 from django.core.mail import EmailMessage
@@ -30,7 +32,8 @@ from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
 from projectmanager.utils import account_activation_token, add_user_to_obj_group, add_perm_to_group, \
     add_obj_perm_to_group, \
-    add_users_to_obj_group, remove_all_perms_from_obj_group, remove_all_users_from_obj_group
+    add_users_to_obj_group, remove_all_perms_from_obj_group, remove_all_users_from_obj_group, \
+    calcular_capacidad_desarrollador
 from guardian.shortcuts import get_perms
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
@@ -76,9 +79,12 @@ class PlanificarSprint(View):
 
         # Calcular capacidad de sprint
         capacidad = 0
+        capacidad_dev = {}
+        for s_member in proyecto.scrum_member.all():
+            capacidad_dev[s_member.username] = 0
         temp_date = fecha_incio
         dia = ''
-        while temp_date < fecha_fin:
+        while temp_date <= fecha_fin:
 
             if temp_date.weekday() == 0:
                 dia = 'LUN'
@@ -96,20 +102,29 @@ class PlanificarSprint(View):
             for work_user in proyecto.tiempos_de_usuarios.all():
                 if work_user.dia == dia:
                     capacidad += work_user.horas
+                    capacidad_dev[work_user.desarrollador.username] += work_user.horas
             temp_date = temp_date + timedelta(days=1)
 
         if hasattr(proyecto, "siguiente_sprint"):
             messages.error(request, "Ya tienes un sprint planificado")
             return redirect('proyecto_gestion', slug=proyecto.slug)
         elif hasattr(proyecto, "sprint_actual"):
-            Sprint.objects.create(fecha_inicio=fecha_incio, fecha_finalizacion=fecha_fin,
-                                  fecha_inicio_desarrollo=fecha_incio, fecha_finalizacion_real=fecha_fin,
-                                  proyecto=proyecto,
-                                  proyecto_sig=proyecto, capacidad_horas=capacidad)
+            sprint1 = Sprint.objects.create(fecha_inicio=fecha_incio, fecha_finalizacion=fecha_fin,
+                                            fecha_inicio_desarrollo=fecha_incio, fecha_finalizacion_real=fecha_fin,
+                                            proyecto=proyecto,
+                                            proyecto_sig=proyecto, capacidad_horas=capacidad)
+            for s_member in proyecto.scrum_member.all():
+                CapacidadSMasteSprint.objects.create(capacidad_horas=capacidad_dev[s_member.username],
+                                                     saldo_horas=capacidad_dev[s_member.username],
+                                                     sprint=sprint1, scrum_member=s_member)
         else:
-            Sprint.objects.create(fecha_inicio=fecha_incio, fecha_finalizacion=fecha_fin, proyecto=proyecto,
-                                  fecha_inicio_desarrollo=fecha_incio, fecha_finalizacion_real=fecha_fin,
-                                  proyecto_actual=proyecto, capacidad_horas=capacidad)
+            sprint2 = Sprint.objects.create(fecha_inicio=fecha_incio, fecha_finalizacion=fecha_fin, proyecto=proyecto,
+                                            fecha_inicio_desarrollo=fecha_incio, fecha_finalizacion_real=fecha_fin,
+                                            proyecto_actual=proyecto, capacidad_horas=capacidad)
+            for s_member in proyecto.scrum_member.all():
+                CapacidadSMasteSprint.objects.create(capacidad_horas=capacidad_dev[s_member.username],
+                                                     sprint=sprint2, scrum_member=s_member,
+                                                     saldo_horas=capacidad_dev[s_member.username])
         return redirect('proyecto_gestion', slug=slug)
 
 
@@ -159,6 +174,9 @@ class QuitarUSFromSprintBacklog(View):
             return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
         sprint = ustory.sprint
         sprint.horas_ocupadas_us -= ustory.tiempoEstimadoSMaster
+        capacidadsm = CapacidadSMasteSprint.objects.get(sprint=ustory.sprint, scrum_member=ustory.desarrolladorAsignado)
+        capacidadsm.saldo_horas += ustory.tiempoEstimadoSMaster
+        capacidadsm.save()
         ustory.sprint = None
         ustory.desarrolladorAsignado = None
         ustory.tiempoEstimado = 0
@@ -210,6 +228,9 @@ class AsignarYEstimarUserStoryView(View):
             ustory.tiempoEstimadoSMaster = horasEstimadas
             sprint = ustory.sprint
             sprint.horas_ocupadas_us += horasEstimadas
+            capacidad = CapacidadSMasteSprint.objects.get(sprint=ustory.sprint, scrum_member=sm_asignado)
+            capacidad.saldo_horas -= horasEstimadas
+            capacidad.save()
             sprint.save()
             ustory.save()
             add_obj_perm_to_group('desarrollador_de_' + str(ustory.pk), 'desarrollar_user_story', ustory)
@@ -309,7 +330,6 @@ class PlanningPokerSMemberView(View):
             return render(request, 'sprint/planning_poker_scrummember.html', context)
         except Exception as ex:
             messages.error(request, "Error de Token")
-            print(ex)
             return redirect('home')
 
     def post(self, request, uidb64, token, usPk, *args, **kwargs):
@@ -334,17 +354,24 @@ class PlanningPokerSMemberView(View):
                 horas_estimadas_smaster = float(user_story.tiempoEstimadoSMaster)
                 user_story.tiempoEstimado = float((horas_estimadas_smaster + horas_estimadas_smember) / 2)
                 user_story.save()
+                sprint = user_story.sprint
+                sprint.horas_ocupadas_us -= user_story.tiempoEstimadoSMaster
+                sprint.horas_ocupadas_us += user_story.tiempoEstimado
+                capacidad = CapacidadSMasteSprint.objects.get(sprint=sprint,
+                                                              scrum_member=user_story.desarrolladorAsignado)
+                capacidad.saldo_horas += user_story.tiempoEstimadoSMaster
+                capacidad.saldo_horas -= user_story.tiempoEstimado
+                capacidad.save()
+                sprint.save()
+
             # Log activity
-            sprint = user_story.sprint
-            sprint.horas_ocupadas_us -= user_story.tiempoEstimadoSMaster
-            sprint.horas_ocupadas_us += user_story.tiempoEstimado
-            sprint.save()
             SystemActivity.objects.create(usuario=request.user,
                                           descripcion="Ha estimado su User Story con id "
                                                       + str(user_story.pk) + " en el planning poker")
             return redirect('proyecto_gestion', slug=user_story.proyecto.slug)
         except Exception as ex:
             messages.error(request, "Error de Token")
+            print(ex)
             return redirect('home')
 
 
@@ -405,7 +432,53 @@ class EstimarSprint(View):
                                                            sprint.fecha_finalizacion_real.date())
         sprint.estado = 'conf3'
 
+        # Calcular capacidad de sprint
+        bandera_suma = True
+        fecha_incio = sprint.fecha_inicio_desarrollo
+        fecha_fin = sprint.fecha_inicio
+        if sprint.fecha_inicio_desarrollo > sprint.fecha_inicio:
+            bandera_suma = False
+            fecha_fin = sprint.fecha_inicio_desarrollo
+            fecha_incio = sprint.fecha_finalizacion
+        capacidad = sprint.capacidad_horas
+        capacidad_dev = {}
+        for s_member in proyecto.scrum_member.all():
+            capacidad_dev_actual = CapacidadSMasteSprint.objects.get(sprint=sprint, scrum_member=s_member)
+            capacidad_dev[s_member.username] = capacidad_dev_actual.capacidad_horas
+        temp_date = fecha_incio
+        dia = ''
+        while temp_date < fecha_fin:
+
+            if temp_date.weekday() == 0:
+                dia = 'LUN'
+            elif temp_date.weekday() == 1:
+                dia = 'MAR'
+            elif temp_date.weekday() == 2:
+                dia = 'MIE'
+            elif temp_date.weekday() == 3:
+                dia = 'JUE'
+            elif temp_date.weekday() == 4:
+                dia = 'VIE'
+            else:
+                dia = ''
+
+            for work_user in proyecto.tiempos_de_usuarios.all():
+                if work_user.dia == dia:
+                    if bandera_suma:
+                        capacidad += work_user.horas
+                        capacidad_dev[work_user.desarrollador.username] += work_user.horas
+                    else:
+                        capacidad -= work_user.horas
+                        capacidad_dev[work_user.desarrollador.username] -= work_user.horas
+            temp_date = temp_date + timedelta(days=1)
+
         sprint.save()
+        for s_member in sprint.proyecto.scrum_member.all():
+            capacidad_dev_x = CapacidadSMasteSprint.objects.get(sprint=sprint, scrum_member=s_member)
+            capacidad_dev_x.capacidad_horas += capacidad_dev[s_member.username]
+            capacidad_dev_x.saldo_horas += capacidad_dev[s_member.username]
+            capacidad_dev_x.save()
+
         for us in sprint.sprint_backlog.all():
             us.estado = 'To-Do'
             us.save()
@@ -438,6 +511,7 @@ class getDataForBurndownChart(View):
     def get(self, request, slug, sprintPk, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         sprint = Sprint.objects.get(pk=sprintPk)
+        registros_de_actividad = RegistroActividadDiairia.objects.filter(us__sprint=sprint)
         horas_us_total = 0
         for us in sprint.sprint_backlog.all():
             if not us.tiempoEstimado > 0:
@@ -446,8 +520,11 @@ class getDataForBurndownChart(View):
             horas_us_total = horas_us_total + us.tiempoEstimado
         duracionSprint = sprint.duracion_estimada_dias
         progreso = []
+        progreso_act = []
         for x in range(0, duracionSprint + 1):
             progreso.append(horas_us_total)
+            progreso_act.append(horas_us_total)
+
         for us in sprint.sprint_backlog.all().order_by('id'):
             if hasattr(us, 'QA') and us.QA.aceptar:
                 diferencia_dia = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
@@ -456,15 +533,23 @@ class getDataForBurndownChart(View):
                     progreso[(duracionSprint) - i] -= us.tiempoEstimado
                     if progreso[(duracionSprint) - i] < 0:
                         progreso[(duracionSprint) - i] = 0
-        passed_days = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
-                                             datetime.datetime.now(timezone.utc).date()))
+
+        for actividad in registros_de_actividad:
+            diferencia_dia = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
+                                                    actividad.fecha.date()))
+            for i in range(0, duracionSprint + 1 - diferencia_dia):
+                progreso_act[(duracionSprint) - i] -= actividad.hora
+        passed_days = duracionSprint
+
         if sprint.estado == 'fin':
             progreso = sprint.saved_us_progress
+            progreso_act = sprint.saved_act_progress
             horas_us_total = sprint.saved_horas_us_total
         data = {
             'dias_estimados': duracionSprint,
             'horas_us_totales': horas_us_total,
             'progreso': progreso,
+            'progreso_act': progreso_act,
             'passed_days': passed_days,
             'horas_desarrolladas': 0
         }
@@ -505,22 +590,36 @@ class FinalizarSprint(View):
             messages.error(request, "No tienes permisos para eso")
             return redirect('/')
 
+        registros_de_actividad = RegistroActividadDiairia.objects.filter(us__sprint=sprint)
         horas_us_total = 0
         for us in sprint.sprint_backlog.all():
             horas_us_total = horas_us_total + us.tiempoEstimado
         duracionSprint = sprint.duracion_estimada_dias
         progreso = []
+        progreso_act = []
         for x in range(0, duracionSprint + 1):
             progreso.append(horas_us_total)
+            progreso_act.append(horas_us_total)
         for us in sprint.sprint_backlog.all().order_by('id'):
             if hasattr(us, 'QA') and us.QA.aceptar:
                 diferencia_dia = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
                                                         us.QA.fecha.date()))
+                print(sprint.fecha_inicio_desarrollo.date())
+                print(us.QA.fecha.date())
+                print(diferencia_dia)
                 for i in range(0, duracionSprint + 1 - diferencia_dia):
                     progreso[(duracionSprint) - i] -= us.tiempoEstimado
                     if progreso[(duracionSprint) - i] < 0:
                         progreso[(duracionSprint) - i] = 0
+
+        for actividad in registros_de_actividad:
+            diferencia_dia = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
+                                                    actividad.fecha.date()))
+            for i in range(0, duracionSprint + 1 - diferencia_dia):
+                progreso_act[(duracionSprint) - i] -= actividad.hora
+        passed_days = duracionSprint
         sprint.saved_us_progress = progreso
+        sprint.saved_act_progress = progreso_act
         sprint.saved_horas_us_total = horas_us_total
         sprint.fecha_finalizacion_real = timezone.now().date()
         sprint.save()
@@ -636,7 +735,8 @@ class ExtenderSprint(View):
                                       descripcion="Ha extendido el sprint con id " + str(sprint.pk))
         messages.success(request, "Se ha asignado la estimación al Sprint")
 
-        return redirect('proyecto_gestion', slug=slug) 
+        return redirect('proyecto_gestion', slug=slug)
+
 
 def get_list_user_current_sprint(request):
     """
@@ -649,7 +749,8 @@ def get_list_user_current_sprint(request):
         for us in proyecto.scrum_member.all():
             user_list.append(us.username)
         return JsonResponse({"status": 200, "usuarios": user_list})
-    return JsonResponse({"status": 400}) 
+    return JsonResponse({"status": 400})
+
 
 def cambiar_dev_en_US(request):
     """
@@ -659,7 +760,14 @@ def cambiar_dev_en_US(request):
         body = json.loads(request.body)
         user = User.objects.get(username=body['user'])
         us = UserStory.objects.get(pk=body['id'])
-        us.desarrolladorAsignado = user 
-        us.save() 
-        return JsonResponse({"status": 200}) 
-    return JsonResponse({"status": 400}) 
+        desarrolladorkue = us.desarrolladorAsignado
+        capacidad = CapacidadSMasteSprint.objects.get(sprint=us.sprint, scrum_member=desarrolladorkue)
+        capacidad.saldo_horas += us.tiempoEstimado
+        capacidad.save()
+        capacidadnew = CapacidadSMasteSprint.objects.get(sprint=us.sprint, scrum_member=user)
+        capacidadnew.saldo_horas -= us.tiempoEstimado
+        capacidadnew.save()
+        us.desarrolladorAsignado = user
+        us.save()
+        return JsonResponse({"status": 200})
+    return JsonResponse({"status": 400})

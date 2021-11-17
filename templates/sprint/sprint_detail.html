@@ -80,6 +80,7 @@
             const lab = [];
             var dataset1 = [];
             var dataset2 = [];
+            var dataset3 = [];
             console.log(defaultData.horas_us_totales);
             for(let i=0;i<=parseInt(defaultData.dias_estimados);i++){
                 lab.push(defaultData.dias_estimados-i);
@@ -87,6 +88,9 @@
             }
             for(let i=0;i<=defaultData.passed_days;i++){
                 dataset2.push(defaultData.progreso[i]);
+            }
+            for(let i=0;i<=defaultData.passed_days;i++){
+                dataset3.push(defaultData.progreso_act[i]);
             }
             const data = {
               labels: lab,
@@ -98,10 +102,17 @@
                   backgroundColor: 'rgb(255, 100, 50)',
                 },
                 {
-                  label: 'Progreso Real',
+                  label: 'Progreso QA',
                   data: dataset2,
                   borderColor: 'rgb(100, 100, 255)',
                   backgroundColor: 'rgb(100, 100, 255)',
+                },
+                {
+                  label: 'Progreso Actividades',
+                  data: dataset3,
+                  borderColor: 'rgb(100, 200, 200)',
+                  backgroundColor: 'rgb(100, 100, 200)',
+                    borderDash: [10,5]
                 }
               ]
             };

@@ -56,6 +56,7 @@ class Sprint(models.Model):
     proyecto_sig = models.OneToOneField(Proyecto, related_name="siguiente_sprint", blank=True, null=True,
                                         on_delete=models.CASCADE)
     saved_us_progress = ArrayField(models.IntegerField(), null=True, blank=True)
+    saved_act_progress = ArrayField(models.IntegerField(), null=True, blank=True)
     saved_horas_us_total = models.IntegerField(null=True, blank=True)
 
     class Meta:
