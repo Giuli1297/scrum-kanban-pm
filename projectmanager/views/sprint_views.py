@@ -102,10 +102,13 @@ class PlanificarSprint(View):
             messages.error(request, "Ya tienes un sprint planificado")
             return redirect('proyecto_gestion', slug=proyecto.slug)
         elif hasattr(proyecto, "sprint_actual"):
-            Sprint.objects.create(fecha_inicio=fecha_incio, fecha_finalizacion=fecha_fin, proyecto=proyecto,
+            Sprint.objects.create(fecha_inicio=fecha_incio, fecha_finalizacion=fecha_fin,
+                                  fecha_inicio_desarrollo=fecha_incio, fecha_finalizacion_real=fecha_fin,
+                                  proyecto=proyecto,
                                   proyecto_sig=proyecto, capacidad_horas=capacidad)
         else:
             Sprint.objects.create(fecha_inicio=fecha_incio, fecha_finalizacion=fecha_fin, proyecto=proyecto,
+                                  fecha_inicio_desarrollo=fecha_incio, fecha_finalizacion_real=fecha_fin,
                                   proyecto_actual=proyecto, capacidad_horas=capacidad)
         return redirect('proyecto_gestion', slug=slug)
 
@@ -397,10 +400,9 @@ class EstimarSprint(View):
         proyecto = Proyecto.objects.get(slug=slug)
         sprint = proyecto.sprint_actual
         form = EstimacionSprint(request.POST)
-
-        sprint.duracion_estimada_dias = numpy.busday_count(sprint.fecha_inicio.date(),
-                                                           sprint.fecha_finalizacion.date())
-        sprint.fecha_inicio_desarrollo = timezone.now().date()
+        sprint.fecha_inicio_desarrollo = timezone.now()
+        sprint.duracion_estimada_dias = numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
+                                                           sprint.fecha_finalizacion_real.date())
         sprint.estado = 'conf3'
 
         sprint.save()
@@ -520,6 +522,7 @@ class FinalizarSprint(View):
                         progreso[(duracionSprint) - i] = 0
         sprint.saved_us_progress = progreso
         sprint.saved_horas_us_total = horas_us_total
+        sprint.fecha_finalizacion_real = timezone.now().date()
         sprint.save()
         if sprint_actual.estado == 'conf3':
             sprint_actual.estado = 'fin'
@@ -624,19 +627,13 @@ class ExtenderSprint(View):
     def post(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         sprint = proyecto.sprint_actual
-        form = EstimacionSprint(request.POST)
-
-        if form.is_valid():
-            diasEstimados = form.cleaned_data['dias_estimados']
-            sprint.duracion_estimada_dias += diasEstimados
-            sprint.fecha_finalizacion = timezone.now().date() + timedelta(hours=sprint.duracion_estimada_dias * 24 + 16)
-            sprint.save()
-            # Log activity
-            SystemActivity.objects.create(usuario=request.user,
-                                          descripcion="Ha extendido el sprint con id " + str(sprint.pk))
-            messages.success(request, "Se ha asignado la estimación al Sprint")
-
-        else:
-            messages.error(request, "Un error a ocurrido")
+        fecha_fin = datetime.datetime.strptime(request.POST.get('fecha_fin'), "%Y-%m-%d")
+        sprint.fecha_finalizacion = fecha_fin
+        sprint.fecha_finalizacion_real = fecha_fin
+        sprint.save()
+        # Log activity
+        SystemActivity.objects.create(usuario=request.user,
+                                      descripcion="Ha extendido el sprint con id " + str(sprint.pk))
+        messages.success(request, "Se ha asignado la estimación al Sprint")
 
         return redirect('proyecto_gestion', slug=slug)

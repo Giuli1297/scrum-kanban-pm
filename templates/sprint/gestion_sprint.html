@@ -109,8 +109,9 @@
                 {% endfor %}
               </tbody>
             </table>
-            <div style="margin-block: 10px;">
-                {% if 'iniciar_ppoker_proyecto' in proyecto_perms or request.user|has_group:'Administrador' %}
+            <div class="row" style="margin-block: 10px;">
+                <div class="col-md-6">
+                    {% if 'iniciar_ppoker_proyecto' in proyecto_perms or request.user|has_group:'Administrador' %}
                     {% if proyecto.sprint_actual.estado == 'conf1' %}
                         <a class="btn btn-dark align-center" href="{% url 'planning_poker_smaster' slug=proyecto.slug sprintPk=proyecto.sprint_actual.pk %}" >
                             Realizar Planning Poker
@@ -126,16 +127,23 @@
                     {% endif %}
 
                 {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="card-subtitle mb-2 text-muted">Fecha Inicio: {{ proyecto.sprint_actual.fecha_inicio_desarrollo|date:"M d, Y" }}</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">Fecha Fin: {{ proyecto.sprint_actual.fecha_finalizacion_real|date:"M d, Y" }}</h6>
+                </div>
             </div>
         </div>
     </div>
     {% if proyecto.siguiente_sprint %}
         <div class="col-md-6 border border-2">
         <div class="row m-1">
-            <div class="col-md-4">
-                <h4>Sprint Backlog - (Planificacion Sprint Siguiente)</h4>
+            <div class="col-md-5">
+                <h4>Sprint Backlog - (Sprint Siguiente)</h4>
             </div>
-            <div class="col-md-4"></div>
+            <div class="col-md-3"></div>
             <div class="col-md-2">
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
                       Capacidad
@@ -210,6 +218,12 @@
                     {% endif %}
 
                 {% endif %}
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="card-subtitle mb-2 text-muted">Fecha Inicio: {{ proyecto.siguiente_sprint.fecha_inicio_desarrollo|date:"M d, Y" }}</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">Fecha Fin: {{ proyecto.siguiente_sprint.fecha_finalizacion_real|date:"M d, Y" }}</h6>
+                </div>
             </div>
         </div>
     </div>
@@ -220,10 +234,10 @@
         <div class="row">
         <div class="col-md-6 border border-2">
         <div class="row m-1">
-            <div class="col-md-4">
-                <h4>Sprint Backlog - (Planificacion Sprint Siguiente)</h4>
+            <div class="col-md-5">
+                <h4>Sprint Backlog - (Sprint Siguiente)</h4>
             </div>
-            <div class="col-md-4"></div>
+            <div class="col-md-3"></div>
             <div class="col-md-2">
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
                       Capacidad
@@ -298,6 +312,12 @@
                     {% endif %}
 
                 {% endif %}
+            </div>
+        <div class="row">
+                <div class="col-md-6">
+                    <h6 class="card-subtitle mb-2 text-muted">Fecha Inicio: {{ proyecto.siguiente_sprint.fecha_inicio_desarrollo|date:"M d, Y" }}</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">Fecha Fin: {{ proyecto.siguiente_sprint.fecha_finalizacion_real|date:"M d, Y" }}</h6>
+                </div>
             </div>
         </div>
     </div>
@@ -451,18 +471,18 @@
     {% else %}
 
 
-        <input id='idia' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio.day }}">
-        <input id='imes' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio.month }}">
-        <input id='ianio' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio.year }}">
-        <input id='fdia' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion.day }}">
-        <input id='fmes' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion.month }}">
-        <input id='fanio' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion.year }}">
+        <input id='idia' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio_desarrollo.day }}">
+        <input id='imes' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio_desarrollo.month }}">
+        <input id='ianio' type="hidden" value="{{ proyecto.sprint_actual.fecha_inicio_desarrollo.year }}">
+        <input id='fdia' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion_real.day }}">
+        <input id='fmes' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion_real.month }}">
+        <input id='fanio' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion_real.year }}">
         <div class="col-md-9">
             <h4>Duración del Sprint {{ proyecto.sprint_actual.duracion_estimada_dias }} dias laborales</h4>
             <h4>Dia Actual {{ proyecto.sprint_actual.fecha_inicio_desarrollo.day }}/{{ proyecto.sprint_actual.fecha_inicio_desarrollo.month }}
             /{{ proyecto.sprint_actual.fecha_inicio_desarrollo.year }}</h4>
-            <h4>Fecha estimada de finalizacion {{ proyecto.sprint_actual.fecha_finalizacion.day }}/{{ proyecto.sprint_actual.fecha_finalizacion.month }}
-            /{{ proyecto.sprint_actual.fecha_finalizacion.year }}</h4>
+            <h4>Fecha estimada de finalizacion {{ proyecto.sprint_actual.fecha_finalizacion_real.day }}/{{ proyecto.sprint_actual.fecha_finalizacion_real.month }}
+            /{{ proyecto.sprint_actual.fecha_finalizacion_real.year }}</h4>
             <div id="countdown" class="countdown">
                 <div  class="time">
                     <h5 id="days"></h5>
