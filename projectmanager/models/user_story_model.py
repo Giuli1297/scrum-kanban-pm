@@ -54,6 +54,7 @@ class UserStory(models.Model):
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Nuevo')
 
     tiempoEnDesarrollo = models.FloatField(validators=[MinValueValidator(0)], default=0, null=True)
+    saldo_horas = models.FloatField(default=0.0)
     desarrolladorAsignado = models.ForeignKey(User, related_name='desarrollador_asignado', null=True, blank=True,
                                               on_delete=models.CASCADE)
     proyecto = models.ForeignKey(Proyecto, related_name='product_backlog', null=True, on_delete=models.CASCADE)
@@ -63,6 +64,10 @@ class UserStory(models.Model):
 
     def historial(self):
         return HistorialUs.objects.filter(descripcion=self).order_by('version')
+
+    def save(self, *args, **kwargs):
+        self.saldo_horas = self.tiempoEstimado - self.tiempoEnDesarrollo
+        super().save(*args, **kwargs)
 
     class Meta:
         permissions = (
@@ -180,7 +185,8 @@ class RegistroActividadDiairia(models.Model):
             descripcion breve del cambio realizado.
     """
     us = models.ForeignKey(UserStory, related_name='RegistroActividad', null=True, on_delete=models.CASCADE)
-    descripcion = models.TextField(blank=True, max_length=5000)
+    descripcion = models.TextField(blank=True, null=True, max_length=5000)
+    fecha = models.DateTimeField(default=timezone.now)
     hora = models.FloatField(default=0)
 
 class UserStorySprint(models.Model):

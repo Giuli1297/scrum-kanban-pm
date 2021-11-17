@@ -6,7 +6,7 @@
     <h5>Informacion a tener en cuenta</h5>
     <ul>
         <li>Horas de desarrollo total de los User Stories: {{ horas }} hs.</li>
-        <li>Horas por semana de los desarrolladores: {{ horas_desarrolladores }} hs.</li>
+        <li>Capacidad del Sprint: {{ proyecto.sprint_actual.capacidad_horas }} </li>
         <li>Cada dia consta de 8 horas de trabajo.</li>
         <li>Los dias se contaran a partir de hoy.</li>
         <li>Horas de desarrollo disponible en la semana: (El "*" marca el dia actual)</li>
@@ -38,7 +38,6 @@
     <div class="form-group col-md-4">
         <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
             <button class="btn btn-dark" type="submit">Iniciar Desarrollo del Proyecto</button>
         </form>
         <a class="mb-3 btn btn-danger" href="{% url 'proyecto_gestion' slug=proyecto.slug %}">Volver</a>

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -295,6 +297,7 @@ class RegistroDiario(View):
         if form.is_valid():
             descripcion = form.cleaned_data['descripcion']
             horas = form.cleaned_data['horas']
+            fecha = datetime.strptime(request.POST.get('fecha'), "%Y-%m-%d")
 
             nuevoRegistro = RegistroActividadDiairia(us=US, descripcion=descripcion, hora=horas)
 
