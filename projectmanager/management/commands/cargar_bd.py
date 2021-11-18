@@ -70,56 +70,56 @@ userHistory = [
     {
         'proyecto': "proyecto1",
         'us': [
-            {'descripcion': "US1_P1", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US2_P1", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US3_P1", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US4_P1", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US5_P1", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US6_P1", "requisitos": "Terminar y testear el server"},
+            {'descripcion': "US1_P1", "requisitos": "Terminar y testear el server", "prioridad": 1},
+            {'descripcion': "US2_P1", "requisitos": "Terminar y testear el server", "prioridad": 2},
+            {'descripcion': "US3_P1", "requisitos": "Terminar y testear el server", "prioridad": 3},
+            {'descripcion': "US4_P1", "requisitos": "Terminar y testear el server", "prioridad": 5},
+            {'descripcion': "US5_P1", "requisitos": "Terminar y testear el server", "prioridad": 4},
+            {'descripcion': "US6_P1", "requisitos": "Terminar y testear el server", "prioridad": 7},
         ]
     },
     {
         'proyecto': "proyecto2",
         'us': [
-            {'descripcion': "US1_P2", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US2_P2", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US3_P2", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US4_P2", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US5_P2", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US6_P2", "requisitos": "Terminar y testear el server"},
+            {'descripcion': "US1_P2", "requisitos": "Terminar y testear el server", "prioridad": 1},
+            {'descripcion': "US2_P2", "requisitos": "Terminar y testear el server", "prioridad": 2},
+            {'descripcion': "US3_P2", "requisitos": "Terminar y testear el server", "prioridad": 3},
+            {'descripcion': "US4_P2", "requisitos": "Terminar y testear el server", "prioridad": 5},
+            {'descripcion': "US5_P2", "requisitos": "Terminar y testear el server", "prioridad": 4},
+            {'descripcion': "US6_P2", "requisitos": "Terminar y testear el server", "prioridad": 7},
         ]
     },
     {
         'proyecto': "proyecto3",
         'us': [
-            {'descripcion': "US1_P3", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US2_P3", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US3_P3", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US4_P3", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US5_P3", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US6_P3", "requisitos": "Terminar y testear el server"},
+            {'descripcion': "US1_P3", "requisitos": "Terminar y testear el server", "prioridad": 1},
+            {'descripcion': "US2_P3", "requisitos": "Terminar y testear el server", "prioridad": 2},
+            {'descripcion': "US3_P3", "requisitos": "Terminar y testear el server", "prioridad": 3},
+            {'descripcion': "US4_P3", "requisitos": "Terminar y testear el server", "prioridad": 5},
+            {'descripcion': "US5_P3", "requisitos": "Terminar y testear el server", "prioridad": 4},
+            {'descripcion': "US6_P3", "requisitos": "Terminar y testear el server", "prioridad": 7},
         ]
     },
     {
         'proyecto': "proyecto4",
         'us': [
-            {'descripcion': "US1_P4", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US2_P4", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US3_P4", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US4_P4", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US5_P4", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US6_P4", "requisitos": "Terminar y testear el server"},
+            {'descripcion': "US1_P4", "requisitos": "Terminar y testear el server", "prioridad": 1},
+            {'descripcion': "US2_P4", "requisitos": "Terminar y testear el server", "prioridad": 2},
+            {'descripcion': "US3_P4", "requisitos": "Terminar y testear el server", "prioridad": 3},
+            {'descripcion': "US4_P4", "requisitos": "Terminar y testear el server", "prioridad": 5},
+            {'descripcion': "US5_P4", "requisitos": "Terminar y testear el server", "prioridad": 4},
+            {'descripcion': "US6_P4", "requisitos": "Terminar y testear el server", "prioridad": 7},
         ]
     },
     {
         'proyecto': "proyecto5",
         'us': [
-            {'descripcion': "US1_P5", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US2_P5", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US3_P5", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US4_P5", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US5_P5", "requisitos": "Terminar y testear el server"},
-            {'descripcion': "US6_P5", "requisitos": "Terminar y testear el server"},
+            {'descripcion': "US1_P5", "requisitos": "Terminar y testear el server", "prioridad": 1},
+            {'descripcion': "US2_P5", "requisitos": "Terminar y testear el server", "prioridad": 2},
+            {'descripcion': "US3_P5", "requisitos": "Terminar y testear el server", "prioridad": 3},
+            {'descripcion': "US4_P5", "requisitos": "Terminar y testear el server", "prioridad": 5},
+            {'descripcion': "US5_P5", "requisitos": "Terminar y testear el server", "prioridad": 4},
+            {'descripcion': "US6_P5", "requisitos": "Terminar y testear el server", "prioridad": 7},
         ]
     }
 ]
@@ -157,7 +157,7 @@ class Command(BaseCommand):
         for x in userHistory:
             p = Proyecto.objects.get(nombre=x['proyecto'])
             for y in x['us']:
-                UserStory.objects.create(descripcion=y['descripcion'], descripcionDone=y['requisitos'], proyecto=p)
+                UserStory.objects.create(descripcion=y['descripcion'], descripcionDone=y['requisitos'], prioridad=y['prioridad'] proyecto=p)
                 SystemActivity.objects.create(usuario=self.admin,
                                               descripcion="Ha creado un user story en el proyecto " + x['proyecto'])
 

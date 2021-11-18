@@ -1,0 +1,74 @@
+{% extends "layout/base.html" %}
+
+{% block content %}
+    <div class="mt-2 container d-flex flex-column">
+        <h4 class="mt-2">Generación de informes del proyecto:</h4>
+        <table class="mt-3 table table-hover">
+            <thead>
+		        <tr>
+                    <th scope="col">#</th>
+			        <th scope="col">Nombre del reporte</th>
+                    <th scope="col">Entrada</th>
+			        <th scope="col">Acción</th>
+		        </tr>
+	        </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">1</th>
+                    <td>Product Backlog</td>
+                    <td>{{ proyecto.nombre }}</td>
+                    <td>
+                        <a {% if proyecto.product_backlog.all %} {% else %} disabled {% endif %} href="{% url 'proyecto_pdf_product_backlog' proyecto.slug %}" target="_blank" class="btn btn-primary" >
+                            Descargar PDF
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">2</th>
+                    <td>Spring Backlog</td>
+                    <td>
+                        {% if proyecto.registro_sprints.all  %}
+                            <select id="sprintId" name="sprintId" class="form-select w-50" onChange="select_sprint();">
+                                <option disabled selected>Elegir Sprint</option>
+                                {% for sprint in proyecto.registro_sprints.all %} 
+                                    <option value="{{sprint.pk}}">Sprint {{ sprint.pk }}</option>
+                                {% endfor %}
+                            </select>
+                        {% else %}
+                            No existe ningun sprint por el momento
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a id="bottomSprint" {% if proyecto.registro_sprints.all %} {% else %} disabled {% endif %} class="btn btn-primary" target="_blank">
+                            Descargar PDF
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">3</th>
+                    <td>US - Prioridad</td>
+                    <td>
+                        {% if proyecto.sprint_actual %}
+                            Sprint Actual 
+                        {% else %}
+                            Por el momento no tiene un sprint activo
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'proyecto_pdf_us_prioridad' proyecto.slug %}" target="_blank" {% if proyecto.sprint_actual %} {% else %} disabled {% endif %} class="btn btn-primary" >
+                            Descargar PDF
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <script>
+        function select_sprint() {
+            let id = document.getElementById("sprintId").value;
+            let a = document.getElementById("bottomSprint");
+            let url = "/proyectos/" + '{{ proyecto.slug }}'  + "/" + id + "/vista-pdf-sprint_backlog/";
+            a.setAttribute("href", url);
+        }
+    </script>
+{% endblock %}
