@@ -550,6 +550,8 @@ class FinalizarSprint(View):
         SystemActivity.objects.create(usuario=request.user,
                                       descripcion="Se a finalizado sprint en proyecto " + proyecto.nombre)
 
+        '''Acá se guardan en la nueva clase UserStorySprint los user storys de cada sprint
+        con sus respectivos estados '''
         for us in sprint.sprint_backlog.all():
             UserStorySprint.objects.create(descripcion=us.descripcion,tiempoEstimadoSMaster=us.tiempoEstimadoSMaster,
                                            tiempoEstimado=us.tiempoEstimado, estado=us.estado,
