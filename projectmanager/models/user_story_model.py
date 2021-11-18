@@ -191,7 +191,8 @@ class RegistroActividadDiairia(models.Model):
 
 class UserStorySprint(models.Model):
     """
-    Clase que representa a los USerStory
+    Clase para guardar los user storys para cada sprint del proyecto
+    tiene los mismos atributos que la clase deuser story
 
     Atributos:
 
