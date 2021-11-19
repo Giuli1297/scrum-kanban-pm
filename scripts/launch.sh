@@ -43,10 +43,7 @@ then
   pip install -r ../requirements.txt
 
 
-  psql -U postgres << EOF
-  DROP DATABASE IF EXISTS pmsdb;
-  CREATE DATABASE pmsdb;
-EOF
+  psql -c "DATABASE IF EXISTS pmsdb;" -c "CREATE DATABASE pmsdb;" -U postgres
 
 
   echo "MIGRACIONES\n\n\n"
@@ -67,6 +64,7 @@ EOF
     then
       python ../manage.py test_db_carga
     fi
+  fi
   heroku pg:reset --confirm scrumkanbanpm
   git push heroku --force main
   PGUSER=postgres PGPASSWORD=postgres heroku pg:push pmsdb DATABASE_URL --app scrumkanbanpm
@@ -83,10 +81,7 @@ then
   pip install -r ../requirements.txt
 
 
-  psql -U postgres << EOF
-  DROP DATABASE IF EXISTS pmsdb;
-  CREATE DATABASE pmsdb;
-EOF
+  psql -c "DATABASE IF EXISTS pmsdb;" -c "CREATE DATABASE pmsdb;" -U postgres
 
 
   echo "MIGRACIONES\n\n\n"
