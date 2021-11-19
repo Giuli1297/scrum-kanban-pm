@@ -492,7 +492,7 @@ class RealizarQAUSView(View):
                 email_subject = 'User Story rechazado por QA.'
                 email = EmailMessage(
                     email_subject,
-                    'Proyecto: ' + proyecto.nombre + "\n"
+                    'Proyecto: ' + proyecto.nombre + "\n" +
                     'El user story con descripcion ' + user_story.descripcion + ' ha sido rechazado en QA.\n' +
                     'Comentario del Scrum Master: ' + comentario,
                     EMAIL_HOST_USER,
