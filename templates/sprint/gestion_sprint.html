@@ -492,11 +492,11 @@
         <input id='fmes' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion_real.month }}">
         <input id='fanio' type="hidden" value="{{ proyecto.sprint_actual.fecha_finalizacion_real.year }}">
         <div class="col-md-9">
-            <h4>Duración del Sprint {{ proyecto.sprint_actual.duracion_estimada_dias }} dias laborales</h4>
-            <h4>Dia Actual {{ proyecto.sprint_actual.fecha_inicio_desarrollo.day }}/{{ proyecto.sprint_actual.fecha_inicio_desarrollo.month }}
-            /{{ proyecto.sprint_actual.fecha_inicio_desarrollo.year }}</h4>
-            <h4>Fecha estimada de finalizacion {{ proyecto.sprint_actual.fecha_finalizacion_real.day }}/{{ proyecto.sprint_actual.fecha_finalizacion_real.month }}
-            /{{ proyecto.sprint_actual.fecha_finalizacion_real.year }}</h4>
+            <h5>Duración del Sprint {{ proyecto.sprint_actual.duracion_estimada_dias }} dias laborales</h5>
+            <h5>Fecha de Inicio{{ proyecto.sprint_actual.fecha_inicio_desarrollo.day }}/{{ proyecto.sprint_actual.fecha_inicio_desarrollo.month }}
+            /{{ proyecto.sprint_actual.fecha_inicio_desarrollo.year }}</h5>
+            <h5>Fecha estimada de finalizacion {{ proyecto.sprint_actual.fecha_finalizacion_real.day }}/{{ proyecto.sprint_actual.fecha_finalizacion_real.month }}
+            /{{ proyecto.sprint_actual.fecha_finalizacion_real.year }}</h5>
             <div id="countdown" class="countdown">
                 <div  class="time">
                     <h5 id="days"></h5>

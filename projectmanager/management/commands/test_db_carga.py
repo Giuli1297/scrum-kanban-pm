@@ -275,8 +275,14 @@ class Command(BaseCommand):
         d_2 = de[2]
         d_3 = de[3]
         u_1.desarrolladorAsignado = d_1
+        RegistroActividadDiairia.objects.create(us=u_1, descripcion="Se asigno al desarrolador " + d_1.username,
+                                                fecha=fecha_inicio_sprint_fin)
         u_2.desarrolladorAsignado = d_2
+        RegistroActividadDiairia.objects.create(us=u_2, descripcion="Se asigno al desarrolador " + d_2.username,
+                                                fecha=fecha_inicio_sprint_fin)
         u_3.desarrolladorAsignado = d_3
+        RegistroActividadDiairia.objects.create(us=u_3, descripcion="Se asigno al desarrolador " + d_3.username,
+                                                fecha=fecha_inicio_sprint_fin)
         u_1.tiempoEstimadoSMaster = 20
         u_2.tiempoEstimadoSMaster = 20
         u_3.tiempoEstimadoSMaster = 20
@@ -323,8 +329,14 @@ class Command(BaseCommand):
         u_2.estado = 'Doing'
         u_3.estado = 'Doing'
         u_1.save()
+        RegistroActividadDiairia.objects.create(us=u_1, descripcion="Se paso Doing",
+                                                fecha=fecha_inicio_sprint_fin)
         u_2.save()
+        RegistroActividadDiairia.objects.create(us=u_2, descripcion="Se paso Doing",
+                                                fecha=fecha_inicio_sprint_fin)
         u_3.save()
+        RegistroActividadDiairia.objects.create(us=u_3, descripcion="Se paso Doing",
+                                                fecha=fecha_inicio_sprint_fin)
         sprint_fin.save()
 
         # Registrar Actividades
@@ -362,10 +374,16 @@ class Command(BaseCommand):
         # Marcar como done
         QA.objects.create(comentario="comentario", aceptar=True, user_story=u_1,
                           fecha=asuncion.localize(datetime.strptime('2021-11-09', "%Y-%m-%d")))
+        RegistroActividadDiairia.objects.create(us=u_1, descripcion="Se acepto en QA",
+                                                fecha=asuncion.localize(datetime.strptime('2021-11-09', "%Y-%m-%d")))
         QA.objects.create(comentario="comentario1", aceptar=True, user_story=u_2,
                           fecha=asuncion.localize(datetime.strptime('2021-11-10', "%Y-%m-%d")))
+        RegistroActividadDiairia.objects.create(us=u_2, descripcion="Se acepto en QA",
+                                                fecha=asuncion.localize(datetime.strptime('2021-11-10', "%Y-%m-%d")))
         QA.objects.create(comentario="comentario2", aceptar=False, user_story=u_3,
                           fecha=asuncion.localize(datetime.strptime('2021-11-10', "%Y-%m-%d")))
+        RegistroActividadDiairia.objects.create(us=u_3, descripcion="Se rechazo en QA",
+                                                fecha=asuncion.localize(datetime.strptime('2021-11-10', "%Y-%m-%d")))
         u_1.estado = 'Release'
         u_2.estado = 'Release'
         u_3.estado = 'QA'
@@ -434,7 +452,8 @@ class Command(BaseCommand):
                                                tiempoEstimado=us.tiempoEstimado, estado=us.estado,
                                                tiempoEnDesarrollo=us.tiempoEnDesarrollo, proyecto=us.proyecto,
                                                sprintUs=us.sprint,
-                                               prioridad=us.prioridad, descripcionDone=us.descripcionDone)
+                                               prioridad=us.prioridad, descripcionDone=us.descripcionDone,
+                                               desarrolladorAsignado=us.desarrolladorAsignado)
 
         # Speint en proceso y planificado
         # Planificacion
@@ -481,7 +500,11 @@ class Command(BaseCommand):
         d_1 = de[0]
         d_2 = de[3]
         u_1.desarrolladorAsignado = d_1
+        RegistroActividadDiairia.objects.create(us=u_1, descripcion="Se asigno al desarrolador " + d_1.username,
+                                                fecha=fecha_inicio_sprint_eje)
         u_2.desarrolladorAsignado = d_2
+        RegistroActividadDiairia.objects.create(us=u_2, descripcion="Se asigno al desarrolador " + d_2.username,
+                                                fecha=fecha_inicio_sprint_eje)
         u_1.tiempoEstimadoSMaster = 20
         u_2.tiempoEstimadoSMaster = 20
         sprint_eje.horas_ocupadas_us += 40
@@ -510,7 +533,7 @@ class Command(BaseCommand):
         u_2.save()
 
         # Inicio desarrollo
-        sprint_eje.fecha_inicio_desarrollo = fecha_inicio_sprint_fin
+        sprint_eje.fecha_inicio_desarrollo = fecha_inicio_sprint_eje
         sprint_eje.duracion_estimada_dias = numpy.busday_count(sprint_eje.fecha_inicio_desarrollo.date(),
                                                                sprint_eje.fecha_finalizacion_real.date())
         sprint_eje.estado = 'conf3'
@@ -568,8 +591,14 @@ class Command(BaseCommand):
         d_2 = de[2]
         d_3 = de[3]
         u_1.desarrolladorAsignado = d_1
+        RegistroActividadDiairia.objects.create(us=u_1, descripcion="Se asigno al desarrolador " + d_1.username,
+                                                fecha=fecha_inicio_sprint_fin)
         u_2.desarrolladorAsignado = d_2
+        RegistroActividadDiairia.objects.create(us=u_2, descripcion="Se asigno al desarrolador " + d_1.username,
+                                                fecha=fecha_inicio_sprint_fin)
         u_3.desarrolladorAsignado = d_3
+        RegistroActividadDiairia.objects.create(us=u_3, descripcion="Se asigno al desarrolador " + d_1.username,
+                                                fecha=fecha_inicio_sprint_fin)
         u_1.tiempoEstimadoSMaster = 20
         u_2.tiempoEstimadoSMaster = 20
         u_3.tiempoEstimadoSMaster = 20
@@ -616,8 +645,14 @@ class Command(BaseCommand):
         u_2.estado = 'Doing'
         u_3.estado = 'Doing'
         u_1.save()
+        RegistroActividadDiairia.objects.create(us=u_1, descripcion="Se paso a doing",
+                                                fecha=fecha_inicio_sprint_fin)
         u_2.save()
+        RegistroActividadDiairia.objects.create(us=u_2, descripcion="Se paso a doing",
+                                                fecha=fecha_inicio_sprint_fin)
         u_3.save()
+        RegistroActividadDiairia.objects.create(us=u_3, descripcion="Se paso a doing",
+                                                fecha=fecha_inicio_sprint_fin)
         sprint_fin.save()
 
         # Registrar Actividades
@@ -655,10 +690,16 @@ class Command(BaseCommand):
         # Marcar como done
         QA.objects.create(comentario="comentario", aceptar=True, user_story=u_1,
                           fecha=asuncion.localize(datetime.strptime('2021-08-17', "%Y-%m-%d")))
+        RegistroActividadDiairia.objects.create(us=u_1, descripcion="Se acepto QA",
+                                                fecha=asuncion.localize(datetime.strptime('2021-08-17', "%Y-%m-%d")))
         QA.objects.create(comentario="comentario1", aceptar=True, user_story=u_2,
                           fecha=asuncion.localize(datetime.strptime('2021-08-18', "%Y-%m-%d")))
+        RegistroActividadDiairia.objects.create(us=u_2, descripcion="Se acepto QA",
+                                                fecha=asuncion.localize(datetime.strptime('2021-08-18', "%Y-%m-%d")))
         QA.objects.create(comentario="comentario2", aceptar=True, user_story=u_3,
                           fecha=asuncion.localize(datetime.strptime('2021-08-18', "%Y-%m-%d")))
+        RegistroActividadDiairia.objects.create(us=u_3, descripcion="Se acepto QA",
+                                                fecha=asuncion.localize(datetime.strptime('2021-08-18', "%Y-%m-%d")))
         u_1.estado = 'Release'
         u_2.estado = 'Release'
         u_3.estado = 'Release'
@@ -727,7 +768,8 @@ class Command(BaseCommand):
                                                tiempoEstimado=us.tiempoEstimado, estado=us.estado,
                                                tiempoEnDesarrollo=us.tiempoEnDesarrollo, proyecto=us.proyecto,
                                                sprintUs=us.sprint,
-                                               prioridad=us.prioridad, descripcionDone=us.descripcionDone)
+                                               prioridad=us.prioridad, descripcionDone=us.descripcionDone,
+                                               desarrolladorAsignado=us.desarrolladorAsignado)
 
             # Sprint Finalizado
             #
@@ -761,7 +803,11 @@ class Command(BaseCommand):
             d_1 = de[0]
             d_2 = de[2]
             u_1.desarrolladorAsignado = d_1
+            RegistroActividadDiairia.objects.create(us=u_1, descripcion="Se asigno a " + d_1.username,
+                                                    fecha=fecha_inicio_sprint_1)
             u_2.desarrolladorAsignado = d_2
+            RegistroActividadDiairia.objects.create(us=u_2, descripcion="Se asigno a " + d_2.username,
+                                                    fecha=fecha_inicio_sprint_1)
             u_1.tiempoEstimadoSMaster = 20
             u_2.tiempoEstimadoSMaster = 20
             sprint_1.horas_ocupadas_us += 40
@@ -797,7 +843,11 @@ class Command(BaseCommand):
             u_1.estado = 'Doing'
             u_2.estado = 'Doing'
             u_1.save()
+            RegistroActividadDiairia.objects.create(us=u_1, descripcion="Se paso a Doing",
+                                                    fecha=fecha_inicio_sprint_1)
             u_2.save()
+            RegistroActividadDiairia.objects.create(us=u_2, descripcion="Se paso a Doing",
+                                                    fecha=fecha_inicio_sprint_1)
             sprint_1.save()
 
             # Registrar Actividades
@@ -834,8 +884,14 @@ class Command(BaseCommand):
             # Marcar como done
             QA.objects.create(comentario="comentario", aceptar=True, user_story=u_1,
                               fecha=asuncion.localize(datetime.strptime('2021-08-24', "%Y-%m-%d")))
+            RegistroActividadDiairia.objects.create(us=u_1, descripcion="Se acepto QA",
+                                                    fecha=asuncion.localize(
+                                                        datetime.strptime('2021-08-24', "%Y-%m-%d")))
             QA.objects.create(comentario="comentario1", aceptar=True, user_story=u_2,
                               fecha=asuncion.localize(datetime.strptime('2021-08-25', "%Y-%m-%d")))
+            RegistroActividadDiairia.objects.create(us=u_2, descripcion="Se acepto QA",
+                                                    fecha=asuncion.localize(
+                                                        datetime.strptime('2021-08-25', "%Y-%m-%d")))
             u_1.estado = 'Release'
             u_2.estado = 'Release'
             u_1.save()
@@ -899,7 +955,8 @@ class Command(BaseCommand):
                                                    tiempoEstimado=us.tiempoEstimado, estado=us.estado,
                                                    tiempoEnDesarrollo=us.tiempoEnDesarrollo, proyecto=us.proyecto,
                                                    sprintUs=us.sprint,
-                                                   prioridad=us.prioridad, descripcionDone=us.descripcionDone)
+                                                   prioridad=us.prioridad, descripcionDone=us.descripcionDone,
+                                                   desarrolladorAsignado=us.desarrolladorAsignado)
                 # Sprint Finalizado
                 #
                 # Creacion
@@ -928,6 +985,8 @@ class Command(BaseCommand):
                 de = proyecto.scrum_member.all().order_by('id')
                 d_1 = de[0]
                 u_1.desarrolladorAsignado = d_1
+                RegistroActividadDiairia.objects.create(us=u_2, descripcion="Se asigno a " + d_1.username,
+                                                        fecha=fecha_inicio_sprint_2)
                 u_1.tiempoEstimadoSMaster = 15
                 sprint_2.horas_ocupadas_us += 15
                 cap1 = CapacidadSMasteSprint.objects.get(sprint=sprint_2, scrum_member=d_1)
@@ -951,6 +1010,8 @@ class Command(BaseCommand):
                                                                      sprint_2.fecha_finalizacion_real.date())
                 sprint_2.estado = 'conf3'
                 u_1.estado = 'Doing'
+                RegistroActividadDiairia.objects.create(us=u_2, descripcion="Paso a doing",
+                                                        fecha=fecha_inicio_sprint_2)
                 u_1.save()
                 sprint_2.save()
 
@@ -971,6 +1032,9 @@ class Command(BaseCommand):
                 # Marcar como done
                 QA.objects.create(comentario="comentario", aceptar=True, user_story=u_1,
                                   fecha=asuncion.localize(datetime.strptime('2021-08-30', "%Y-%m-%d")))
+                RegistroActividadDiairia.objects.create(us=u_2, descripcion="Se acepto QA",
+                                                        fecha=asuncion.localize(
+                                                            datetime.strptime('2021-08-30', "%Y-%m-%d")))
 
                 u_1.estado = 'Release'
                 u_1.save()
@@ -1033,7 +1097,8 @@ class Command(BaseCommand):
                                                        tiempoEstimado=us.tiempoEstimado, estado=us.estado,
                                                        tiempoEnDesarrollo=us.tiempoEnDesarrollo, proyecto=us.proyecto,
                                                        sprintUs=us.sprint,
-                                                       prioridad=us.prioridad, descripcionDone=us.descripcionDone)
+                                                       prioridad=us.prioridad, descripcionDone=us.descripcionDone,
+                                                       desarrolladorAsignado=us.desarrolladorAsignado)
         proyecto.estado = 'FIN'
         proyecto.fecha_fin = asuncion.localize(datetime.strptime('2021-09-01', "%Y-%m-%d"))
         for uw in proyecto.tiempos_de_usuarios.all():
