@@ -21,7 +21,7 @@ from django.views.generic import (
 from projectmanager.models.user_story_model import RegistroActividadDiairia
 from scrum_kanban_pm.settings.development import EMAIL_HOST_USER
 from projectmanager.forms import *
-from projectmanager.models.user_story_model import RegistroActividadDiairia, logHistorial,UserStorySprint
+from projectmanager.models.user_story_model import RegistroActividadDiairia, logHistorial, UserStorySprint
 from django.core.mail import EmailMessage
 from projectmanager.forms import UserForm, RolForm, UserFormDelete
 from django.shortcuts import render, redirect
@@ -319,7 +319,13 @@ class PlanningPokerView(View):
                 EMAIL_HOST_USER,
                 [us.desarrolladorAsignado.email],
             )
-            email.send(fail_silently=False)
+            try:
+                email.send(fail_silently=False)
+            except Exception as ex:
+                sprint.estado = 'conf1'
+                sprint.save()
+                messages.error(request, "No se pudo enviar vuelva a intentar")
+                return redirect('proyecto_gestion', slug=proyecto.slug)
         # Log activity
         SystemActivity.objects.create(usuario=request.user,
                                       descripcion="Ha iniciado el planning poker en el proyecto " + proyecto.nombre)
@@ -680,15 +686,16 @@ class FinalizarSprint(View):
         '''Acá se guardan en la nueva clase UserStorySprint los user storys de cada sprint
         con sus respectivos estados '''
         for us in sprint.sprint_backlog.all():
-            usprint=UserStorySprint.objects.create(descripcion=us.descripcion,tiempoEstimadoSMaster=us.tiempoEstimadoSMaster,
+            usprint = UserStorySprint.objects.create(descripcion=us.descripcion,
+                                                     tiempoEstimadoSMaster=us.tiempoEstimadoSMaster,
 
-                                           desarrolladorAsignado=us.desarrolladorAsignado,
-                                           tiempoEstimado=us.tiempoEstimado, estado=us.estado,
-                                           tiempoEnDesarrollo=us.tiempoEnDesarrollo, proyecto=us.proyecto,
-                                           sprintUs=us.sprint,
-                                           prioridad=us.prioridad, descripcionDone=us.descripcionDone)
+                                                     desarrolladorAsignado=us.desarrolladorAsignado,
+                                                     tiempoEstimado=us.tiempoEstimado, estado=us.estado,
+                                                     tiempoEnDesarrollo=us.tiempoEnDesarrollo, proyecto=us.proyecto,
+                                                     sprintUs=us.sprint,
+                                                     prioridad=us.prioridad, descripcionDone=us.descripcionDone)
             for act in us.RegistroActividad.all():
-                RegistroActividadDiairia.objects.create(us2=usprint,descripcion=act.descripcion,fecha=act.fecha,
+                RegistroActividadDiairia.objects.create(us2=usprint, descripcion=act.descripcion, fecha=act.fecha,
                                                         hora=act.hora)
 
         messages.success(request, "Sprint Finalizado")
