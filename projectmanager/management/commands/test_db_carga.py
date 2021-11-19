@@ -436,6 +436,7 @@ class Command(BaseCommand):
             for user_story in sprint_actual.sprint_backlog.all():
                 if user_story.estado != 'Release':
                     user_story.estado = 'no-terminado'
+                    user_story.tiempoEnDesarrolloPrevio = user_story.tiempoEnDesarrollo
                     user_story.desarrolladorAsignado = None
                     user_story.save()
             sprint_actual.proyecto_actual = None
@@ -756,6 +757,7 @@ class Command(BaseCommand):
             for user_story in sprint_actual.sprint_backlog.all():
                 if user_story.estado != 'Release':
                     user_story.estado = 'no-terminado'
+                    user_story.tiempoEnDesarrolloPrevio = user_story.tiempoEnDesarrollo
                     user_story.desarrolladorAsignado = None
                     user_story.save()
             sprint_actual.proyecto_actual = None
@@ -947,6 +949,7 @@ class Command(BaseCommand):
                 for user_story in sprint_actual.sprint_backlog.all():
                     if user_story.estado != 'Release':
                         user_story.estado = 'no-terminado'
+                        user_story.tiempoEnDesarrolloPrevio = user_story.tiempoEnDesarrollo
                         user_story.desarrolladorAsignado = None
                         user_story.save()
                 sprint_actual.proyecto_actual = None
@@ -1094,6 +1097,7 @@ class Command(BaseCommand):
                     for user_story in sprint_actual.sprint_backlog.all():
                         if user_story.estado != 'Release':
                             user_story.estado = 'no-terminado'
+                            user_story.tiempoEnDesarrolloPrevio = user_story.tiempoEnDesarrollo
                             user_story.desarrolladorAsignado = None
                             user_story.save()
                     sprint_actual.proyecto_actual = None
