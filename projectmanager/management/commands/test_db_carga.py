@@ -395,7 +395,7 @@ class Command(BaseCommand):
         registros_de_actividad = RegistroActividadDiairia.objects.filter(us__sprint=sprint_fin)
         horas_us_total = 0
         for us in sprint_fin.sprint_backlog.all():
-            horas_us_total = horas_us_total + us.tiempoEstimado
+            horas_us_total = horas_us_total + us.tiempoEstimado - us.tiempoEnDesarrolloPrevio
         duracionSprint = sprint_fin.duracion_estimada_dias
         progreso = []
         progreso_act = []
@@ -715,7 +715,7 @@ class Command(BaseCommand):
         registros_de_actividad = RegistroActividadDiairia.objects.filter(us__sprint=sprint_fin)
         horas_us_total = 0
         for us in sprint_fin.sprint_backlog.all():
-            horas_us_total = horas_us_total + us.tiempoEstimado
+            horas_us_total = horas_us_total + us.tiempoEstimado - us.tiempoEnDesarrolloPrevio
         duracionSprint = sprint_fin.duracion_estimada_dias
         progreso = []
         progreso_act = []
@@ -909,7 +909,7 @@ class Command(BaseCommand):
             registros_de_actividad = RegistroActividadDiairia.objects.filter(us__sprint=sprint_1)
             horas_us_total = 0
             for us in sprint_1.sprint_backlog.all():
-                horas_us_total = horas_us_total + us.tiempoEstimado
+                horas_us_total = horas_us_total + us.tiempoEstimado - us.tiempoEnDesarrolloPrevio
             duracionSprint = sprint_1.duracion_estimada_dias
             progreso = []
             progreso_act = []
@@ -1056,7 +1056,7 @@ class Command(BaseCommand):
                 registros_de_actividad = RegistroActividadDiairia.objects.filter(us__sprint=sprint_2)
                 horas_us_total = 0
                 for us in sprint_2.sprint_backlog.all():
-                    horas_us_total = horas_us_total + us.tiempoEstimado
+                    horas_us_total = horas_us_total + us.tiempoEstimado - us.tiempoEnDesarrolloPrevio
                 duracionSprint = sprint_2.duracion_estimada_dias
                 progreso = []
                 progreso_act = []

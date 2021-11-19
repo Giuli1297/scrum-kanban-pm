@@ -66,6 +66,7 @@ class UserStory(models.Model):
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Nuevo')
 
     tiempoEnDesarrollo = models.FloatField(validators=[MinValueValidator(0)], default=0, null=True)
+    tiempoEnDesarrolloPrevio = models.FloatField(default=0, null=True)
     saldo_horas = models.FloatField(default=0.0)
     desarrolladorAsignado = models.ForeignKey(User, related_name='desarrollador_asignado', null=True, blank=True,
                                               on_delete=models.CASCADE)

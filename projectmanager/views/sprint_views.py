@@ -427,7 +427,7 @@ class EstimarSprint(View):
             if not us.tiempoEstimado > 0:
                 messages.error(request, "Faltan Estimar User Stories")
                 return redirect('proyecto_gestion', slug=slug)
-            horas_us_total = horas_us_total + us.tiempoEstimado
+            horas_us_total = horas_us_total + us.tiempoEstimado - us.tiempoEnDesarrolloPrevio
         for tiempo in proyecto.tiempos_de_usuarios.all():
             horas_desarrolladores += tiempo.horas
             if tiempo.dia == 'LUN':
@@ -553,7 +553,7 @@ class getDataForBurndownChart(View):
             if not us.tiempoEstimado > 0:
                 messages.error(request, "Faltan Estimar User Stories")
                 return redirect('proyecto_gestion', slug=slug)
-            horas_us_total = horas_us_total + us.tiempoEstimado
+            horas_us_total = horas_us_total + us.tiempoEstimado - us.tiempoEnDesarrolloPrevio
         duracionSprint = sprint.duracion_estimada_dias
         progreso = []
         progreso_act = []
@@ -634,7 +634,7 @@ class FinalizarSprint(View):
         registros_de_actividad = RegistroActividadDiairia.objects.filter(us__sprint=sprint)
         horas_us_total = 0
         for us in sprint.sprint_backlog.all():
-            horas_us_total = horas_us_total + us.tiempoEstimado
+            horas_us_total = horas_us_total + us.tiempoEstimado - us.tiempoEnDesarrolloPrevio
         duracionSprint = sprint.duracion_estimada_dias
         progreso = []
         progreso_act = []
@@ -670,6 +670,7 @@ class FinalizarSprint(View):
             for user_story in sprint_actual.sprint_backlog.all():
                 if user_story.estado != 'Release':
                     user_story.estado = 'no-terminado'
+                    user_story.tiempoEnDesarrolloPrevio = user_story.tiempoEnDesarrollo
                     user_story.desarrolladorAsignado = None
                     user_story.save()
                     RegistroActividadDiairia.objects.create(us=user_story, descripcion="Se ")
@@ -750,7 +751,7 @@ class ExtenderSprint(View):
             if not us.tiempoEstimado > 0:
                 messages.error(request, "Faltan Estimar User Stories")
                 return redirect('proyecto_gestion', slug=slug)
-            horas_us_total = horas_us_total + us.tiempoEstimado
+            horas_us_total = horas_us_total + us.tiempoEstimado - us.tiempoEnDesarrolloPrevio
             if us.estado == 'Release':
                 horas_desarrolladas += us.tiempoEstimado
         for tiempo in proyecto.tiempos_de_usuarios.all():
