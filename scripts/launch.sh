@@ -43,7 +43,10 @@ then
   pip install -r ../requirements.txt
 
 
-  psql -c "DATABASE IF EXISTS pmsdb;" -c "CREATE DATABASE pmsdb;" -U postgres
+  psql -U postgres << EOF
+  DROP DATABASE IF EXISTS pmsdb;
+  CREATE DATABASE pmsdb;
+EOF
 
 
   echo "MIGRACIONES\n\n\n"
@@ -51,7 +54,6 @@ then
   python ../manage.py migrate
 
   echo "CREACION DEL ADMINISTRADOR MAS CARGA DE BD\n\n\n"
-  python ../manage.py createsuperuser
   python ../manage.py crear_admin
   python ../manage.py modify_site_prod
   if [ $tag = "6" ]
@@ -81,7 +83,10 @@ then
   pip install -r ../requirements.txt
 
 
-  psql -c "DATABASE IF EXISTS pmsdb;" -c "CREATE DATABASE pmsdb;" -U postgres
+  psql -U postgres << EOF
+DROP DATABASE IF EXISTS pmsdb;
+CREATE DATABASE pmsdb;
+EOF
 
 
   echo "MIGRACIONES\n\n\n"
