@@ -86,7 +86,7 @@ date1 = {{ user_story.sprint.fecha_finalizacion_real.date.year }}+'-'+
         month+'-'+
         day;
 let datex = new Date(date1)
-datex.setDate(datex.getDate()+1);
+datex.setDate(datex.getDate());
 document.getElementById("fecha").setAttribute("max", datex.toISOString().split('T')[0]);
 day = {{ user_story.sprint.fecha_inicio_desarrollo.date.day }};
 month = {{ user_story.sprint.fecha_inicio_desarrollo.date.month }};
@@ -100,7 +100,7 @@ date1 = {{ user_story.sprint.fecha_inicio_desarrollo.date.year }}+'-'+
         month+'-'+
         day;
 datex = new Date(date1)
-datex.setDate(datex.getDate()+1);
+datex.setDate(datex.getDate());
 document.getElementById("fecha").setAttribute("min", datex.toISOString().split('T')[0]);
 
 </script>

@@ -16,9 +16,12 @@ class Command(BaseCommand):
         print("...CREAR ADMINISTRADOR.......\n\n")
         if User.objects.filter(groups__name="Administrador"):
             raise CommandError("Ya Existe Un Usuario Adminstrador")
-        admin_username = input('Ingresa el nombre de usuario: ')
-        admin_password = input('Ingresa la contraseña del administrador: ')
-        admin_email = input('Ingresa el email del administrador: ')
+        # admin_username = input('Ingresa el nombre de usuario: ')
+        # admin_password = input('Ingresa la contraseña del administrador: ')
+        # admin_email = input('Ingresa el email del administrador: ')
+        admin_username = 'admin1'
+        admin_password = 'admin1'
+        admin_email = 'giuli1297.gg@fpuna.edu.py'
 
         while True:
             response = requests.get(
