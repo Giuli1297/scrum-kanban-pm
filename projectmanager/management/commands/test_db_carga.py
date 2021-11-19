@@ -415,10 +415,11 @@ class Command(BaseCommand):
                         progreso[(duracionSprint) - i] = 0
 
         for actividad in registros_de_actividad:
-            diferencia_dia = int(numpy.busday_count(sprint_fin.fecha_inicio_desarrollo.date(),
-                                                    actividad.fecha.date()))
-            for i in range(0, duracionSprint + 1 - diferencia_dia):
-                progreso_act[(duracionSprint) - i] -= actividad.hora
+            if actividad.sprint == sprint_fin and actividad.hora > 0:
+                diferencia_dia = int(numpy.busday_count(sprint_fin.fecha_inicio_desarrollo.date(),
+                                                        actividad.fecha.date()))
+                for i in range(0, duracionSprint + 1 - diferencia_dia):
+                    progreso_act[(duracionSprint) - i] -= actividad.hora
         passed_days = duracionSprint
         sprint_fin.saved_us_progress = progreso
         sprint_fin.saved_act_progress = progreso_act
@@ -734,10 +735,11 @@ class Command(BaseCommand):
                         progreso[(duracionSprint) - i] = 0
 
         for actividad in registros_de_actividad:
-            diferencia_dia = int(numpy.busday_count(sprint_fin.fecha_inicio_desarrollo.date(),
-                                                    actividad.fecha.date()))
-            for i in range(0, duracionSprint + 1 - diferencia_dia):
-                progreso_act[(duracionSprint) - i] -= actividad.hora
+            if actividad.sprint == sprint_fin and actividad.hora > 0:
+                diferencia_dia = int(numpy.busday_count(sprint_fin.fecha_inicio_desarrollo.date(),
+                                                        actividad.fecha.date()))
+                for i in range(0, duracionSprint + 1 - diferencia_dia):
+                    progreso_act[(duracionSprint) - i] -= actividad.hora
         passed_days = duracionSprint
         sprint_fin.saved_us_progress = progreso
         sprint_fin.saved_act_progress = progreso_act
@@ -924,10 +926,11 @@ class Command(BaseCommand):
                             progreso[(duracionSprint) - i] = 0
 
             for actividad in registros_de_actividad:
-                diferencia_dia = int(numpy.busday_count(sprint_1.fecha_inicio_desarrollo.date(),
-                                                        actividad.fecha.date()))
-                for i in range(0, duracionSprint + 1 - diferencia_dia):
-                    progreso_act[(duracionSprint) - i] -= actividad.hora
+                if actividad.sprint == sprint_1 and actividad.hora > 0:
+                    diferencia_dia = int(numpy.busday_count(sprint_1.fecha_inicio_desarrollo.date(),
+                                                            actividad.fecha.date()))
+                    for i in range(0, duracionSprint + 1 - diferencia_dia):
+                        progreso_act[(duracionSprint) - i] -= actividad.hora
             passed_days = duracionSprint
             sprint_1.saved_us_progress = progreso
             sprint_1.saved_act_progress = progreso_act
@@ -1070,10 +1073,11 @@ class Command(BaseCommand):
                                 progreso[(duracionSprint) - i] = 0
 
                 for actividad in registros_de_actividad:
-                    diferencia_dia = int(numpy.busday_count(sprint_2.fecha_inicio_desarrollo.date(),
-                                                            actividad.fecha.date()))
-                    for i in range(0, duracionSprint + 1 - diferencia_dia):
-                        progreso_act[(duracionSprint) - i] -= actividad.hora
+                    if actividad.sprint == sprint_2 and actividad.hora > 0:
+                        diferencia_dia = int(numpy.busday_count(sprint_2.fecha_inicio_desarrollo.date(),
+                                                                actividad.fecha.date()))
+                        for i in range(0, duracionSprint + 1 - diferencia_dia):
+                            progreso_act[(duracionSprint) - i] -= actividad.hora
                 passed_days = duracionSprint
                 sprint_2.saved_us_progress = progreso
                 sprint_2.saved_act_progress = progreso_act

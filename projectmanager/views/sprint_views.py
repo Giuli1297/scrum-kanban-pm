@@ -570,14 +570,15 @@ class getDataForBurndownChart(View):
                     if progreso[(duracionSprint) - i] < 0:
                         progreso[(duracionSprint) - i] = 0
         for actividad in registros_de_actividad:
-            diferencia_dia = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
-                                                    actividad.fecha.date()))
-            print(sprint.fecha_inicio_desarrollo.date())
-            print(actividad.fecha.date())
-            print(diferencia_dia)
-            for i in range(0, duracionSprint + 1 - diferencia_dia):
-                progreso_act[(duracionSprint) - i] -= actividad.hora
-                print((duracionSprint) - i)
+            if actividad.sprint == sprint and actividad.hora > 0:
+                diferencia_dia = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
+                                                        actividad.fecha.date()))
+                print(sprint.fecha_inicio_desarrollo.date())
+                print(actividad.fecha.date())
+                print(diferencia_dia)
+                for i in range(0, duracionSprint + 1 - diferencia_dia):
+                    progreso_act[(duracionSprint) - i] -= actividad.hora
+                    print((duracionSprint) - i)
         passed_days = duracionSprint
 
         if sprint.estado == 'fin':
@@ -653,10 +654,11 @@ class FinalizarSprint(View):
                         progreso[(duracionSprint) - i] = 0
 
         for actividad in registros_de_actividad:
-            diferencia_dia = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
-                                                    actividad.fecha.date()))
-            for i in range(0, duracionSprint + 1 - diferencia_dia):
-                progreso_act[(duracionSprint) - i] -= actividad.hora
+            if actividad.sprint == sprint and actividad.hora > 0:
+                diferencia_dia = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
+                                                        actividad.fecha.date()))
+                for i in range(0, duracionSprint + 1 - diferencia_dia):
+                    progreso_act[(duracionSprint) - i] -= actividad.hora
         passed_days = duracionSprint
         sprint.saved_us_progress = progreso
         sprint.saved_act_progress = progreso_act
