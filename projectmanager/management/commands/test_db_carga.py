@@ -510,7 +510,7 @@ class Command(BaseCommand):
         u_2.save()
 
         # Inicio desarrollo
-        sprint_eje.fecha_inicio_desarrollo = fecha_inicio_sprint_fin
+        sprint_eje.fecha_inicio_desarrollo = fecha_inicio_sprint_eje
         sprint_eje.duracion_estimada_dias = numpy.busday_count(sprint_eje.fecha_inicio_desarrollo.date(),
                                                                sprint_eje.fecha_finalizacion_real.date())
         sprint_eje.estado = 'conf3'
