@@ -21,6 +21,7 @@ from django.views.generic import (
 from projectmanager.models.user_story_model import RegistroActividadDiairia
 from scrum_kanban_pm.settings.development import EMAIL_HOST_USER
 from projectmanager.forms import *
+from projectmanager.models.user_story_model import RegistroActividadDiairia, logHistorial,UserStorySprint
 from django.core.mail import EmailMessage
 from projectmanager.forms import UserForm, RolForm, UserFormDelete
 from django.shortcuts import render, redirect
@@ -578,6 +579,7 @@ class ConfirmarFinalizarSprint(View):
         context = {
             'sprint': Sprint.objects.get(pk=sprintPk)
         }
+
         return render(request, 'sprint/sprint_confirmar_finalizar.html', context)
 
 
@@ -654,6 +656,14 @@ class FinalizarSprint(View):
         SystemActivity.objects.create(usuario=request.user,
                                       descripcion="Se a finalizado sprint en proyecto " + proyecto.nombre)
 
+        '''Acá se guardan en la nueva clase UserStorySprint los user storys de cada sprint
+        con sus respectivos estados '''
+        for us in sprint.sprint_backlog.all():
+            UserStorySprint.objects.create(descripcion=us.descripcion,tiempoEstimadoSMaster=us.tiempoEstimadoSMaster,
+                                           tiempoEstimado=us.tiempoEstimado, estado=us.estado,
+                                           tiempoEnDesarrollo=us.tiempoEnDesarrollo, proyecto=us.proyecto,
+                                           sprintUs=us.sprint,
+                                           prioridad=us.prioridad, descripcionDone=us.descripcionDone)
         messages.success(request, "Sprint Finalizado")
         return redirect('proyecto_gestion', slug=proyecto.slug)
 
