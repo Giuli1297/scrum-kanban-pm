@@ -54,7 +54,6 @@ EOF
   python ../manage.py migrate
 
   echo "CREACION DEL ADMINISTRADOR MAS CARGA DE BD\n\n\n"
-  python ../manage.py createsuperuser
   python ../manage.py crear_admin
   python ../manage.py modify_site_prod
   if [ $tag = "6" ]
@@ -67,6 +66,7 @@ EOF
     then
       python ../manage.py test_db_carga
     fi
+  fi
   heroku pg:reset --confirm scrumkanbanpm
   git push heroku --force main
   PGUSER=postgres PGPASSWORD=postgres heroku pg:push pmsdb DATABASE_URL --app scrumkanbanpm
@@ -84,8 +84,8 @@ then
 
 
   psql -U postgres << EOF
-  DROP DATABASE IF EXISTS pmsdb;
-  CREATE DATABASE pmsdb;
+DROP DATABASE IF EXISTS pmsdb;
+CREATE DATABASE pmsdb;
 EOF
 
 

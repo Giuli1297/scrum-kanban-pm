@@ -25,3 +25,4 @@ admin.site.register(QA)
 admin.site.register(CapacidadSMasteSprint)
 
 admin.site.register(UserStorySprint)
+

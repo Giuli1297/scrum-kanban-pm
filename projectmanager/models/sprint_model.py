@@ -23,13 +23,31 @@ class Sprint(models.Model):
         Define el estado del sprint
 
     fecha_inicio
-        fecha de inicio de spriot
-
-    duracion_estiamda
-        duracion estimada del Sprint
+        fecha en la que el sprint es planificado
 
     fecha_finalizacion
-        fecha en la que finalizara el sprint
+        fecha en la que finalizara el sprint segun lo planificado
+
+    capacidad_horas
+        la capacidad del sprint definida en horas
+
+    horas_ocupadas_us
+        cantidad de horas ocupadas por userstory
+
+    duracion_estiamda_dias
+        duracion estimada del Sprint en dias
+
+    duracion_restante_dias
+        cantidad de dias restantes en el sprint
+
+    horas_realizadas
+        horas trabajadas en el sprint
+
+    fecha_inicio_desarrollo
+        fecha en la que se da iniciar al sprint
+
+    fecha_finalizacion_real
+        fecha real en la que es finalizada el sprint
 
     proyecto
         proyecto al cual esta ligado el sprint

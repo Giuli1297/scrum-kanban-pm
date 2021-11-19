@@ -27,17 +27,29 @@ class UserStory(models.Model):
     descripcion
         Breve descripcion del UserStory
 
+    tiempoEstimadoSMaster
+        tiempo estimado por el scrum master
+
+    tiempoEnDesarrollo
+        tiempo que lleva en desarrollo el userstory
+
     tiempoEstimado
         tiempo estimado para realizar el UserStory
 
     desarrolladorAsignado
         desarrollador asignado para realizar el UserStory
 
+    saldos_horas
+        El saldo de hora del sprint
+
     proyecto
         Proyecto al cual esta ligado el UserStory
 
     Sprint
         Sprint en donde esta contenido el UserStory
+
+    priodidad
+        priodidad asignada al userstory
     """
     ESTADOS = (
         ('Nuevo', 'Nuevo'),
@@ -167,28 +179,6 @@ class UserInfo(models.Model):
     horasDisponibles = models.FloatField(default=40.0)
 
 
-class RegistroActividadDiairia(models.Model):
-    """
-        Guarda y define el registro de las actividades realizadas diariamente
-
-        Atributos:
-
-        Parameters
-        ----------
-        us
-            identificador del user story
-
-        hora
-            hora en la que se realizo el cambio
-
-        descripcion
-            descripcion breve del cambio realizado.
-    """
-    us = models.ForeignKey(UserStory, related_name='RegistroActividad', null=True, on_delete=models.CASCADE)
-    descripcion = models.TextField(blank=True, null=True, max_length=5000)
-    fecha = models.DateTimeField(default=timezone.now)
-    hora = models.FloatField(default=0)
-
 class UserStorySprint(models.Model):
     """
     Clase para guardar los user storys para cada sprint del proyecto
@@ -253,4 +243,29 @@ class UserStorySprint(models.Model):
 
     def __str__(self):
         return self.descripcion + self.proyecto.slug
+
+class RegistroActividadDiairia(models.Model):
+    """
+        Guarda y define el registro de las actividades realizadas diariamente
+
+        Atributos:
+
+        Parameters
+        ----------
+        us
+            identificador del user story
+
+        hora
+            hora en la que se realizo el cambio
+
+        descripcion
+            descripcion breve del cambio realizado.
+    """
+    us = models.ForeignKey(UserStory, related_name='RegistroActividad', null=True, on_delete=models.CASCADE)
+    us2 = models.ForeignKey(UserStorySprint, related_name='RegistroActividad', null=True, on_delete=models.CASCADE)
+    descripcion = models.TextField(blank=True, null=True, max_length=5000)
+    fecha = models.DateTimeField(default=timezone.now)
+    hora = models.FloatField(default=0)
+
+
 

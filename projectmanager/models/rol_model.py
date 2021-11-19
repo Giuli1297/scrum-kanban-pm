@@ -24,6 +24,9 @@ class Rol(models.Model):
     tipo
         define que tipo de rol es, ya sea de sistema, proyecto, por default o importado
 
+    proyecto
+        define a que proyecto corresponde el rol
+
     """
     TIPOS = (
         ('sistema', 'Rol de Sistema'),

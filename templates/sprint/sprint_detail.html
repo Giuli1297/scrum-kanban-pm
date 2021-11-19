@@ -4,11 +4,15 @@
 <div class="row mt-2">
     <div class="col-md-6 border border-2">
         <div class="row m-1">
-            <div class="col-md-4">
-                <h4>Sprint Backlog Desarrollado</h4>
+                <div class="col-md-9">
+                    <h4>Sprint Backlog Desarrollado</h4>
+                        <ul>
+                            <li>Capacidad del Sprint: {{ sprint.capacidad_horas }} hs.</li>
+                            <li>Horas de Desarrollar: {{ sprint.horas_ocupadas_us }}</li>
+                        </ul>
+                    </div>
+                <div class="col-md-3"></div>
             </div>
-            <div class="col-md-8"></div>
-        </div>
         <div class="row m-1">
             <table class="table mb-2">
               <thead>
@@ -17,17 +21,19 @@
                     <th scope="col">Encargado</th>
                     <th scope="col">Horas (Planning Poker)</th>
                     <th scope="col">Estado</th>
+                    <th scope="col">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {% for user_story in sprint.sprint_backlog_us.all %}
                     <tr>
                         <th scope="row">{{ user_story.descripcion }}</th>
-                        <td>{{ user_story.desarrolladorAsignado.username }}</td>
+                        <td>{{ user_story.desarrolladorAsignado }}</td>
                         <td>
                                 {{ user_story.tiempoEstimado }}
                         </td>
                         <td>{{ user_story.estado }}</td>
+                        <td><a class="btn btn-primary btn-warning " href="{% url 'log_registro_us_sprint'  slug=sprint.proyecto.slug pk=user_story.pk %}" >Detalles</a></td>
                     </tr>
                 {% endfor %}
               </tbody>

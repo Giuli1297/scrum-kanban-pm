@@ -19,6 +19,12 @@ Vista Kanban
    :members:
    :show-inheritance:
 
+Reportes
+-----------
+.. automodule:: projectmanager.views.reporte_views
+   :members:
+   :show-inheritance:
+
 Rol
 ---------
 .. automodule:: projectmanager.views.rol_views

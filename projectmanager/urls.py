@@ -51,6 +51,8 @@ urlpatterns = [
     path('proyectos/<slug:slug>/eliminarUs/<int:pk>/', views.EliminarUs.as_view(), name='elimnar_us'),
     path('proyectos/<slug:slug>/historial/<int:pk>/', views.listarHistorial.as_view(), name='historial_us'),
     path('proyectos/<slug:slug>/revertir/<int:pk>/', views.RevertirHistorial.as_view(), name='revertir_us'),
+    path('proyectos/<slug:slug>/logRegistroUs/<int:pk>/', views.LogRegistroActividadUs.as_view(), name='log_registro_us'),
+    path('proyectos/<slug:slug>/logRegistroUsSprint/<int:pk>/', views.LogRegistroActividadUsDetalleSprint.as_view(), name='log_registro_us_sprint'),
     # path('proyectos/<slug:slug>/historial/<int:pk>/', views.listarLogHistorial.as_view(), name='historial_us'),
 
     # URLS DE SPRINTS
