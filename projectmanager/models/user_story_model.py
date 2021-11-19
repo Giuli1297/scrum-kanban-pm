@@ -273,5 +273,8 @@ class RegistroActividadDiairia(models.Model):
             Guarde la instancia actual. Reemplace esto en una subclase si desea controlar el proceso de guardado.
 
         """
-        self.sprint = self.us.sprint
+        if self.us is not None:
+            self.sprint = self.us.sprint
+        else:
+            self.sprint = self.us2.sprintUs
         super(RegistroActividadDiairia, self).save(*args, **kwargs)
