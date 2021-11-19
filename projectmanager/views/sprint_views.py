@@ -56,6 +56,9 @@ class PlanificarSprint(View):
     """
 
     def get(self, request, slug, *args, **kwargs):
+        """
+        Obtiene la instancia del proyecto
+        """
         proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.cargar_sprint_backlog_proyecto',),
                                       proyecto) and not request.user.groups.filter(
@@ -68,6 +71,7 @@ class PlanificarSprint(View):
         return render(request, 'sprint/planificar_sprint.html', context)
 
     def post(self, request, slug, *args, **kwargs):
+
         proyecto = Proyecto.objects.get(slug=slug)
         if not request.user.has_perms(('projectmanager.cargar_sprint_backlog_proyecto',),
                                       proyecto) and not request.user.groups.filter(
@@ -79,6 +83,9 @@ class PlanificarSprint(View):
         fecha_fin = datetime.datetime.strptime(request.POST.get('fecha_fin'), "%Y-%m-%d")
 
         # Calcular capacidad de sprint
+        """
+        Calculo de la capacidad del sprint en horas
+        """
         capacidad = 0
         capacidad_dev = {}
         for s_member in proyecto.scrum_member.all():
@@ -172,6 +179,9 @@ class QuitarUSFromSprintBacklog(View):
     """
 
     def get(self, request, usPk, *args, **kwargs):
+        """
+        Obtiene la instancia del UserStory
+        """
         ustory = UserStory.objects.get(pk=usPk)
         if not request.user.has_perms(('projectmanager.cargar_sprint_backlog_proyecto',),
                                       ustory.proyecto) and not request.user.groups.filter(
@@ -205,6 +215,9 @@ class AsignarYEstimarUserStoryView(View):
     """
 
     def get(self, request, usPk, *args, **kwargs):
+        """
+        Obtiene la instancia del UserStory
+        """
         ustory = UserStory.objects.get(pk=usPk)
         if not request.user.has_perms(('projectmanager.estimar_userstory_proyecto',),
                                       ustory.proyecto) and not request.user.groups.filter(
@@ -261,6 +274,9 @@ class PlanningPokerView(View):
     """
 
     def get(self, request, slug, sprintPk, *args, **kwargs):
+        """
+        Se obtiene la instancia del proyecto y el sprint
+        """
         proyecto = Proyecto.objects.get(slug=slug)
         sprint = Sprint.objects.get(pk=sprintPk)
         if not request.user.has_perms(('projectmanager.iniciar_ppoker_proyecto',),
@@ -312,7 +328,7 @@ class PlanningPokerView(View):
 
 class PlanningPokerSMemberView(View):
     """
-    Vista basada en clases pra la visualizacion de miembros del planning poker
+    Vista basada en clases para la visualizacion de miembros del planning poker
     """
 
     def get(self, request, uidb64, token, usPk, *args, **kwargs):
@@ -518,6 +534,9 @@ class getDataForBurndownChart(View):
     """
 
     def get(self, request, slug, sprintPk, *args, **kwargs):
+        """
+        Se obtiene la instancia del proyecto y el sprint
+        """
         proyecto = Proyecto.objects.get(slug=slug)
         sprint = Sprint.objects.get(pk=sprintPk)
         registros_de_actividad = RegistroActividadDiairia.objects.filter(us__sprint=sprint)
@@ -567,7 +586,7 @@ class getDataForBurndownChart(View):
 
 class ConfirmarFinalizarSprint(View):
     """
-    Vista basada en clase que sirve una pagina de confirmacion para terminar sprint;
+    Vista basada en clase que sirve como una pagina de confirmacion para terminar sprint;
     """
 
     def get(self, request, sprintPk, *args, **kwargs):

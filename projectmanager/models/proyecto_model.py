@@ -23,6 +23,9 @@ class Proyecto(models.Model):
         nombre
             Define el nombre de proyecto
 
+        slug
+            identificador del proyecto
+
         descripcion
             Breve descripcion del proyecto
 

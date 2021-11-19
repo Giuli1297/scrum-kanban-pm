@@ -255,7 +255,7 @@ class TestUrlsSprint(SimpleTestCase):
         """
         Test para verificar que se carga correctamente la vista correspondiente al smaster planning poker 
         """
-        url = reverse('planning_poker_smaster', args=['slug'])
+        url = reverse('planning_poker_smaster', args=['slug', 1])
         self.assertEquals(resolve(url).func.view_class, views.PlanningPokerView)
 
     def test_planning_poker_smember(self):
@@ -273,21 +273,20 @@ class TestUrlsSprint(SimpleTestCase):
         self.assertEquals(resolve(url).func.view_class, views.EstimarSprint)
 
     def test_ver_en_detalle_sprint_anteriores(self):
-
         '''
             Test para verificar si carga correctamente ver sprint anteriores
         :return:
         '''
         url = reverse('ver_sprint_detail', args=['1'])
-        self.assertEquals(resolve(url).func.view_class,views.VerSprintDetail)
+        self.assertEquals(resolve(url).func.view_class, views.VerSprintDetail)
+
     def test_ver_burndown_charts_sprint_anteriores(self):
-
         '''
             Test para verificar si carga correctamente ver sprint anteriores
         :return:
         '''
         url = reverse('ver_sprint_detail', args=['1'])
-        self.assertEquals(resolve(url).func.view_class,views.VerSprintDetail)
+        self.assertEquals(resolve(url).func.view_class, views.VerSprintDetail)
 
     def test_reversion_us(self):
         '''
@@ -295,7 +294,7 @@ class TestUrlsSprint(SimpleTestCase):
         :return:
         '''
 
-        url = reverse('revertir_us', args=['slug','1'])
+        url = reverse('revertir_us', args=['slug', '1'])
         self.assertEquals(resolve(url).func.view_class, views.RevertirHistorial)
 
     def test_finalizar_sprint(self):
@@ -305,7 +304,7 @@ class TestUrlsSprint(SimpleTestCase):
           '''
 
         url = reverse('finalizar_sprint', args=['1'])
-        self.assertEquals(resolve(url).func.view_class, views.FinalizarSprint,"No son iguales las vistas")
+        self.assertEquals(resolve(url).func.view_class, views.FinalizarSprint, "No son iguales las vistas")
 
     def test_extender_sprint(self):
         '''
@@ -314,5 +313,27 @@ class TestUrlsSprint(SimpleTestCase):
                   '''
 
         url = reverse('extender_sprint', args=['slug'])
-        self.assertEquals(resolve(url).func.view_class, views.ExtenderSprint,"no son iguales las vistas")
+        self.assertEquals(resolve(url).func.view_class, views.ExtenderSprint, "no son iguales las vistas")
 
+    def test_ver_sprint_detail(self):
+        '''
+          Test para verificar si carga correctamente la pagina al ver sprint en detalle
+          :return:
+          '''
+
+        url = reverse('ver_sprint_detail', args=[1])
+        self.assertEquals(resolve(url).func.view_class, views.VerSprintDetail, "no son iguales las vistas")
+
+    def test_cambiar_desarrollador_de_user_story(self):
+        '''
+                  Test para verificar si carga correctamente las paginas a cambiar de desarrollador en US
+                  :return:
+                  '''
+        url1 = reverse('poryecto_rol_usuarios')
+        url2 = reverse('poryecto_cambiar_usuario_US_sprint')
+        url3 = reverse('poryecto_users_sprint')
+        self.assertEquals(resolve(url1).func, views.get_list_users_group,
+                          "no es igual la vista para listar usuario por Group")
+        self.assertEquals(resolve(url3).func, views.get_list_user_current_sprint,
+                          "no es igual la vista para listar usuario por sprint")
+        self.assertEquals(resolve(url2).func, views.cambiar_dev_en_US, "no es igual la vista para cambiar DEV")

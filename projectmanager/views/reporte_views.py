@@ -18,6 +18,9 @@ class VistaReporteView(View):
 
 
 class ViewPdfProductBacklog(View):
+    """
+    Vista basada en clase utlizada para la generacion del reporte del product backlog
+    """
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         product_backlog = proyecto.product_backlog 
@@ -30,6 +33,9 @@ class ViewPdfProductBacklog(View):
 
 
 class ViewPdfSpringBacklog(View):
+    """
+    Vista basada en clase utlizada para la generacion del reporte del sprint backlog
+    """
     def get(self, request, slug, pk, *args, **kwargs):
         sprint = Sprint.objects.get(pk=pk)
         context = {
@@ -41,6 +47,9 @@ class ViewPdfSpringBacklog(View):
 
 
 class ViewPdfUSPrioridad(View):
+    """
+    Vista basada en clase utlizada para la generacion del reporte de la prioridad de UserStory
+    """
     def get(self, request, slug, *args, **kwargs):
         proyecto = Proyecto.objects.get(slug=slug)
         sprint_actual = proyecto.sprint_actual

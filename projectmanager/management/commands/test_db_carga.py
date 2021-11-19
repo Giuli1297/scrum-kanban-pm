@@ -447,13 +447,16 @@ class Command(BaseCommand):
                     sprint_sig.save()
             proyecto.save()
             for us in sprint_fin.sprint_backlog.all():
-                UserStorySprint.objects.create(descripcion=us.descripcion,
-                                               tiempoEstimadoSMaster=us.tiempoEstimadoSMaster,
-                                               tiempoEstimado=us.tiempoEstimado, estado=us.estado,
-                                               tiempoEnDesarrollo=us.tiempoEnDesarrollo, proyecto=us.proyecto,
-                                               sprintUs=us.sprint,
-                                               prioridad=us.prioridad, descripcionDone=us.descripcionDone,
-                                               desarrolladorAsignado=us.desarrolladorAsignado)
+                newUs = UserStorySprint.objects.create(descripcion=us.descripcion,
+                                                       tiempoEstimadoSMaster=us.tiempoEstimadoSMaster,
+                                                       tiempoEstimado=us.tiempoEstimado, estado=us.estado,
+                                                       tiempoEnDesarrollo=us.tiempoEnDesarrollo, proyecto=us.proyecto,
+                                                       sprintUs=us.sprint,
+                                                       prioridad=us.prioridad, descripcionDone=us.descripcionDone,
+                                                       desarrolladorAsignado=us.desarrolladorAsignado)
+                for act in us.RegistroActividad.all():
+                    RegistroActividadDiairia.objects.create(us=newUs, descripcion=act.descripcion, fecha=act.fecha,
+                                                            hora=act.hora)
 
         # Speint en proceso y planificado
         # Planificacion
@@ -763,13 +766,16 @@ class Command(BaseCommand):
                     sprint_sig.save()
             proyecto.save()
             for us in sprint_fin.sprint_backlog.all():
-                UserStorySprint.objects.create(descripcion=us.descripcion,
-                                               tiempoEstimadoSMaster=us.tiempoEstimadoSMaster,
-                                               tiempoEstimado=us.tiempoEstimado, estado=us.estado,
-                                               tiempoEnDesarrollo=us.tiempoEnDesarrollo, proyecto=us.proyecto,
-                                               sprintUs=us.sprint,
-                                               prioridad=us.prioridad, descripcionDone=us.descripcionDone,
-                                               desarrolladorAsignado=us.desarrolladorAsignado)
+                newUs = UserStorySprint.objects.create(descripcion=us.descripcion,
+                                                       tiempoEstimadoSMaster=us.tiempoEstimadoSMaster,
+                                                       tiempoEstimado=us.tiempoEstimado, estado=us.estado,
+                                                       tiempoEnDesarrollo=us.tiempoEnDesarrollo, proyecto=us.proyecto,
+                                                       sprintUs=us.sprint,
+                                                       prioridad=us.prioridad, descripcionDone=us.descripcionDone,
+                                                       desarrolladorAsignado=us.desarrolladorAsignado)
+                for act in us.RegistroActividad.all():
+                    RegistroActividadDiairia.objects.create(us=newUs, descripcion=act.descripcion, fecha=act.fecha,
+                                                            hora=act.hora)
 
             # Sprint Finalizado
             #
@@ -950,13 +956,17 @@ class Command(BaseCommand):
                         sprint_sig.save()
                 proyecto.save()
                 for us in sprint_1.sprint_backlog.all():
-                    UserStorySprint.objects.create(descripcion=us.descripcion,
-                                                   tiempoEstimadoSMaster=us.tiempoEstimadoSMaster,
-                                                   tiempoEstimado=us.tiempoEstimado, estado=us.estado,
-                                                   tiempoEnDesarrollo=us.tiempoEnDesarrollo, proyecto=us.proyecto,
-                                                   sprintUs=us.sprint,
-                                                   prioridad=us.prioridad, descripcionDone=us.descripcionDone,
-                                                   desarrolladorAsignado=us.desarrolladorAsignado)
+                    newUs = UserStorySprint.objects.create(descripcion=us.descripcion,
+                                                           tiempoEstimadoSMaster=us.tiempoEstimadoSMaster,
+                                                           tiempoEstimado=us.tiempoEstimado, estado=us.estado,
+                                                           tiempoEnDesarrollo=us.tiempoEnDesarrollo,
+                                                           proyecto=us.proyecto,
+                                                           sprintUs=us.sprint,
+                                                           prioridad=us.prioridad, descripcionDone=us.descripcionDone,
+                                                           desarrolladorAsignado=us.desarrolladorAsignado)
+                    for act in us.RegistroActividad.all():
+                        RegistroActividadDiairia.objects.create(us=newUs, descripcion=act.descripcion, fecha=act.fecha,
+                                                                hora=act.hora)
                 # Sprint Finalizado
                 #
                 # Creacion
@@ -1092,13 +1102,19 @@ class Command(BaseCommand):
                             sprint_sig.save()
                     proyecto.save()
                     for us in sprint_2.sprint_backlog.all():
-                        UserStorySprint.objects.create(descripcion=us.descripcion,
-                                                       tiempoEstimadoSMaster=us.tiempoEstimadoSMaster,
-                                                       tiempoEstimado=us.tiempoEstimado, estado=us.estado,
-                                                       tiempoEnDesarrollo=us.tiempoEnDesarrollo, proyecto=us.proyecto,
-                                                       sprintUs=us.sprint,
-                                                       prioridad=us.prioridad, descripcionDone=us.descripcionDone,
-                                                       desarrolladorAsignado=us.desarrolladorAsignado)
+                        newUs = UserStorySprint.objects.create(descripcion=us.descripcion,
+                                                               tiempoEstimadoSMaster=us.tiempoEstimadoSMaster,
+                                                               tiempoEstimado=us.tiempoEstimado, estado=us.estado,
+                                                               tiempoEnDesarrollo=us.tiempoEnDesarrollo,
+                                                               proyecto=us.proyecto,
+                                                               sprintUs=us.sprint,
+                                                               prioridad=us.prioridad,
+                                                               descripcionDone=us.descripcionDone,
+                                                               desarrolladorAsignado=us.desarrolladorAsignado)
+                        for act in us.RegistroActividad.all():
+                            RegistroActividadDiairia.objects.create(us=newUs, descripcion=act.descripcion,
+                                                                    fecha=act.fecha,
+                                                                    hora=act.hora)
         proyecto.estado = 'FIN'
         proyecto.fecha_fin = asuncion.localize(datetime.strptime('2021-09-01', "%Y-%m-%d"))
         for uw in proyecto.tiempos_de_usuarios.all():
