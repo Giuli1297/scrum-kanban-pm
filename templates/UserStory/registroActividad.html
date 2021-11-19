@@ -99,33 +99,33 @@ document.getElementById("fecha").value = today;
 
 </script>
     <script>
-    let day = {{ US.sprint.fecha_finalizacion.date.day }};
-    let month = {{ US.sprint.fecha_finalizacion.date.month }};
+    let day = {{ US.sprint.fecha_finalizacion_real.date.day }};
+    let month = {{ US.sprint.fecha_finalizacion_real.date.month }};
     if(day<10){
         day = '0'+day;
     }
     if(month<10){
         month = '0'+month;
     }
-    date1 = {{ US.sprint.fecha_finalizacion.date.year }}+'-'+
+    date1 = {{ US.sprint.fecha_finalizacion_real.date.year }}+'-'+
             month+'-'+
             day;
     let datex = new Date(date1)
-    datex.setDate(datex.getDate()+1);
+    datex.setDate(datex.getDate());
     document.getElementById("fecha").setAttribute("max", datex.toISOString().split('T')[0]);
-    day = {{ US.sprint.fecha_inicio.date.day }};
-    month = {{ US.sprint.fecha_inicio.date.month }};
+    day = {{ US.sprint.fecha_inicio_desarrollo.date.day }};
+    month = {{ US.sprint.fecha_inicio_desarrollo.date.month }};
     if(day<10){
         day = '0'+day;
     }
     if(month<10){
         month = '0'+month;
     }
-    date1 = {{ US.sprint.fecha_inicio.date.year }}+'-'+
+    date1 = {{ US.sprint.fecha_inicio_desarrollo.date.year }}+'-'+
             month+'-'+
             day;
     datex = new Date(date1)
-    datex.setDate(datex.getDate()+1);
+    datex.setDate(datex.getDate());
     document.getElementById("fecha").setAttribute("min", datex.toISOString().split('T')[0]);
 
 </script>

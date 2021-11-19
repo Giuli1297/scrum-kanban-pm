@@ -353,7 +353,7 @@
                                     </a>
                                 {% endif %}
                                 {% with "scrum_master_"|add:proyecto.slug as isGroup  %}
-                                    {% if request.user|has_group:isGroup %}
+                                    {% if request.user|has_group:isGroup or request.user|has_group:'Administrador'%}
                                         <button id="{{user_story.pk}}" onclick="list_devs('{{ user_story.desarrolladorAsignado.username }}', '{{user_story.pk}}')" type="button" class="btn btn-danger mr-2" data-bs-toggle="modal" data-bs-target="#modalCambiarDev">
                                             Cambiar Dev
                                         </button>
@@ -395,6 +395,13 @@
                                         Gestionar
                                     </a>
                                 {% endif %}
+                                 {% with "scrum_master_"|add:proyecto.slug as isGroup  %}
+                                    {% if request.user|has_group:isGroup or request.user|has_group:'Administrador'%}
+                                        <button id="{{user_story.pk}}" onclick="list_devs('{{ user_story.desarrolladorAsignado.username }}', '{{user_story.pk}}')" type="button" class="btn btn-danger mr-2" data-bs-toggle="modal" data-bs-target="#modalCambiarDev">
+                                            Cambiar Dev
+                                        </button>
+                                    {% endif %}
+                                {% endwith %}
                             </td>
                         </tr>
                     {% endif %}
@@ -514,7 +521,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <a class="btn btn-dark m-3" href="{% url 'ver_burndownchart_actual' slug=proyecto.slug sprintPk=proyecto.sprint_actual.pk %}">Ver Burndown Chart</a>
+            <a class="btn btn-dark m-3" href="{% url 'ver_burndownchart_actual' slug=proyecto.slug sprintPk=proyecto.sprint_actual.pk %}">Ver Reporte Sprint</a>
         </div>
     {% endif %}
 
@@ -556,6 +563,15 @@
       <div class="modal-body">
         <p>Capacidad en horas : {{ proyecto.sprint_actual.capacidad_horas }}</p>
             <p>Horas consumidas por US: {{ proyecto.sprint_actual.horas_ocupadas_us }}</p>
+          {% for s_member in proyecto.scrum_member.all %}
+          {% for capacidad in s_member.capacidad_sprints.all %}
+            {% if capacidad.sprint == proyecto.sprint_actual %}
+                <p>Scrum Member {{ s_member.username }} - Capacidad: {{ capacidad.capacidad_horas }}
+                 - Saldo: {{ capacidad.saldo_horas }}</p>
+            {% endif %}
+          {% endfor %}
+
+      {% endfor %}
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -575,7 +591,16 @@
       </div>
       <div class="modal-body">
         <p>Capacidad en horas: {{ proyecto.siguiente_sprint.capacidad_horas }}</p>
-            <p>Horas consumidas por US: {{ proyecto.siguiente_sprint.horas_ocupadas_us }}</p>
+        <p>Horas consumidas por US: {{ proyecto.siguiente_sprint.horas_ocupadas_us }}</p>
+        {% for s_member in proyecto.scrum_member.all %}
+          {% for capacidad in s_member.capacidad_sprints.all %}
+            {% if capacidad.sprint == proyecto.siguiente_sprint %}
+                <p>Scrum Member {{ s_member.username }} - Capacidad: {{ capacidad.capacidad_horas }}
+                 - Saldo: {{ capacidad.saldo_horas }}</p>
+            {% endif %}
+          {% endfor %}
+
+      {% endfor %}
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

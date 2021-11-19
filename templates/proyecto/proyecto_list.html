@@ -29,7 +29,7 @@
                 <td>{{ proyecto.nombre }}</td>
                 <td>{{ proyecto.estado }}</td>
                 <td>{{ proyecto.fecha_inicio }}</td>
-                {% if proyecto.estado == 'FIN' %}
+                {% if proyecto.estado == 'FIN' or proyecto.estado == 'CAN' %}
                     <td>{{ proyecto.fecha_fin }}</td>
                 {% else %}
                     <td>--</td>
