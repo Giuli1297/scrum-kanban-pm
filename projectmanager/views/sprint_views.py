@@ -249,8 +249,10 @@ class AsignarYEstimarUserStoryView(View):
             ustory.tiempoEstimadoSMaster = horasEstimadas
             sprint = ustory.sprint
             sprint.horas_ocupadas_us += horasEstimadas
+            sprint.horas_ocupadas_us -= ustory.tiempoEnDesarrollo
             capacidad = CapacidadSMasteSprint.objects.get(sprint=ustory.sprint, scrum_member=sm_asignado)
             capacidad.saldo_horas -= horasEstimadas
+            capacidad.saldo_horas += ustory.tiempoEnDesarrollo
             capacidad.save()
             sprint.save()
             ustory.save()
@@ -567,12 +569,15 @@ class getDataForBurndownChart(View):
                     progreso[(duracionSprint) - i] -= us.tiempoEstimado
                     if progreso[(duracionSprint) - i] < 0:
                         progreso[(duracionSprint) - i] = 0
-
         for actividad in registros_de_actividad:
             diferencia_dia = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
                                                     actividad.fecha.date()))
+            print(sprint.fecha_inicio_desarrollo.date())
+            print(actividad.fecha.date())
+            print(diferencia_dia)
             for i in range(0, duracionSprint + 1 - diferencia_dia):
                 progreso_act[(duracionSprint) - i] -= actividad.hora
+                print((duracionSprint) - i)
         passed_days = duracionSprint
 
         if sprint.estado == 'fin':
