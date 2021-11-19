@@ -39,10 +39,29 @@
     <div class="form-group col-md-4">
         <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
+            <label for="fecha_fin" class="form-label">Fecha de Finalizacion</label>
+            <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" onkeydown="return false"
+                   min="{{ proyecto.sprint_actual.fecha_finalizacion. }}" REQUIRED>
             <button class="btn btn-dark" type="submit">Extender</button>
         </form>
         <a class="mb-3 btn btn-danger" href="{% url 'proyecto_gestion' slug=proyecto.slug %}">Volver</a>
     </div>
 </div>
+    <script>
+    let day = {{ proyecto.sprint_actual.fecha_finalizacion.date.day }};
+    let month = {{ proyecto.sprint_actual.fecha_finalizacion.date.month }};
+    if(day<10){
+        day = '0'+day;
+    }
+    if(month<10){
+        month = '0'+month;
+    }
+    date1 = {{ proyecto.sprint_actual.fecha_finalizacion.date.year }}+'-'+
+            month+'-'+
+            day;
+    let datex = new Date(date1)
+    datex.setDate(datex.getDate()+1);
+    document.getElementById("fecha_fin").setAttribute("min", datex.toISOString().split('T')[0]);
+
+</script>
 {% endblock %}

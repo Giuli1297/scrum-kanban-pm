@@ -30,7 +30,10 @@
                 <form action="" method="post">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <button class="btn btn-dark" type="submit">Guardar</button>
+                <label for="fecha" class="form-label">Fecha</label>
+                <input type="date" class="form-control" id="fecha" name="fecha" onkeydown="return false"
+                       REQUIRED>
+                <button class="btn btn-dark mt-3" type="submit">Guardar</button>
                 </form>
             </table>
               <a class="mb-3 btn btn-danger" href="{% url 'proyecto_gestion' slug=proyecto.slug %}">Volver</a>
@@ -75,6 +78,57 @@
         {% endif %}
     </div>
 </div>
+<script>
+var today = new Date();
+var dd = today.getDate();
+var mm = today.getMonth()+1; //January is 0!
+var yyyy = today.getFullYear();
+
+if(dd<10) {
+  dd = '0'+dd
+}
+
+if(mm<10) {
+  mm = '0'+mm
+}
+
+today = yyyy + '-' + mm + '-' + dd;
+console.log(today);
+document.getElementById("fecha").value = today;
+
+
+</script>
+    <script>
+    let day = {{ US.sprint.fecha_finalizacion_real.date.day }};
+    let month = {{ US.sprint.fecha_finalizacion_real.date.month }};
+    if(day<10){
+        day = '0'+day;
+    }
+    if(month<10){
+        month = '0'+month;
+    }
+    date1 = {{ US.sprint.fecha_finalizacion_real.date.year }}+'-'+
+            month+'-'+
+            day;
+    let datex = new Date(date1)
+    datex.setDate(datex.getDate());
+    document.getElementById("fecha").setAttribute("max", datex.toISOString().split('T')[0]);
+    day = {{ US.sprint.fecha_inicio_desarrollo.date.day }};
+    month = {{ US.sprint.fecha_inicio_desarrollo.date.month }};
+    if(day<10){
+        day = '0'+day;
+    }
+    if(month<10){
+        month = '0'+month;
+    }
+    date1 = {{ US.sprint.fecha_inicio_desarrollo.date.year }}+'-'+
+            month+'-'+
+            day;
+    datex = new Date(date1)
+    datex.setDate(datex.getDate());
+    document.getElementById("fecha").setAttribute("min", datex.toISOString().split('T')[0]);
+
+</script>
 {% endblock %}
 
 

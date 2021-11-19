@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <h1>Spring Backlog</h1>
+        {% for us in sprint.sprint_backlog.all  %} 
+            <div>
+                <div>
+                    <h4>Identificador:</h4>
+                    <p>{{ us.pk }}</p>
+                </div>
+                <div>
+                    <h4>Nombre US:</h4>
+                    <p>{{ us.descripcion }}</p>
+                </div>
+                <div>
+                    <h4>Estado:</h4>
+                    <p>{{ us.estado }}</p>
+                </div>
+                <div>
+                    <h4>Horas trabajadas:</h4>
+                    <p>{{ us.tiempoEnDesarrollo }}</p>
+                </div>
+                <div>
+                    <h4>Planificado:</h4>
+                    <p>{{ us.tiempoEstimado }}</p>
+                </div>
+                <div>===============================</div>
+            </di>
+        {% endfor %}
+    </body>
+</html>

@@ -6,6 +6,7 @@ from .user_story_model import UserStory, HistorialUs, UserInfo
 from .user_work_model import UserWorkTime
 from .system_activity_model import SystemActivity
 from .QA_models import QA
+from .capacidad_sm_sprint_model import CapacidadSMasteSprint
 
 
 def get_name(self):
@@ -23,5 +24,6 @@ __all__ = [
     'UserStory',
     'HistorialUs',
     'SystemActivity',
-    'QA'
+    'QA',
+    'CapacidadSMasteSprint',
 ]

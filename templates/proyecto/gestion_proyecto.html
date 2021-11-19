@@ -143,13 +143,26 @@ right: 20px;
                         <tr>
                           <td>{{ ustory.descripcion }}</td>
                           <td>{{ ustory.estado }}</td>
-                        {% if proyecto.estado == 'ACT' and proyecto.sprint_actual.estado == 'conf1' %}
+                        {% if proyecto.siguiente_sprint.estado == 'conf1' or proyecto.sprint_actual.estado == 'conf1' %}
+                            {% if proyecto.estado == 'ACT' %}
                             <td>
-                                <a class="btn btn-success"
-                                   href="{% url 'cargar_sprint_backlog' usPk=ustory.pk sprintPk=proyecto.sprint_actual.pk %}">
-                                    <h4>+</h4>
-                                </a>
+                                <form method="POST"
+                                        action="{% url 'cargar_sprint_backlog' usPk=ustory.pk sprintPk=proyecto.sprint_actual.pk %}">
+                                    {% csrf_token %}
+                                    <select name="sprintx" id="sprint" style="width: 150px">
+                                        {% if proyecto.sprint_actual.estado == 'conf1' %}
+                                            <option value="1">Sprint Actual</option>
+                                        {% endif %}
+                                        {% if proyecto.siguiente_sprint %}
+                                            <option value="2">Sprint Siguiente</option>
+                                        {% endif %}
+                                    </select>
+                                    <button class="btn btn-success">
+                                        <h4>+</h4>
+                                    </button>
+                                </form>
                             </td>
+                            {% endif %}
                         {% endif %}
                         </tr>
                         {% endif %}
@@ -180,10 +193,19 @@ right: 20px;
             {% endif %}
         </div>
     </div>
-
-
 {% endif %}
-{% if proyecto.estado == 'ACT' %}
+{% if not proyecto.sprint_actual or not proyecto.siguiente_sprint %}
+    {% if "planificar_sprint" in proyecto_perms or request.user|has_group:'Administrador' %}
+        {% if proyecto.estado == 'ACT' %}
+            <div class="row mt-2">
+                <div class="col-md-2">
+                    <a href="{% url 'crear_sprint' slug=proyecto.slug %}" class="btn btn-dark">Planificar Sprint</a>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+{% endif %}
+{%  if proyecto.sprint_actual %}
     {% include 'sprint/gestion_sprint.html' %}
 {% endif %}
 {% if proyecto.estado == 'FIN' %}
@@ -196,9 +218,9 @@ right: 20px;
             <div class="row">
                 <div class="card">
                   <div class="card-body">
-                    <h5 class="card-title">Sprint {{ forloop.counter }}</h5>
+                    <h5 class="card-title">Sprint {{ sprint.fecha_inicio_desarrollo|date:"M d, Y" }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">Fecha Inicio: {{ sprint.fecha_inicio_desarrollo|date:"M d, Y" }}</h6>
-                    <h6 class="card-subtitle mb-2 text-muted">Fecha Fin: {{ sprint.fecha_finalizacion|date:"M d, Y" }}</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">Fecha Fin: {{ sprint.fecha_finalizacion_real|date:"M d, Y" }}</h6>
 {#                    <p class="card-text">Descripcion Final o Algo</p>#}
                     <a href="{% url 'ver_sprint_detail' sprint.pk %}" class="card-link">Ver en detalle</a>
                   </div>
@@ -213,13 +235,13 @@ right: 20px;
     <div class="row mt-1"><h4>Registro de Sprints</h4></div>
     <div class="row mt-3">
         {% for sprint in proyecto.registro_sprints.all %}
-            {% if sprint != proyecto.sprint_actual %}
+            {% if sprint != proyecto.sprint_actual and sprint != proyecto.siguiente_sprint %}
                 <div class="row">
                 <div class="card">
                   <div class="card-body">
-                    <h5 class="card-title">Sprint {{ forloop.counter }}</h5>
+                    <h5 class="card-title">Sprint {{ sprint.fecha_inicio_desarrollo|date:"M d, Y" }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">Fecha Inicio: {{ sprint.fecha_inicio_desarrollo|date:"M d, Y" }}</h6>
-                    <h6 class="card-subtitle mb-2 text-muted">Fecha Fin: {{ sprint.fecha_finalizacion|date:"M d, Y" }}</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">Fecha Fin: {{ sprint.fecha_finalizacion_real|date:"M d, Y" }}</h6>
 {#                    <p class="card-text">Descripcion Final o Algo</p>#}
                     <a href="{% url 'ver_sprint_detail' sprint.pk %}" class="card-link">Ver en detalle</a>
                   </div>

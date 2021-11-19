@@ -2,22 +2,65 @@
 
 {% block content %}
     <div class="row">
-            <h3>Burndown Chart del Sprint Actual del proyecto {{ proyecto.nombre }}</h3>
-            <p>Este grafico muestra el progreso actual del Sprint en curso.</p>
-            <ul>
-                <li>El eje de las abscisas representa los dias restantes de acuerdo a la planificacion del Sprint</li>
-                <li>El eje de las ordenadas representa las horas a desarrollar del Sprint.</li>
-            </ul>
-    </div>
+        <div class="col-md-5 border border-2">
+                <div class="row m-1">
+                    <div class="col-md-4">
+                        <h4>Sprint Backlog Desarrollado</h4>
+                    </div>
+                    <div class="col-md-8"></div>
+                </div>
+                <div class="row m-1">
+                    <table class="table mb-2">
+                      <thead>
+                        <tr>
+                            <th scope="col">User Story</th>
+                            <th scope="col">Encargado</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Horas (Planning Poker)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for user_story in proyecto.sprint_actual.sprint_backlog.all %}
+                            <tr>
+                                <th scope="row">{{ user_story.descripcion }}</th>
+                                <td>{{ user_story.desarrolladorAsignado.username }}</td>
+                                <td>{{ user_story.estado }}</td>
+                                <td>
+                                        {{ user_story.tiempoEstimado }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                </div>
+        </div>
+        <div class="col-md-1"></div>
+        <div class="col-md-6">
+            <div class="row">
+                <h3>Burndown Chart del Sprint Actual del proyecto {{ proyecto.nombre }}</h3>
+                <p>Este grafico muestra el progreso actual del Sprint en curso.</p>
+                <ul>
+                    <li>El eje de las abscisas representa los dias restantes de acuerdo a la planificacion del Sprint</li>
+                    <li>El eje de las ordenadas representa las horas a desarrollar del Sprint.</li>
+                </ul>
+            </div>
             <div class="row">
                 <input id='slug' type="hidden" value="{{ proyecto.slug }}">
                 <input id='sprintPk' type="hidden" value="{{ proyecto.sprint_actual.pk }}">
                 <canvas id="myChart"></canvas>
             </div>
             <div class="row">
+                <div class="col-md-6">
+                    <h6 class="card-subtitle mb-2 text-muted">Fecha Inicio: {{ proyecto.sprint_actual.fecha_inicio_desarrollo|date:"M d, Y" }}</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">Fecha Fin: {{ proyecto.sprint_actual.fecha_finalizacion_real|date:"M d, Y" }}</h6>
+                </div>
+            </div>
+            <div class="row">
                 <div class="col-md-3">    <a class="m-3 btn btn-danger" href="{% url 'proyecto_gestion' slug=proyecto.slug %}">Volver</a>
+                </div>
             </div>
         </div>
+    </div>
 {% endblock %}
 
 {% block scripts %}
@@ -43,6 +86,7 @@
             const lab = [];
             var dataset1 = [];
             var dataset2 = [];
+            var dataset3 = []
             console.log(defaultData.horas_us_totales);
             for(let i=0;i<=parseInt(defaultData.dias_estimados);i++){
                 lab.push(defaultData.dias_estimados-i);
@@ -50,6 +94,9 @@
             }
             for(let i=0;i<=defaultData.passed_days;i++){
                 dataset2.push(defaultData.progreso[i]);
+            }
+            for(let i=0;i<=defaultData.passed_days;i++){
+                dataset3.push(defaultData.progreso_act[i]);
             }
             const data = {
               labels: lab,
@@ -61,10 +108,17 @@
                   backgroundColor: 'rgb(255, 100, 50)',
                 },
                 {
-                  label: 'Progreso Real',
+                  label: 'Progreso QA',
                   data: dataset2,
                   borderColor: 'rgb(100, 100, 255)',
                   backgroundColor: 'rgb(100, 100, 255)',
+                },
+                {
+                  label: 'Progreso Actividades',
+                  data: dataset3,
+                  borderColor: 'rgb(100, 200, 200)',
+                  backgroundColor: 'rgb(100, 100, 200)',
+                    borderDash: [10,5]
                 }
               ]
             };

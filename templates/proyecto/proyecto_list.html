@@ -18,23 +18,38 @@
 			<th scope="col">Fecha de inicio</th>
             <th scope="col">Fecha Fin</th>
 			<th scope="col">Scrum Master</th>
+			<th scope="col">Acciones</th>
 		</tr>
 	</thead>
 
 	<tbody>
 		{% if object_list %}
 		{% for proyecto in object_list %}
-            <tr onclick="document.location = '{% url 'proyecto_gestion' slug=proyecto.slug %}';">
+            <tr>
                 <th scope="row">{{ forloop.counter }}</th>
                 <td>{{ proyecto.nombre }}</td>
                 <td>{{ proyecto.estado }}</td>
                 <td>{{ proyecto.fecha_inicio }}</td>
-                {% if proyecto.estado == 'FIN' %}
+                {% if proyecto.estado == 'FIN' or proyecto.estado == 'CAN' %}
                     <td>{{ proyecto.fecha_fin }}</td>
                 {% else %}
                     <td>--</td>
                 {% endif %}
                 <td>{{ proyecto.scrum_master }}</td>
+				<td>
+					<a class="btn btn-success"
+                        href="{% url 'proyecto_gestion' slug=proyecto.slug %}">
+                            Abrir
+                    </a>
+					{% with "scrum_master_"|add:proyecto.slug as isGroup  %}
+						{% if request.user|has_group:isGroup or request.user|has_group:'Administrador' %}
+							<a class="ms-2 btn btn-info"
+                    	        href="{% url 'proyecto_reporte' slug=proyecto.slug %}">
+                    	            Generar reporte
+                    	    </a>
+						{% endif %}
+					{% endwith %}
+				</td>
             </tr>
 		{% endfor %}
 		{% else %}

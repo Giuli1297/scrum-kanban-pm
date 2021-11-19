@@ -5,6 +5,8 @@
     <h3>Estime en horas el User Story:</h3>
     <h5>Horas Estimadas por Scrum Master: {{ user_story.tiempoEstimadoSMaster }} hs.</h5>
     <p>{{ user_story.descripcion }}</p>
+    <p>Capacidad del Sprint: {{ user_story.sprint.capacidad_horas }}.</p>
+    <p>Capacidad consumida: {{ user_story.sprint.horas_ocupadas_us }}</p>
 </div>
 <div class="row mb-3">
     <div class="form-group col-md-4">

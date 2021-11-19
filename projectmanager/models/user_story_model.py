@@ -54,6 +54,7 @@ class UserStory(models.Model):
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Nuevo')
 
     tiempoEnDesarrollo = models.FloatField(validators=[MinValueValidator(0)], default=0, null=True)
+    saldo_horas = models.FloatField(default=0.0)
     desarrolladorAsignado = models.ForeignKey(User, related_name='desarrollador_asignado', null=True, blank=True,
                                               on_delete=models.CASCADE)
     proyecto = models.ForeignKey(Proyecto, related_name='product_backlog', null=True, on_delete=models.CASCADE)
@@ -63,6 +64,10 @@ class UserStory(models.Model):
 
     def historial(self):
         return HistorialUs.objects.filter(descripcion=self).order_by('version')
+
+    def save(self, *args, **kwargs):
+        self.saldo_horas = self.tiempoEstimado - self.tiempoEnDesarrollo
+        super().save(*args, **kwargs)
 
     class Meta:
         permissions = (
@@ -180,5 +185,72 @@ class RegistroActividadDiairia(models.Model):
             descripcion breve del cambio realizado.
     """
     us = models.ForeignKey(UserStory, related_name='RegistroActividad', null=True, on_delete=models.CASCADE)
-    descripcion = models.TextField(blank=True, max_length=5000)
+    descripcion = models.TextField(blank=True, null=True, max_length=5000)
+    fecha = models.DateTimeField(default=timezone.now)
     hora = models.FloatField(default=0)
+
+class UserStorySprint(models.Model):
+    """
+    Clase para guardar los user storys para cada sprint del proyecto
+    tiene los mismos atributos que la clase deuser story
+
+    Atributos:
+
+    Parameters
+    -----------
+    estado
+        Define el estado del UserStory
+
+    nombre
+        Define el nombre del UserStory
+
+    descripcion
+        Breve descripcion del UserStory
+
+    tiempoEstimado
+        tiempo estimado para realizar el UserStory
+
+    desarrolladorAsignado
+        desarrollador asignado para realizar el UserStory
+
+    proyecto
+        Proyecto al cual esta ligado el UserStory
+
+    Sprint
+        Sprint en donde esta contenido el UserStory
+    """
+    ESTADOS = (
+        ('Nuevo', 'Nuevo'),
+        ('no-terminado', 'No Terminado'),
+        ('To-Do', 'To-Do'),
+        ('Doing', 'Doing'),
+        ('Done', 'Done'),
+        ('QA', 'QA'),
+        ('Release', 'Release')
+    )
+    descripcion = models.TextField(blank=True, max_length=255)
+    tiempoEstimadoSMaster = models.FloatField(default=0.0)
+    tiempoEstimado = models.FloatField(validators=[MinValueValidator(0)], default=0, null=True)
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='Nuevo')
+
+    tiempoEnDesarrollo = models.FloatField(validators=[MinValueValidator(0)], default=0, null=True)
+    desarrolladorAsignado = models.ForeignKey(User, related_name='desarrollador_asignado_us', null=True, blank=True,
+                                              on_delete=models.CASCADE)
+    proyecto = models.ForeignKey(Proyecto, related_name='product_backlog_us', null=True, on_delete=models.CASCADE)
+    sprintUs = models.ForeignKey(Sprint, related_name='sprint_backlog_us', null=True, blank=True, on_delete=models.SET_NULL)
+    prioridad = models.IntegerField(default=1)
+    descripcionDone = models.TextField(blank=True, max_length=255)
+
+    '''def historial(self):
+        return HistorialUs.objects.filter(descripcion=self).order_by('version')'''
+
+    class Meta:
+        permissions = (
+            ('desarrollar_user_story', 'Puede desarrollar un user story'),)
+        verbose_name = 'User Story'
+        verbose_name_plural = 'Users Storys'
+        ordering = ['estado', '-prioridad']
+
+    def __str__(self):
+        return self.descripcion + self.proyecto.slug
+
