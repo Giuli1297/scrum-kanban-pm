@@ -111,7 +111,7 @@ document.getElementById("fecha").value = today;
             month+'-'+
             day;
     let datex = new Date(date1)
-    datex.setDate(datex.getDate()+1);
+    datex.setDate(datex.getDate());
     document.getElementById("fecha").setAttribute("max", datex.toISOString().split('T')[0]);
     day = {{ US.sprint.fecha_inicio_desarrollo.date.day }};
     month = {{ US.sprint.fecha_inicio_desarrollo.date.month }};
@@ -125,7 +125,7 @@ document.getElementById("fecha").value = today;
             month+'-'+
             day;
     datex = new Date(date1)
-    datex.setDate(datex.getDate()+1);
+    datex.setDate(datex.getDate());
     document.getElementById("fecha").setAttribute("min", datex.toISOString().split('T')[0]);
 
 </script>

@@ -364,7 +364,7 @@ class QuitarSMember(View):
 
         # Log activity
         SystemActivity.objects.create(usuario=request.user,
-                                      descripcion="Ha quitado scrum members del proyecto " + proyecto.name)
+                                      descripcion="Ha quitado scrum members del proyecto " + proyecto.nombre)
         messages.success(request, 'Scrum Member removido')
         return redirect('proyecto_gestion', slug=slug)
 
@@ -414,6 +414,7 @@ class ProyectoCancelarView(UserAccessMixin, View):
         proyecto = Proyecto.objects.get(slug=slug)
         if proyecto.estado == 'PEN':
             proyecto.estado = 'CAN'
+            proyecto.fecha_fin = timezone.now()
             for scrum_member in proyecto.scrum_member.all():
                 for work in scrum_member.tiempos_de_trabajo.all():
                     if work.proyecto == proyecto:

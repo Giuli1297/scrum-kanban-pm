@@ -179,9 +179,11 @@ class QuitarUSFromSprintBacklog(View):
             return redirect('proyecto_gestion', slug=ustory.proyecto.slug)
         sprint = ustory.sprint
         sprint.horas_ocupadas_us -= ustory.tiempoEstimadoSMaster
-        capacidadsm = CapacidadSMasteSprint.objects.get(sprint=ustory.sprint, scrum_member=ustory.desarrolladorAsignado)
-        capacidadsm.saldo_horas += ustory.tiempoEstimadoSMaster
-        capacidadsm.save()
+        if hasattr(ustory, 'desarrolladorAsignado') and ustory.desarrolladorAsignado is not None:
+            capacidadsm = CapacidadSMasteSprint.objects.get(sprint=ustory.sprint,
+                                                            scrum_member=ustory.desarrolladorAsignado)
+            capacidadsm.saldo_horas += ustory.tiempoEstimadoSMaster
+            capacidadsm.save()
         ustory.sprint = None
         ustory.desarrolladorAsignado = None
         ustory.tiempoEstimado = 0
@@ -664,8 +666,8 @@ class VerSprintDetail(View):
 
     def get(self, request, sprintPk, *args, **kwargs):
         sprint = Sprint.objects.get(pk=sprintPk)
-        proyecto = sprint.proyecto_actual
-        if not request.user.has_perms(('projectmanager.finalizar_sprint',),
+        proyecto = sprint.proyecto
+        if not request.user.has_perms(('projectmanager.ver_proyecto',),
                                       proyecto) and not request.user.groups.filter(name='Administrador').exists():
             messages.error(request, "No tienes permisos para eso")
             return redirect('/')
