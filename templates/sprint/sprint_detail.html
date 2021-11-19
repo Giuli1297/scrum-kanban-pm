@@ -4,11 +4,15 @@
 <div class="row mt-2">
     <div class="col-md-6 border border-2">
         <div class="row m-1">
-            <div class="col-md-4">
-                <h4>Sprint Backlog Desarrollado</h4>
+                <div class="col-md-9">
+                    <h4>Sprint Backlog Desarrollado</h4>
+                        <ul>
+                            <li>Capacidad del Sprint: {{ sprint.capacidad_horas }} hs.</li>
+                            <li>Horas de Desarrollar: {{ sprint.horas_ocupadas_us }}</li>
+                        </ul>
+                    </div>
+                <div class="col-md-3"></div>
             </div>
-            <div class="col-md-8"></div>
-        </div>
         <div class="row m-1">
             <table class="table mb-2">
               <thead>
