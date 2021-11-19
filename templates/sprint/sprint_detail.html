@@ -17,17 +17,19 @@
                     <th scope="col">Encargado</th>
                     <th scope="col">Horas (Planning Poker)</th>
                     <th scope="col">Estado</th>
+                    <th scope="col">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {% for user_story in sprint.sprint_backlog_us.all %}
                     <tr>
                         <th scope="row">{{ user_story.descripcion }}</th>
-                        <td>{{ user_story.desarrolladorAsignado.username }}</td>
+                        <td>{{ user_story.desarrolladorAsignado }}</td>
                         <td>
                                 {{ user_story.tiempoEstimado }}
                         </td>
                         <td>{{ user_story.estado }}</td>
+                        <td><a class="btn btn-primary btn-warning " href="{% url 'log_registro_us_sprint'  slug=sprint.proyecto.slug pk=user_story.pk %}" >Detalles</a></td>
                     </tr>
                 {% endfor %}
               </tbody>

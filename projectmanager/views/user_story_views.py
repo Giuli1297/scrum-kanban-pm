@@ -18,7 +18,7 @@ from django.views.generic import (
     DetailView
 )
 
-from projectmanager.models.user_story_model import RegistroActividadDiairia, logHistorial
+from projectmanager.models.user_story_model import RegistroActividadDiairia, logHistorial, UserStorySprint
 from scrum_kanban_pm.settings.development import EMAIL_HOST_USER
 from projectmanager.forms import *
 from django.core.mail import EmailMessage
@@ -426,6 +426,7 @@ class MarcarUSComoDoneView(View):
             return redirect('proyecto_gestion', slug=user_story.proyecto.slug)
         user_story.estado = 'QA'
         user_story.save()
+        RegistroActividadDiairia.objects.create(us=user_story,descripcion="Se cambió estado de user story a Done")
         # Log activity
         SystemActivity.objects.create(usuario=request.user,
                                       descripcion="Ha marcado como DONE el User Story " + str(user_story.pk))
@@ -482,8 +483,12 @@ class RealizarQAUSView(View):
                 qa.save()
             if user_story.QA.aceptar:
                 user_story.estado = 'Release'
+                RegistroActividadDiairia.objects.create(us=user_story,
+                                                        descripcion="Se cambió estado de user story a Release")
             else:
                 user_story.estado = 'To-Do'
+                RegistroActividadDiairia.objects.create(us=user_story,
+                                                        descripcion="User Story rechazado por QA, se cambió estado de user story a To-Do")
                 email_subject = 'User Story rechazado por QA.'
                 email = EmailMessage(
                     email_subject,
@@ -498,7 +503,36 @@ class RealizarQAUSView(View):
             SystemActivity.objects.create(usuario=request.user,
                                           descripcion="Ha realizado un QA sobre el user story con pk =" + str(
                                               user_story.pk))
+            RegistroActividadDiairia.objects.create(us=user_story, descripcion="Se realizó QA en el user story")
             messages.success(request, "QA realizado")
             return redirect('proyecto_gestion', slug=slug)
         messages.error(request, 'Algo fue mal')
         return redirect('proyecto_gestion', slug=slug)
+
+
+class LogRegistroActividadUs(View):
+    def get(self, request, slug, pk, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=slug)
+        US = UserStory.objects.get(pk=pk)
+        context = {
+            'proyecto': proyecto,
+            'US': US
+        }
+        return render(request, 'UserStory/logRegistroActividad.html', context)
+class LogRegistroActividadUsDetalleSprint(View):
+    def get(self, request, slug, pk, *args, **kwargs):
+        proyecto = Proyecto.objects.get(slug=slug)
+        if not request.user.has_perms(('projectmanager.gestionar_user_stories',),
+                                      proyecto) and not request.user.groups.filter(name='Administrador').exists():
+            messages.error(request, "No tienes permisos para eso")
+            return redirect('proyecto_gestion', slug=slug)
+        US = UserStorySprint.objects.get(pk=pk)
+        context = {
+            'proyecto': proyecto,
+            'US': US
+        }
+        return render(request, 'UserStory/logRegistroActividad.html', context)

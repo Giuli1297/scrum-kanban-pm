@@ -9,7 +9,7 @@ from projectmanager.models import Rol, Proyecto, SystemActivity, UserStory, User
     QA
 from django.utils import timezone
 
-from projectmanager.models.user_story_model import RegistroActividadDiairia
+from projectmanager.models.user_story_model import RegistroActividadDiairia, UserStorySprint
 from projectmanager.utils import add_obj_perm_to_group, add_user_to_obj_group
 
 usuarios = [
@@ -428,6 +428,13 @@ class Command(BaseCommand):
                     sprint_sig.proyecto_sig = None
                     sprint_sig.save()
             proyecto.save()
+            for us in sprint_fin.sprint_backlog.all():
+                UserStorySprint.objects.create(descripcion=us.descripcion,
+                                               tiempoEstimadoSMaster=us.tiempoEstimadoSMaster,
+                                               tiempoEstimado=us.tiempoEstimado, estado=us.estado,
+                                               tiempoEnDesarrollo=us.tiempoEnDesarrollo, proyecto=us.proyecto,
+                                               sprintUs=us.sprint,
+                                               prioridad=us.prioridad, descripcionDone=us.descripcionDone)
 
         # Speint en proceso y planificado
         # Planificacion
@@ -714,6 +721,13 @@ class Command(BaseCommand):
                     sprint_sig.proyecto_sig = None
                     sprint_sig.save()
             proyecto.save()
+            for us in sprint_fin.sprint_backlog.all():
+                UserStorySprint.objects.create(descripcion=us.descripcion,
+                                               tiempoEstimadoSMaster=us.tiempoEstimadoSMaster,
+                                               tiempoEstimado=us.tiempoEstimado, estado=us.estado,
+                                               tiempoEnDesarrollo=us.tiempoEnDesarrollo, proyecto=us.proyecto,
+                                               sprintUs=us.sprint,
+                                               prioridad=us.prioridad, descripcionDone=us.descripcionDone)
 
             # Sprint Finalizado
             #
@@ -879,6 +893,13 @@ class Command(BaseCommand):
                         sprint_sig.proyecto_sig = None
                         sprint_sig.save()
                 proyecto.save()
+                for us in sprint_1.sprint_backlog.all():
+                    UserStorySprint.objects.create(descripcion=us.descripcion,
+                                                   tiempoEstimadoSMaster=us.tiempoEstimadoSMaster,
+                                                   tiempoEstimado=us.tiempoEstimado, estado=us.estado,
+                                                   tiempoEnDesarrollo=us.tiempoEnDesarrollo, proyecto=us.proyecto,
+                                                   sprintUs=us.sprint,
+                                                   prioridad=us.prioridad, descripcionDone=us.descripcionDone)
                 # Sprint Finalizado
                 #
                 # Creacion
@@ -1006,6 +1027,13 @@ class Command(BaseCommand):
                             sprint_sig.proyecto_sig = None
                             sprint_sig.save()
                     proyecto.save()
+                    for us in sprint_2.sprint_backlog.all():
+                        UserStorySprint.objects.create(descripcion=us.descripcion,
+                                                       tiempoEstimadoSMaster=us.tiempoEstimadoSMaster,
+                                                       tiempoEstimado=us.tiempoEstimado, estado=us.estado,
+                                                       tiempoEnDesarrollo=us.tiempoEnDesarrollo, proyecto=us.proyecto,
+                                                       sprintUs=us.sprint,
+                                                       prioridad=us.prioridad, descripcionDone=us.descripcionDone)
         proyecto.estado = 'FIN'
         proyecto.fecha_fin = asuncion.localize(datetime.strptime('2021-09-01', "%Y-%m-%d"))
         for uw in proyecto.tiempos_de_usuarios.all():

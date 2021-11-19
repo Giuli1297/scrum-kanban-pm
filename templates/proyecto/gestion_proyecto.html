@@ -131,6 +131,8 @@ right: 20px;
                 <tr>
                   <th scope="col">Descripcion</th>
                   <th scope="col">Estado</th>
+                  <th scope="col">Acciones</th>
+
                     {% if proyecto.estado == 'ACT' and proyecto.sprint_actual.estado == 'conf1' %}
                         <th scope="col">Agregar a Sprint Backlog</th>
                     {% endif %}
@@ -143,6 +145,8 @@ right: 20px;
                         <tr>
                           <td>{{ ustory.descripcion }}</td>
                           <td>{{ ustory.estado }}</td>
+                            <td><a class="btn btn-primary btn-warning " href="{% url 'log_registro_us'  slug=proyecto.slug pk=ustory.pk %}" >Detalles</a></td>
+
                         {% if proyecto.siguiente_sprint.estado == 'conf1' or proyecto.sprint_actual.estado == 'conf1' %}
                             {% if proyecto.estado == 'ACT' %}
                             <td>

@@ -22,7 +22,7 @@ admin.site.register(RegistroActividadDiairia)
 admin.site.register(SystemActivity)
 admin.site.register(QA)
 
-admin.site.register(UserStorySprint)
-
 admin.site.register(CapacidadSMasteSprint)
+
+admin.site.register(UserStorySprint)
 

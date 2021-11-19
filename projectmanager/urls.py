@@ -23,6 +23,10 @@ urlpatterns = [
     path('proyectos/listar/', views.ProyectoView.as_view(), name="proyecto_listar"),
     path('proyectos/crear/', views.ProyectoCreate.as_view(), name="proyecto_crear"),
     path('proyectos/<slug:slug>/gestionar/', views.GestionProyectoView.as_view(), name='proyecto_gestion'),
+    path('proyectos/<slug:slug>/reporte/', views.VistaReporteView.as_view(), name='proyecto_reporte'),
+    path('proyectos/<slug:slug>/vista-pdf-product_backlog/', views.ViewPdfProductBacklog.as_view(), name='proyecto_pdf_product_backlog'),
+    path('proyectos/<slug:slug>/<int:pk>/vista-pdf-sprint_backlog/', views.ViewPdfSpringBacklog.as_view(), name='proyecto_pdf_product_backlog'),
+    path('proyectos/<slug:slug>/vista-pdf-us-prioridad/', views.ViewPdfUSPrioridad.as_view(), name='proyecto_pdf_us_prioridad'),
     path('proyectos/<slug:slug>/editar/', views.ProyectoUpdate.as_view(), name="proyecto_editar"),
     path('proyectos/<slug:slug>/editarsm/', views.AgregarSMember.as_view(), name="proyecto_agregar_sm"),
     path('proyectos/<slug:slug>/quitarsm/', views.QuitarSMember.as_view(), name="proyecto_quitar_sm"),
@@ -47,6 +51,8 @@ urlpatterns = [
     path('proyectos/<slug:slug>/eliminarUs/<int:pk>/', views.EliminarUs.as_view(), name='elimnar_us'),
     path('proyectos/<slug:slug>/historial/<int:pk>/', views.listarHistorial.as_view(), name='historial_us'),
     path('proyectos/<slug:slug>/revertir/<int:pk>/', views.RevertirHistorial.as_view(), name='revertir_us'),
+    path('proyectos/<slug:slug>/logRegistroUs/<int:pk>/', views.LogRegistroActividadUs.as_view(), name='log_registro_us'),
+    path('proyectos/<slug:slug>/logRegistroUsSprint/<int:pk>/', views.LogRegistroActividadUsDetalleSprint.as_view(), name='log_registro_us_sprint'),
     # path('proyectos/<slug:slug>/historial/<int:pk>/', views.listarLogHistorial.as_view(), name='historial_us'),
 
     # URLS DE SPRINTS

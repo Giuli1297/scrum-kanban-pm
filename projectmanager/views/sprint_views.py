@@ -490,6 +490,7 @@ class EstimarSprint(View):
         for us in sprint.sprint_backlog.all():
             us.estado = 'To-Do'
             us.save()
+            RegistroActividadDiairia.objects.create(us=us, descripcion="Se cambió estado de user story a TO-Do")
         # Log activity
         SystemActivity.objects.create(usuario=request.user,
                                       descripcion="Ha estimado el sprint con id " + str(sprint.pk))
@@ -639,6 +640,7 @@ class FinalizarSprint(View):
                     user_story.estado = 'no-terminado'
                     user_story.desarrolladorAsignado = None
                     user_story.save()
+                    RegistroActividadDiairia.objects.create(us=user_story, descripcion="Se ")
             sprint_actual.proyecto_actual = None
             sprint_actual.fecha_finalizacion_real = timezone.now().date()
             sprint_actual.save()
@@ -660,6 +662,7 @@ class FinalizarSprint(View):
         con sus respectivos estados '''
         for us in sprint.sprint_backlog.all():
             UserStorySprint.objects.create(descripcion=us.descripcion,tiempoEstimadoSMaster=us.tiempoEstimadoSMaster,
+                                           desarrolladorAsignado=us.desarrolladorAsignado,
                                            tiempoEstimado=us.tiempoEstimado, estado=us.estado,
                                            tiempoEnDesarrollo=us.tiempoEnDesarrollo, proyecto=us.proyecto,
                                            sprintUs=us.sprint,

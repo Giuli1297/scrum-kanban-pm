@@ -72,6 +72,7 @@ right: 20px;
                         <tr>
                             <td>{{ list.descripcion }}</td>
                           <td> <a class="btn btn-primary btn-warning " href="{% url 'update_us'  slug=proyecto.slug pk=list.pk %}" >Editar</a></td>
+                          <td> <a class="btn btn-primary btn-warning " href="{% url 'log_registro_us'  slug=proyecto.slug pk=list.pk %}" >Detalles</a></td>
                             <td> <a class="btn btn-danger btn-flat" href="{% url 'elimnar_us' slug=proyecto.slug pk=list.pk %}" >Eliminar</a></td>
                             <td> <a class="btn btn-danger btn-flat" href="{% url 'historial_us' slug=proyecto.slug pk=list.pk %}" >Historial</a></td>
 
