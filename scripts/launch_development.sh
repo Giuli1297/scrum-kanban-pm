@@ -10,13 +10,6 @@
 #pip install -r ../requirements.txt
 
 
-#echo "INSERTE LA CONTRASENA DE SU USUARIO DE POSTGRES"
-#sudo -u postgres psql -c '\x' -c "DROP DATABASE IF EXISTS pmsdb;"
-#echo "INSERTE LA CONTRASENA DE SU USUARIO DE POSTGRES"
-#sudo -u postgres psql -c '\x' -c "CREATE DATABASE pmsdb;"
-#echo "INSERTE LA CONTRASENA DE SU USUARIO DE POSTGRES"
-#sudo -u postgres psql -c '\x' -c "ALTER USER postgres WITH PASSWORD 'postgres';"
-
 psql -U postgres << EOF
 DROP DATABASE IF EXISTS pmsdb;
 CREATE DATABASE pmsdb;

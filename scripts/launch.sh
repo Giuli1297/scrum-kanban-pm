@@ -32,7 +32,78 @@ then
   then
     git checkout v1.0.0
   fi
+
+  echo "CREACION DEL ENTORNO VIRTUAL"
+  sudo apt-get install python3-venv
+  python3 -m venv env_desarrollo
+
+  echo "\n\n\nACTIVACION\n\n\n"
+  source ./env_desarrollo/bin/activate
+  pip install --upgrade pip
+  pip install -r ../requirements.txt
+
+
+  psql -U postgres << EOF
+  DROP DATABASE IF EXISTS pmsdb;
+  CREATE DATABASE pmsdb;
+EOF
+
+
+  echo "MIGRACIONES\n\n\n"
+  python ../manage.py makemigrations projectmanager
+  python ../manage.py migrate
+
+  echo "CREACION DEL ADMINISTRADOR MAS CARGA DE BD\n\n\n"
+  python ../manage.py createsuperuser
+  python ../manage.py crear_admin
+  python ../manage.py modify_site_prod
+  if [ $tag = "6" ]
+  then
+    echo "Desea cargar datos de prueba?"
+    echo " (1) - Si"
+    echo " (2) - No"
+    read choice1
+    if [ $choice1 = "1" ]
+    then
+      python ../manage.py test_db_carga
+    fi
+  heroku pg:reset --confirm scrumkanbanpm
+  git push heroku --force main
+  PGUSER=postgres PGPASSWORD=postgres heroku pg:push pmsdb DATABASE_URL --app scrumkanbanpm
 elif [ $ambiente = "2" ]
 then
   git checkout desarrollo
+  echo "CREACION DEL ENTORNO VIRTUAL"
+  sudo apt-get install python3-venv
+  python3 -m venv env_desarrollo
+
+  echo "\n\n\nACTIVACION\n\n\n"
+  source ./env_desarrollo/bin/activate
+  pip install --upgrade pip
+  pip install -r ../requirements.txt
+
+
+  psql -U postgres << EOF
+  DROP DATABASE IF EXISTS pmsdb;
+  CREATE DATABASE pmsdb;
+EOF
+
+
+  echo "MIGRACIONES\n\n\n"
+  python ../manage.py makemigrations projectmanager
+  python ../manage.py migrate
+
+  echo "CREACION DEL ADMINISTRADOR MAS CARGA DE BD\n\n\n"
+  python ../manage.py createsuperuser
+  python ../manage.py crear_admin
+  python ../manage.py modify_site_dev
+  echo "Desea cargar datos de prueba?"
+  echo " (1) - Si"
+  echo " (2) - No"
+  read choice1
+  if [ $choice1 = "1" ]
+  then
+    python ../manage.py test_db_carga
+  fi
+  python ../manage.py runserver
 fi
