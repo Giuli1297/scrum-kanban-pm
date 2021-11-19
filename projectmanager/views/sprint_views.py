@@ -249,8 +249,10 @@ class AsignarYEstimarUserStoryView(View):
             ustory.tiempoEstimadoSMaster = horasEstimadas
             sprint = ustory.sprint
             sprint.horas_ocupadas_us += horasEstimadas
+            sprint.horas_ocupadas_us -= ustory.tiempoEnDesarrollo
             capacidad = CapacidadSMasteSprint.objects.get(sprint=ustory.sprint, scrum_member=sm_asignado)
             capacidad.saldo_horas -= horasEstimadas
+            capacidad.saldo_horas += ustory.tiempoEnDesarrollo
             capacidad.save()
             sprint.save()
             ustory.save()
@@ -425,7 +427,7 @@ class EstimarSprint(View):
             if not us.tiempoEstimado > 0:
                 messages.error(request, "Faltan Estimar User Stories")
                 return redirect('proyecto_gestion', slug=slug)
-            horas_us_total = horas_us_total + us.tiempoEstimado
+            horas_us_total = horas_us_total + us.tiempoEstimado - us.tiempoEnDesarrolloPrevio
         for tiempo in proyecto.tiempos_de_usuarios.all():
             horas_desarrolladores += tiempo.horas
             if tiempo.dia == 'LUN':
@@ -551,7 +553,7 @@ class getDataForBurndownChart(View):
             if not us.tiempoEstimado > 0:
                 messages.error(request, "Faltan Estimar User Stories")
                 return redirect('proyecto_gestion', slug=slug)
-            horas_us_total = horas_us_total + us.tiempoEstimado
+            horas_us_total = horas_us_total + us.tiempoEstimado - us.tiempoEnDesarrolloPrevio
         duracionSprint = sprint.duracion_estimada_dias
         progreso = []
         progreso_act = []
@@ -567,12 +569,16 @@ class getDataForBurndownChart(View):
                     progreso[(duracionSprint) - i] -= us.tiempoEstimado
                     if progreso[(duracionSprint) - i] < 0:
                         progreso[(duracionSprint) - i] = 0
-
         for actividad in registros_de_actividad:
-            diferencia_dia = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
-                                                    actividad.fecha.date()))
-            for i in range(0, duracionSprint + 1 - diferencia_dia):
-                progreso_act[(duracionSprint) - i] -= actividad.hora
+            if actividad.sprint == sprint and actividad.hora > 0:
+                diferencia_dia = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
+                                                        actividad.fecha.date()))
+                print(sprint.fecha_inicio_desarrollo.date())
+                print(actividad.fecha.date())
+                print(diferencia_dia)
+                for i in range(0, duracionSprint + 1 - diferencia_dia):
+                    progreso_act[(duracionSprint) - i] -= actividad.hora
+                    print((duracionSprint) - i)
         passed_days = duracionSprint
 
         if sprint.estado == 'fin':
@@ -628,7 +634,7 @@ class FinalizarSprint(View):
         registros_de_actividad = RegistroActividadDiairia.objects.filter(us__sprint=sprint)
         horas_us_total = 0
         for us in sprint.sprint_backlog.all():
-            horas_us_total = horas_us_total + us.tiempoEstimado
+            horas_us_total = horas_us_total + us.tiempoEstimado - us.tiempoEnDesarrolloPrevio
         duracionSprint = sprint.duracion_estimada_dias
         progreso = []
         progreso_act = []
@@ -648,10 +654,11 @@ class FinalizarSprint(View):
                         progreso[(duracionSprint) - i] = 0
 
         for actividad in registros_de_actividad:
-            diferencia_dia = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
-                                                    actividad.fecha.date()))
-            for i in range(0, duracionSprint + 1 - diferencia_dia):
-                progreso_act[(duracionSprint) - i] -= actividad.hora
+            if actividad.sprint == sprint and actividad.hora > 0:
+                diferencia_dia = int(numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
+                                                        actividad.fecha.date()))
+                for i in range(0, duracionSprint + 1 - diferencia_dia):
+                    progreso_act[(duracionSprint) - i] -= actividad.hora
         passed_days = duracionSprint
         sprint.saved_us_progress = progreso
         sprint.saved_act_progress = progreso_act
@@ -663,6 +670,7 @@ class FinalizarSprint(View):
             for user_story in sprint_actual.sprint_backlog.all():
                 if user_story.estado != 'Release':
                     user_story.estado = 'no-terminado'
+                    user_story.tiempoEnDesarrolloPrevio = user_story.tiempoEnDesarrollo
                     user_story.desarrolladorAsignado = None
                     user_story.save()
                     RegistroActividadDiairia.objects.create(us=user_story, descripcion="Se ")
@@ -743,7 +751,7 @@ class ExtenderSprint(View):
             if not us.tiempoEstimado > 0:
                 messages.error(request, "Faltan Estimar User Stories")
                 return redirect('proyecto_gestion', slug=slug)
-            horas_us_total = horas_us_total + us.tiempoEstimado
+            horas_us_total = horas_us_total + us.tiempoEstimado - us.tiempoEnDesarrolloPrevio
             if us.estado == 'Release':
                 horas_desarrolladas += us.tiempoEstimado
         for tiempo in proyecto.tiempos_de_usuarios.all():

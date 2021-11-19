@@ -66,6 +66,7 @@ class UserStory(models.Model):
     estado = models.CharField(max_length=20, choices=ESTADOS, default='Nuevo')
 
     tiempoEnDesarrollo = models.FloatField(validators=[MinValueValidator(0)], default=0, null=True)
+    tiempoEnDesarrolloPrevio = models.FloatField(default=0, null=True)
     saldo_horas = models.FloatField(default=0.0)
     desarrolladorAsignado = models.ForeignKey(User, related_name='desarrollador_asignado', null=True, blank=True,
                                               on_delete=models.CASCADE)
@@ -114,10 +115,8 @@ class logHistorial(models.Model):
         """
     us = models.ForeignKey(UserStory, related_name='logHistorial', null=True, on_delete=models.CASCADE)
     descripcion = models.TextField(blank=True, max_length=255)
-    fecha=models.DateTimeField(auto_now_add=True)
-    usuario=models.ForeignKey(User,null=True,on_delete=models.CASCADE)
-
-
+    fecha = models.DateTimeField(auto_now_add=True)
+    usuario = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
 
 
 class HistorialUs(models.Model):
@@ -143,11 +142,11 @@ class HistorialUs(models.Model):
     version = models.IntegerField(editable=False)
     us = models.ForeignKey(UserStory, related_name='UsHistorial', null=True, on_delete=models.CASCADE)
     descripcion = models.TextField(blank=True, max_length=255)
-    fecha=models.DateTimeField(default=timezone.now)
-    usuario=models.ForeignKey(User,null=True,on_delete=models.CASCADE)
+    fecha = models.DateTimeField(default=timezone.now)
+    usuario = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
     descripcionDone = models.TextField(blank=True, max_length=255)
-    prioridad=models.IntegerField(blank=True,default=0)
-    idUs = models.IntegerField(blank=True,default=0)
+    prioridad = models.IntegerField(blank=True, default=0)
+    idUs = models.IntegerField(blank=True, default=0)
 
     class Meta:
         unique_together = ('version', 'us')
@@ -227,7 +226,8 @@ class UserStorySprint(models.Model):
     desarrolladorAsignado = models.ForeignKey(User, related_name='desarrollador_asignado_us', null=True, blank=True,
                                               on_delete=models.CASCADE)
     proyecto = models.ForeignKey(Proyecto, related_name='product_backlog_us', null=True, on_delete=models.CASCADE)
-    sprintUs = models.ForeignKey(Sprint, related_name='sprint_backlog_us', null=True, blank=True, on_delete=models.SET_NULL)
+    sprintUs = models.ForeignKey(Sprint, related_name='sprint_backlog_us', null=True, blank=True,
+                                 on_delete=models.SET_NULL)
     prioridad = models.IntegerField(default=1)
     descripcionDone = models.TextField(blank=True, max_length=255)
 
@@ -243,6 +243,7 @@ class UserStorySprint(models.Model):
 
     def __str__(self):
         return self.descripcion + self.proyecto.slug
+
 
 class RegistroActividadDiairia(models.Model):
     """
@@ -263,9 +264,18 @@ class RegistroActividadDiairia(models.Model):
     """
     us = models.ForeignKey(UserStory, related_name='RegistroActividad', null=True, on_delete=models.CASCADE)
     us2 = models.ForeignKey(UserStorySprint, related_name='RegistroActividad', null=True, on_delete=models.CASCADE)
+    sprint = models.ForeignKey(Sprint, related_name='actividades_us', null=True, on_delete=models.CASCADE)
     descripcion = models.TextField(blank=True, null=True, max_length=5000)
     fecha = models.DateTimeField(default=timezone.now)
     hora = models.FloatField(default=0)
 
+    def save(self, *args, **kwargs):
+        """
+            Guarde la instancia actual. Reemplace esto en una subclase si desea controlar el proceso de guardado.
 
-
+        """
+        if self.us is not None:
+            self.sprint = self.us.sprint
+        else:
+            self.sprint = self.us2.sprintUs
+        super(RegistroActividadDiairia, self).save(*args, **kwargs)

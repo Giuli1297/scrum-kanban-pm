@@ -395,7 +395,7 @@ class Command(BaseCommand):
         registros_de_actividad = RegistroActividadDiairia.objects.filter(us__sprint=sprint_fin)
         horas_us_total = 0
         for us in sprint_fin.sprint_backlog.all():
-            horas_us_total = horas_us_total + us.tiempoEstimado
+            horas_us_total = horas_us_total + us.tiempoEstimado - us.tiempoEnDesarrolloPrevio
         duracionSprint = sprint_fin.duracion_estimada_dias
         progreso = []
         progreso_act = []
@@ -415,10 +415,11 @@ class Command(BaseCommand):
                         progreso[(duracionSprint) - i] = 0
 
         for actividad in registros_de_actividad:
-            diferencia_dia = int(numpy.busday_count(sprint_fin.fecha_inicio_desarrollo.date(),
-                                                    actividad.fecha.date()))
-            for i in range(0, duracionSprint + 1 - diferencia_dia):
-                progreso_act[(duracionSprint) - i] -= actividad.hora
+            if actividad.sprint == sprint_fin and actividad.hora > 0:
+                diferencia_dia = int(numpy.busday_count(sprint_fin.fecha_inicio_desarrollo.date(),
+                                                        actividad.fecha.date()))
+                for i in range(0, duracionSprint + 1 - diferencia_dia):
+                    progreso_act[(duracionSprint) - i] -= actividad.hora
         passed_days = duracionSprint
         sprint_fin.saved_us_progress = progreso
         sprint_fin.saved_act_progress = progreso_act
@@ -435,6 +436,7 @@ class Command(BaseCommand):
             for user_story in sprint_actual.sprint_backlog.all():
                 if user_story.estado != 'Release':
                     user_story.estado = 'no-terminado'
+                    user_story.tiempoEnDesarrolloPrevio = user_story.tiempoEnDesarrollo
                     user_story.desarrolladorAsignado = None
                     user_story.save()
             sprint_actual.proyecto_actual = None
@@ -714,7 +716,7 @@ class Command(BaseCommand):
         registros_de_actividad = RegistroActividadDiairia.objects.filter(us__sprint=sprint_fin)
         horas_us_total = 0
         for us in sprint_fin.sprint_backlog.all():
-            horas_us_total = horas_us_total + us.tiempoEstimado
+            horas_us_total = horas_us_total + us.tiempoEstimado - us.tiempoEnDesarrolloPrevio
         duracionSprint = sprint_fin.duracion_estimada_dias
         progreso = []
         progreso_act = []
@@ -734,10 +736,11 @@ class Command(BaseCommand):
                         progreso[(duracionSprint) - i] = 0
 
         for actividad in registros_de_actividad:
-            diferencia_dia = int(numpy.busday_count(sprint_fin.fecha_inicio_desarrollo.date(),
-                                                    actividad.fecha.date()))
-            for i in range(0, duracionSprint + 1 - diferencia_dia):
-                progreso_act[(duracionSprint) - i] -= actividad.hora
+            if actividad.sprint == sprint_fin and actividad.hora > 0:
+                diferencia_dia = int(numpy.busday_count(sprint_fin.fecha_inicio_desarrollo.date(),
+                                                        actividad.fecha.date()))
+                for i in range(0, duracionSprint + 1 - diferencia_dia):
+                    progreso_act[(duracionSprint) - i] -= actividad.hora
         passed_days = duracionSprint
         sprint_fin.saved_us_progress = progreso
         sprint_fin.saved_act_progress = progreso_act
@@ -754,6 +757,7 @@ class Command(BaseCommand):
             for user_story in sprint_actual.sprint_backlog.all():
                 if user_story.estado != 'Release':
                     user_story.estado = 'no-terminado'
+                    user_story.tiempoEnDesarrolloPrevio = user_story.tiempoEnDesarrollo
                     user_story.desarrolladorAsignado = None
                     user_story.save()
             sprint_actual.proyecto_actual = None
@@ -907,7 +911,7 @@ class Command(BaseCommand):
             registros_de_actividad = RegistroActividadDiairia.objects.filter(us__sprint=sprint_1)
             horas_us_total = 0
             for us in sprint_1.sprint_backlog.all():
-                horas_us_total = horas_us_total + us.tiempoEstimado
+                horas_us_total = horas_us_total + us.tiempoEstimado - us.tiempoEnDesarrolloPrevio
             duracionSprint = sprint_1.duracion_estimada_dias
             progreso = []
             progreso_act = []
@@ -924,10 +928,11 @@ class Command(BaseCommand):
                             progreso[(duracionSprint) - i] = 0
 
             for actividad in registros_de_actividad:
-                diferencia_dia = int(numpy.busday_count(sprint_1.fecha_inicio_desarrollo.date(),
-                                                        actividad.fecha.date()))
-                for i in range(0, duracionSprint + 1 - diferencia_dia):
-                    progreso_act[(duracionSprint) - i] -= actividad.hora
+                if actividad.sprint == sprint_1 and actividad.hora > 0:
+                    diferencia_dia = int(numpy.busday_count(sprint_1.fecha_inicio_desarrollo.date(),
+                                                            actividad.fecha.date()))
+                    for i in range(0, duracionSprint + 1 - diferencia_dia):
+                        progreso_act[(duracionSprint) - i] -= actividad.hora
             passed_days = duracionSprint
             sprint_1.saved_us_progress = progreso
             sprint_1.saved_act_progress = progreso_act
@@ -944,6 +949,7 @@ class Command(BaseCommand):
                 for user_story in sprint_actual.sprint_backlog.all():
                     if user_story.estado != 'Release':
                         user_story.estado = 'no-terminado'
+                        user_story.tiempoEnDesarrolloPrevio = user_story.tiempoEnDesarrollo
                         user_story.desarrolladorAsignado = None
                         user_story.save()
                 sprint_actual.proyecto_actual = None
@@ -1053,7 +1059,7 @@ class Command(BaseCommand):
                 registros_de_actividad = RegistroActividadDiairia.objects.filter(us__sprint=sprint_2)
                 horas_us_total = 0
                 for us in sprint_2.sprint_backlog.all():
-                    horas_us_total = horas_us_total + us.tiempoEstimado
+                    horas_us_total = horas_us_total + us.tiempoEstimado - us.tiempoEnDesarrolloPrevio
                 duracionSprint = sprint_2.duracion_estimada_dias
                 progreso = []
                 progreso_act = []
@@ -1070,10 +1076,11 @@ class Command(BaseCommand):
                                 progreso[(duracionSprint) - i] = 0
 
                 for actividad in registros_de_actividad:
-                    diferencia_dia = int(numpy.busday_count(sprint_2.fecha_inicio_desarrollo.date(),
-                                                            actividad.fecha.date()))
-                    for i in range(0, duracionSprint + 1 - diferencia_dia):
-                        progreso_act[(duracionSprint) - i] -= actividad.hora
+                    if actividad.sprint == sprint_2 and actividad.hora > 0:
+                        diferencia_dia = int(numpy.busday_count(sprint_2.fecha_inicio_desarrollo.date(),
+                                                                actividad.fecha.date()))
+                        for i in range(0, duracionSprint + 1 - diferencia_dia):
+                            progreso_act[(duracionSprint) - i] -= actividad.hora
                 passed_days = duracionSprint
                 sprint_2.saved_us_progress = progreso
                 sprint_2.saved_act_progress = progreso_act
@@ -1090,6 +1097,7 @@ class Command(BaseCommand):
                     for user_story in sprint_actual.sprint_backlog.all():
                         if user_story.estado != 'Release':
                             user_story.estado = 'no-terminado'
+                            user_story.tiempoEnDesarrolloPrevio = user_story.tiempoEnDesarrollo
                             user_story.desarrolladorAsignado = None
                             user_story.save()
                     sprint_actual.proyecto_actual = None
