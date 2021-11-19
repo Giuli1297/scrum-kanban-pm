@@ -6,3 +6,4 @@ from .proyecto_views import *
 from .rol_proyecto_views import *
 from .user_story_views import *
 from .kanban_views import *
+from .reporte_views import *
