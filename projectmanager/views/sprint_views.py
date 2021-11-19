@@ -819,6 +819,7 @@ def cambiar_dev_en_US(request):
         capacidadnew.saldo_horas -= us.tiempoEstimado
         capacidadnew.save()
         us.desarrolladorAsignado = user
+        RegistroActividadDiairia.objects.create(us=us, descripcion="Se cambió desarrollador a " + user.username)
         remove_all_users_from_obj_group('desarrollador_de_' + str(us.pk))
         add_user_to_obj_group(us.desarrolladorAsignado, 'desarrollador_de_' + str(us.pk))
         us.save()
