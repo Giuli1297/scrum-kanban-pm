@@ -18,7 +18,7 @@ class UserWorkTime(models.Model):
     Parameters
     -----------
 
-    dias_laborales
+    dias
         dias laborales, lunes a viernes
 
     proyecto

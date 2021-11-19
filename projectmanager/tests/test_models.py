@@ -118,6 +118,7 @@ class TestModeloAutenticacion(TestCase):
 
 
 class TestModels(TestCase):
+
     def setUp(self):
         self.client = Client()
         self.my_admin = User(username='user', is_staff=True, is_superuser=True)
