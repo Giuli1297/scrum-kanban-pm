@@ -59,6 +59,7 @@
             <tr align="justify">
                 <th scope="col">Descipcion</th>
                 <th scope="col">Horas Invertidas</th>
+                <th scope="col">Fecha</th>
 
             </tr>
           </thead>
@@ -67,6 +68,7 @@
                 <tr>
                     <td>{{ list.descripcion }}</td>
                     <td>{{ list.hora }}</td>
+                    <td>{{ list.fecha.day}}/{{ list.fecha.month}}/{{ list.fecha.year}}</td>
 
                 </tr>
             {% endfor %}
