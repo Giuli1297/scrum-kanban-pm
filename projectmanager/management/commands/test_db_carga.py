@@ -455,7 +455,7 @@ class Command(BaseCommand):
                                                        prioridad=us.prioridad, descripcionDone=us.descripcionDone,
                                                        desarrolladorAsignado=us.desarrolladorAsignado)
                 for act in us.RegistroActividad.all():
-                    RegistroActividadDiairia.objects.create(us=newUs, descripcion=act.descripcion, fecha=act.fecha,
+                    RegistroActividadDiairia.objects.create(us2=newUs, descripcion=act.descripcion, fecha=act.fecha,
                                                             hora=act.hora)
 
         # Speint en proceso y planificado
@@ -774,7 +774,7 @@ class Command(BaseCommand):
                                                        prioridad=us.prioridad, descripcionDone=us.descripcionDone,
                                                        desarrolladorAsignado=us.desarrolladorAsignado)
                 for act in us.RegistroActividad.all():
-                    RegistroActividadDiairia.objects.create(us=newUs, descripcion=act.descripcion, fecha=act.fecha,
+                    RegistroActividadDiairia.objects.create(us2=newUs, descripcion=act.descripcion, fecha=act.fecha,
                                                             hora=act.hora)
 
             # Sprint Finalizado
@@ -965,7 +965,7 @@ class Command(BaseCommand):
                                                            prioridad=us.prioridad, descripcionDone=us.descripcionDone,
                                                            desarrolladorAsignado=us.desarrolladorAsignado)
                     for act in us.RegistroActividad.all():
-                        RegistroActividadDiairia.objects.create(us=newUs, descripcion=act.descripcion, fecha=act.fecha,
+                        RegistroActividadDiairia.objects.create(us2=newUs, descripcion=act.descripcion, fecha=act.fecha,
                                                                 hora=act.hora)
                 # Sprint Finalizado
                 #
@@ -1112,7 +1112,7 @@ class Command(BaseCommand):
                                                                descripcionDone=us.descripcionDone,
                                                                desarrolladorAsignado=us.desarrolladorAsignado)
                         for act in us.RegistroActividad.all():
-                            RegistroActividadDiairia.objects.create(us=newUs, descripcion=act.descripcion,
+                            RegistroActividadDiairia.objects.create(us2=newUs, descripcion=act.descripcion,
                                                                     fecha=act.fecha,
                                                                     hora=act.hora)
         proyecto.estado = 'FIN'

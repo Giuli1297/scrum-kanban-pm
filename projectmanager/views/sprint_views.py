@@ -681,13 +681,14 @@ class FinalizarSprint(View):
         con sus respectivos estados '''
         for us in sprint.sprint_backlog.all():
             usprint=UserStorySprint.objects.create(descripcion=us.descripcion,tiempoEstimadoSMaster=us.tiempoEstimadoSMaster,
+
                                            desarrolladorAsignado=us.desarrolladorAsignado,
                                            tiempoEstimado=us.tiempoEstimado, estado=us.estado,
                                            tiempoEnDesarrollo=us.tiempoEnDesarrollo, proyecto=us.proyecto,
                                            sprintUs=us.sprint,
                                            prioridad=us.prioridad, descripcionDone=us.descripcionDone)
             for act in us.RegistroActividad.all():
-                RegistroActividadDiairia.objects.create(us=usprint,descripcion=act.descripcion,fecha=act.fecha,
+                RegistroActividadDiairia.objects.create(us2=usprint,descripcion=act.descripcion,fecha=act.fecha,
                                                         hora=act.hora)
 
         messages.success(request, "Sprint Finalizado")
