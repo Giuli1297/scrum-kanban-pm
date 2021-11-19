@@ -337,3 +337,18 @@ class TestUrlsSprint(SimpleTestCase):
         self.assertEquals(resolve(url3).func, views.get_list_user_current_sprint,
                           "no es igual la vista para listar usuario por sprint")
         self.assertEquals(resolve(url2).func, views.cambiar_dev_en_US, "no es igual la vista para cambiar DEV")
+
+    def test_generar_pdf(self):
+        '''
+          Test para verificar si carga correctamente las paginas para la generacion de pdfs
+          :return:
+          '''
+        url1 = reverse('proyecto_pdf_product_backlog', args=['slug'])
+        url2 = reverse('proyecto_pdf_product_backlog', args=['slug', 1])
+        url3 = reverse('proyecto_pdf_us_prioridad', args=['slug'])
+        self.assertEquals(resolve(url1).func.view_class, views.ViewPdfProductBacklog,
+                          "no es igual la vista para el reporte de product backlog")
+        self.assertEquals(resolve(url3).func.view_class, views.ViewPdfUSPrioridad,
+                          "no es igual la vista para el reporte de Prioridad de US stories")
+        self.assertEquals(resolve(url2).func.view_class, views.ViewPdfSpringBacklog,
+                          "no es igual la vista para reporte de SprintBacklog")
