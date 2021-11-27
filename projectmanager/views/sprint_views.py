@@ -452,6 +452,7 @@ class EstimarSprint(View):
         sprint = proyecto.sprint_actual
         form = EstimacionSprint(request.POST)
         sprint.fecha_inicio_desarrollo = timezone.now()
+
         sprint.duracion_estimada_dias = numpy.busday_count(sprint.fecha_inicio_desarrollo.date(),
                                                            sprint.fecha_finalizacion_real.date())
         sprint.estado = 'conf3'
